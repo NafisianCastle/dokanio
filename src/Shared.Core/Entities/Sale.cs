@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Shared.Core.Entities;
 
-public class Sale
+public class Sale : ISoftDeletable
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     
@@ -23,6 +23,10 @@ public class Sale
     public DateTime? ServerSyncedAt { get; set; }
     
     public SyncStatus SyncStatus { get; set; } = SyncStatus.NotSynced;
+    
+    // Soft delete properties
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
     
     // Navigation properties
     public virtual ICollection<SaleItem> Items { get; set; } = new List<SaleItem>();
