@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Core.Data;
+using Shared.Core.Repositories;
+using Shared.Core.Tests.TestImplementations;
 
 namespace Shared.Core.DependencyInjection;
 
@@ -29,6 +31,9 @@ public static class ServiceCollectionExtensions
             options.UseInMemoryDatabase("TestDatabase");
             options.EnableSensitiveDataLogging(true);
         });
+
+        // Register test repository implementations
+        services.AddScoped<IProductRepository, InMemoryProductRepository>();
 
         return services;
     }
