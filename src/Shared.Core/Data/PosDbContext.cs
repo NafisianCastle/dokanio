@@ -1,18 +1,29 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shared.Core.Entities;
+using Shared.Core.Services;
 using System.Linq.Expressions;
+using System.Text.Json;
 
 namespace Shared.Core.Data;
 
 public class PosDbContext : DbContext
 {
+    private readonly ILogger<PosDbContext>? _logger;
+
     public DbSet<Product> Products { get; set; } = null!;
     public DbSet<Sale> Sales { get; set; } = null!;
     public DbSet<SaleItem> SaleItems { get; set; } = null!;
     public DbSet<Stock> Stock { get; set; } = null!;
+    public DbSet<TransactionLogEntry> TransactionLogs { get; set; } = null!;
 
     public PosDbContext(DbContextOptions<PosDbContext> options) : base(options)
     {
+    }
+
+    public PosDbContext(DbContextOptions<PosDbContext> options, ILogger<PosDbContext> logger) : base(options)
+    {
+        _logger = logger;
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -40,6 +51,21 @@ public class PosDbContext : DbContext
         ConfigureSoftDelete<Sale>(modelBuilder);
         ConfigureSoftDelete<SaleItem>(modelBuilder);
         ConfigureSoftDelete<Stock>(modelBuilder);
+
+        // TransactionLogEntry configuration (not soft deletable)
+        modelBuilder.Entity<TransactionLogEntry>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.IsProcessed);
+            entity.HasIndex(e => e.CreatedAt);
+            entity.HasIndex(e => e.DeviceId);
+            entity.HasIndex(e => e.EntityType);
+            entity.HasIndex(e => e.EntityId);
+            
+            entity.Property(e => e.Operation).IsRequired().HasMaxLength(20);
+            entity.Property(e => e.EntityType).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.EntityData).IsRequired();
+        });
 
         // Product configuration
         modelBuilder.Entity<Product>(entity =>
@@ -129,14 +155,98 @@ public class PosDbContext : DbContext
 
     public override int SaveChanges()
     {
+        LogTransactions();
         HandleSoftDelete();
         return base.SaveChanges();
     }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        await LogTransactionsAsync();
         HandleSoftDelete();
-        return base.SaveChangesAsync(cancellationToken);
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void LogTransactions()
+    {
+        LogTransactionsAsync().GetAwaiter().GetResult();
+    }
+
+    private async Task LogTransactionsAsync()
+    {
+        try
+        {
+            var entries = ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Added || 
+                           e.State == EntityState.Modified || 
+                           e.State == EntityState.Deleted)
+                .Where(e => e.Entity is not TransactionLogEntry) // Don't log transaction log entries themselves
+                .ToList();
+
+            var transactionLogs = new List<TransactionLogEntry>();
+
+            foreach (var entry in entries)
+            {
+                var operation = entry.State switch
+                {
+                    EntityState.Added => "INSERT",
+                    EntityState.Modified => "UPDATE",
+                    EntityState.Deleted => "DELETE",
+                    _ => "UNKNOWN"
+                };
+
+                var entityType = entry.Entity.GetType().Name;
+                var entityId = GetEntityId(entry.Entity);
+                var entityData = JsonSerializer.Serialize(entry.Entity);
+                var deviceId = GetDeviceId(entry.Entity);
+
+                var logEntry = new TransactionLogEntry
+                {
+                    Operation = operation,
+                    EntityType = entityType,
+                    EntityId = entityId,
+                    EntityData = entityData,
+                    DeviceId = deviceId,
+                    CreatedAt = DateTime.UtcNow,
+                    IsProcessed = false
+                };
+
+                transactionLogs.Add(logEntry);
+            }
+
+            if (transactionLogs.Any())
+            {
+                _logger?.LogDebug("Logging {Count} transactions for durability", transactionLogs.Count);
+                TransactionLogs.AddRange(transactionLogs);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Error logging transactions for durability");
+            // Don't throw - allow the main operation to continue
+        }
+    }
+
+    private Guid GetEntityId(object entity)
+    {
+        // Use reflection to get the Id property
+        var idProperty = entity.GetType().GetProperty("Id");
+        if (idProperty != null && idProperty.PropertyType == typeof(Guid))
+        {
+            return (Guid)(idProperty.GetValue(entity) ?? Guid.Empty);
+        }
+        return Guid.Empty;
+    }
+
+    private Guid GetDeviceId(object entity)
+    {
+        // Use reflection to get the DeviceId property if it exists
+        var deviceIdProperty = entity.GetType().GetProperty("DeviceId");
+        if (deviceIdProperty != null && deviceIdProperty.PropertyType == typeof(Guid))
+        {
+            return (Guid)(deviceIdProperty.GetValue(entity) ?? Guid.Empty);
+        }
+        return Guid.Empty;
     }
 
     private void HandleSoftDelete()
