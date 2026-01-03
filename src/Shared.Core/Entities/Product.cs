@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Shared.Core.Entities;
 
-public class Product
+public class Product : ISoftDeletable
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     
@@ -43,6 +43,10 @@ public class Product
     
     [Range(0, double.MaxValue)]
     public decimal? SellingPrice { get; set; }
+    
+    // Soft delete properties
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
     
     // Navigation properties
     public virtual ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();

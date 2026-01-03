@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Shared.Core.Entities;
 
-public class SaleItem
+public class SaleItem : ISoftDeletable
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     
@@ -18,6 +18,10 @@ public class SaleItem
     
     [MaxLength(50)]
     public string? BatchNumber { get; set; }
+    
+    // Soft delete properties
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
     
     // Navigation properties
     public virtual Sale Sale { get; set; } = null!;
