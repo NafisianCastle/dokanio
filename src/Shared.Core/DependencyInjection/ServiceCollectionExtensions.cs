@@ -25,6 +25,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IProductService, ProductService>();
+        
+        // Register repositories
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<ISaleRepository, SaleRepository>();
+        services.AddScoped<IStockRepository, StockRepository>();
+        
+        // Register transaction logging service for offline-first persistence
+        services.AddScoped<ITransactionLogService, TransactionLogService>();
 
         return services;
     }
