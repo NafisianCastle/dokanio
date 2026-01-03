@@ -1,0 +1,9 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Desktop.MainWindow"
+        Title="POS Desktop App">
+    <StackPanel Margin="20">
+        <TextBlock Text="POS Desktop Application" FontSize="24" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+        <Button Content="Start POS" HorizontalAlignment="Center"/>
+    </StackPanel>
+</Window>
