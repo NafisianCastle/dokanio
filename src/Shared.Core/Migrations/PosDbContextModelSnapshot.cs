@@ -53,12 +53,19 @@ namespace Shared.Core.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsWeightBased")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.Property<decimal?>("PurchasePrice")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("RatePerKilogram")
                         .HasPrecision(10, 2)
                         .HasColumnType("TEXT");
 
@@ -79,6 +86,9 @@ namespace Shared.Core.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("WeightPrecision")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Barcode")
@@ -91,6 +101,8 @@ namespace Shared.Core.Migrations
                     b.HasIndex("ExpiryDate");
 
                     b.HasIndex("IsDeleted");
+
+                    b.HasIndex("IsWeightBased");
 
                     b.HasIndex("SyncStatus");
 
@@ -171,11 +183,23 @@ namespace Shared.Core.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("INTEGER");
 
+                    b.Property<decimal?>("RatePerKilogram")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid>("SaleId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasPrecision(10, 2)
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("UnitPrice")
                         .HasPrecision(10, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("Weight")
+                        .HasPrecision(10, 3)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

@@ -7,6 +7,7 @@ public interface ISaleService
 {
     Task<Sale> CreateSaleAsync(string invoiceNumber, Guid deviceId);
     Task<Sale> AddItemToSaleAsync(Guid saleId, Guid productId, int quantity, decimal unitPrice, string? batchNumber = null);
+    Task<Sale> AddWeightBasedItemToSaleAsync(Guid saleId, Guid productId, decimal weight, string? batchNumber = null);
     Task<Sale> CompleteSaleAsync(Guid saleId, PaymentMethod paymentMethod);
     Task<Sale> CompleteSaleAsync(Sale sale);
     Task<decimal> CalculateSaleTotalAsync(Guid saleId);

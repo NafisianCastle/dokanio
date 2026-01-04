@@ -27,6 +27,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
         
         // Register repositories
         services.AddScoped<IProductRepository, ProductRepository>();
@@ -122,6 +123,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
 
         return services;
     }

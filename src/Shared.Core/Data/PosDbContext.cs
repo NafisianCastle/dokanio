@@ -16,6 +16,7 @@ public class PosDbContext : DbContext
     public DbSet<Sale> Sales { get; set; } = null!;
     public DbSet<SaleItem> SaleItems { get; set; } = null!;
     public DbSet<Stock> Stock { get; set; } = null!;
+    public DbSet<Customer> Customers { get; set; } = null!;
     public DbSet<TransactionLogEntry> TransactionLogs { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<AuditLog> AuditLogs { get; set; } = null!;
@@ -56,6 +57,7 @@ public class PosDbContext : DbContext
         ConfigureSoftDelete<Sale>(modelBuilder);
         ConfigureSoftDelete<SaleItem>(modelBuilder);
         ConfigureSoftDelete<Stock>(modelBuilder);
+        ConfigureSoftDelete<Customer>(modelBuilder);
         ConfigureSoftDelete<User>(modelBuilder);
 
         // TransactionLogEntry configuration (not soft deletable)
@@ -82,6 +84,7 @@ public class PosDbContext : DbContext
             entity.HasIndex(e => e.ExpiryDate);
             entity.HasIndex(e => e.SyncStatus);
             entity.HasIndex(e => e.DeviceId);
+            entity.HasIndex(e => e.IsWeightBased);
             
             entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
             entity.Property(e => e.Barcode).HasMaxLength(50);
@@ -90,6 +93,7 @@ public class PosDbContext : DbContext
             entity.Property(e => e.UnitPrice).HasPrecision(10, 2);
             entity.Property(e => e.PurchasePrice).HasPrecision(10, 2);
             entity.Property(e => e.SellingPrice).HasPrecision(10, 2);
+            entity.Property(e => e.RatePerKilogram).HasPrecision(10, 2);
             
             // Convert enums to integers for SQLite
             entity.Property(e => e.SyncStatus).HasConversion<int>();
@@ -103,13 +107,23 @@ public class PosDbContext : DbContext
             entity.HasIndex(e => e.CreatedAt);
             entity.HasIndex(e => e.SyncStatus);
             entity.HasIndex(e => e.DeviceId);
+            entity.HasIndex(e => e.CustomerId);
             
             entity.Property(e => e.InvoiceNumber).IsRequired().HasMaxLength(50);
             entity.Property(e => e.TotalAmount).HasPrecision(10, 2);
+            entity.Property(e => e.DiscountAmount).HasPrecision(10, 2);
+            entity.Property(e => e.TaxAmount).HasPrecision(10, 2);
+            entity.Property(e => e.MembershipDiscountAmount).HasPrecision(10, 2);
             
             // Convert enums to integers for SQLite
             entity.Property(e => e.PaymentMethod).HasConversion<int>();
             entity.Property(e => e.SyncStatus).HasConversion<int>();
+            
+            // Foreign key relationship with Customer
+            entity.HasOne(e => e.Customer)
+                  .WithMany(c => c.Sales)
+                  .HasForeignKey(e => e.CustomerId)
+                  .OnDelete(DeleteBehavior.SetNull);
         });
 
         // SaleItem configuration
@@ -120,6 +134,9 @@ public class PosDbContext : DbContext
             entity.HasIndex(e => e.ProductId);
             
             entity.Property(e => e.UnitPrice).HasPrecision(10, 2);
+            entity.Property(e => e.TotalPrice).HasPrecision(10, 2);
+            entity.Property(e => e.Weight).HasPrecision(10, 3);
+            entity.Property(e => e.RatePerKilogram).HasPrecision(10, 2);
             entity.Property(e => e.BatchNumber).HasMaxLength(50);
             
             // Foreign key relationships with proper constraints
@@ -171,6 +188,29 @@ public class PosDbContext : DbContext
             
             // Convert enums to integers for SQLite
             entity.Property(e => e.Role).HasConversion<int>();
+            entity.Property(e => e.SyncStatus).HasConversion<int>();
+        });
+
+        // Customer configuration
+        modelBuilder.Entity<Customer>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.MembershipNumber).IsUnique();
+            entity.HasIndex(e => e.Tier);
+            entity.HasIndex(e => e.IsActive);
+            entity.HasIndex(e => e.JoinDate);
+            entity.HasIndex(e => e.TotalSpent);
+            entity.HasIndex(e => e.SyncStatus);
+            entity.HasIndex(e => e.DeviceId);
+            
+            entity.Property(e => e.MembershipNumber).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Email).HasMaxLength(255);
+            entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.TotalSpent).HasPrecision(10, 2);
+            
+            // Convert enums to integers for SQLite
+            entity.Property(e => e.Tier).HasConversion<int>();
             entity.Property(e => e.SyncStatus).HasConversion<int>();
         });
 
