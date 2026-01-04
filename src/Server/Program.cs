@@ -7,6 +7,23 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure HTTPS and security
+builder.Services.AddHsts(options =>
+{
+    options.Preload = true;
+    options.IncludeSubDomains = true;
+    options.MaxAge = TimeSpan.FromDays(365);
+});
+
+builder.Services.AddHttpsRedirection(options =>
+{
+    options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
+    options.HttpsPort = builder.Environment.IsDevelopment() ? 7001 : 443;
+});
+
+// Add security headers
+builder.Services.AddAntiforgery();
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -128,6 +145,24 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseCors("DevelopmentPolicy");
 }
+else
+{
+    // Production security headers
+    app.UseHsts();
+}
+
+// Security middleware
+app.Use(async (context, next) =>
+{
+    // Add security headers
+    context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Add("X-Frame-Options", "DENY");
+    context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
+    context.Response.Headers.Add("Referrer-Policy", "strict-origin-when-cross-origin");
+    context.Response.Headers.Add("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none';");
+    
+    await next();
+});
 
 // Ensure database is created and migrated
 using (var scope = app.Services.CreateScope())

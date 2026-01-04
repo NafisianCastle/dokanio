@@ -31,9 +31,23 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ISaleRepository, SaleRepository>();
         services.AddScoped<IStockRepository, StockRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+        services.AddScoped<IUserSessionRepository, UserSessionRepository>();
         
         // Register transaction logging service for offline-first persistence
         services.AddScoped<ITransactionLogService, TransactionLogService>();
+        
+        // Register security and authentication services
+        services.AddScoped<IEncryptionService, EncryptionService>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IAuditService, AuditService>();
+        services.AddScoped<ISessionService, SessionService>();
+        services.AddScoped<IAuthorizationService, AuthorizationService>();
+        services.AddSingleton<ICurrentUserService, CurrentUserService>();
+        
+        // Register background services
+        services.AddHostedService<SessionCleanupService>();
         
         // Register sync services
         services.AddScoped<ISyncEngine, SyncEngine>();
@@ -71,15 +85,15 @@ public static class ServiceCollectionExtensions
         });
         
         // Register sync configuration (should be configured by the consuming application)
-        services.AddSingleton(provider => new SyncConfiguration
-        {
-            DeviceId = Guid.NewGuid(), // Should be set by the application
-            ServerBaseUrl = "https://api.example.com", // Should be configured
-            SyncInterval = TimeSpan.FromMinutes(5),
-            MaxRetryAttempts = 3,
-            InitialRetryDelay = TimeSpan.FromSeconds(1),
-            RetryBackoffMultiplier = 2.0
-        });
+        // services.AddSingleton(provider => new SyncConfiguration
+        // {
+        //     DeviceId = Guid.NewGuid(), // Should be set by the application
+        //     ServerBaseUrl = "https://api.example.com", // Should be configured
+        //     SyncInterval = TimeSpan.FromMinutes(5),
+        //     MaxRetryAttempts = 3,
+        //     InitialRetryDelay = TimeSpan.FromSeconds(1),
+        //     RetryBackoffMultiplier = 2.0
+        // });
 
         return services;
     }
