@@ -95,3 +95,14 @@ public class SyncProgressEventArgs : EventArgs
     public int ProcessedRecords { get; set; }
     public double ProgressPercentage => TotalRecords > 0 ? (double)ProcessedRecords / TotalRecords * 100 : 0;
 }
+
+/// <summary>
+/// Request for syncing business metadata
+/// </summary>
+public class BusinessMetadataSyncRequest
+{
+    public Guid BusinessId { get; set; }
+    public Guid DeviceId { get; set; }
+    public BusinessDto? Business { get; set; }
+    public List<ShopDto> Shops { get; set; } = new();
+}

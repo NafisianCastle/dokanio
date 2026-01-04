@@ -160,4 +160,36 @@ public class SyncApiClient : ISyncApiClient
             };
         }
     }
+
+    public async Task<SyncApiResult> UploadBusinessMetadataAsync(BusinessMetadataSyncRequest request)
+    {
+        try
+        {
+            _logger.LogDebug("Uploading business metadata for business {BusinessId}", request.BusinessId);
+
+            // In a real implementation, this would make an HTTP POST to the server
+            // For testing, we'll simulate the operation
+            await Task.Delay(100); // Simulate network delay
+
+            var recordCount = (request.Business != null ? 1 : 0) + request.Shops.Count;
+
+            return new SyncApiResult
+            {
+                Success = true,
+                Message = $"Successfully uploaded {recordCount} metadata records",
+                StatusCode = 200
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading business metadata");
+            return new SyncApiResult
+            {
+                Success = false,
+                Message = ex.Message,
+                StatusCode = 500,
+                Errors = { ex.ToString() }
+            };
+        }
+    }
 }

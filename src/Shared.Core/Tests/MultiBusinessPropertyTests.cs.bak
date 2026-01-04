@@ -65,6 +65,24 @@ public class MultiBusinessPropertyTests : IDisposable
         services.AddScoped<ISaleItemRepository, SaleItemRepository>();
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
         
+        // Add sync services for testing
+        services.AddScoped<ISyncEngine, SyncEngine>();
+        services.AddScoped<IConnectivityService, ConnectivityService>();
+        services.AddScoped<ISyncApiClient, SyncApiClient>();
+        services.AddScoped<IMultiTenantSyncService, MultiTenantSyncService>();
+        services.AddHttpClient<ISyncApiClient, SyncApiClient>();
+        
+        // Add sync configuration for testing
+        services.AddSingleton(provider => new SyncConfiguration
+        {
+            DeviceId = Guid.NewGuid(),
+            ServerBaseUrl = "https://test.example.com",
+            SyncInterval = TimeSpan.FromMinutes(5),
+            MaxRetryAttempts = 3,
+            InitialRetryDelay = TimeSpan.FromSeconds(1),
+            RetryBackoffMultiplier = 2.0
+        });
+        
         _serviceProvider = services.BuildServiceProvider();
         _context = _serviceProvider.GetRequiredService<PosDbContext>();
         
@@ -614,6 +632,165 @@ public class MultiBusinessPropertyTests : IDisposable
     }
 
     /// <summary>
+    /// Property 7: Inventory Synchronization Consistency
+    /// For any inventory update, the final stock level should be consistent across all synchronized devices after conflict resolution.
+    /// Validates: Requirements 7.3, 7.4
+    /// Feature: multi-business-pos, Property 7: Inventory Synchronization Consistency
+    /// </summary>
+    [Fact]
+    public async Task InventorySynchronizationConsistency_FinalStockLevelShouldBeConsistentAfterConflictResolution()
+    {
+        var multiTenantSyncService = _serviceProvider.GetRequiredService<IMultiTenantSyncService>();
+        var stockRepository = _serviceProvider.GetRequiredService<IStockRepository>();
+        var productRepository = _serviceProvider.GetRequiredService<IProductRepository>();
+        
+        // Test with multiple random synchronization scenarios
+        for (int iteration = 0; iteration < 15; iteration++)
+        {
+            try
+            {
+                // Setup: Create a business with multiple shops and products
+                var syncTestData = GenerateRandomSyncTestData();
+                await SetupSyncTestDataAsync(syncTestData);
+
+                // Simulate concurrent inventory updates from different devices
+                var conflictScenarios = GenerateInventoryConflictScenarios(syncTestData);
+                
+                foreach (var scenario in conflictScenarios)
+                {
+                    // Apply local changes to simulate offline updates
+                    await ApplyLocalInventoryChangesAsync(scenario.LocalChanges);
+                    
+                    // Simulate server changes
+                    await ApplyServerInventoryChangesAsync(scenario.ServerChanges);
+                    
+                    // Create data conflicts for resolution
+                    var conflicts = await CreateInventoryConflictsAsync(scenario);
+                    
+                    // Test: Resolve conflicts using multi-tenant sync service
+                    var resolutionResult = await multiTenantSyncService.ResolveDataConflictsAsync(conflicts.ToArray());
+                    
+                    // Verify conflict resolution succeeded
+                    Assert.True(resolutionResult.Success, 
+                        $"Conflict resolution should succeed in iteration {iteration}, scenario {scenario.ScenarioId}");
+                    
+                    // Verify consistency: Final stock levels should be deterministic
+                    foreach (var productId in scenario.AffectedProducts)
+                    {
+                        var finalStock = await stockRepository.GetStockByProductIdAsync(productId);
+                        Assert.NotNull(finalStock);
+                        
+                        // Stock level should be non-negative after conflict resolution
+                        Assert.True(finalStock.Quantity >= 0, 
+                            $"Final stock quantity should be non-negative for product {productId} " +
+                            $"in iteration {iteration}, scenario {scenario.ScenarioId}. Got: {finalStock.Quantity}");
+                        
+                        // Verify that the same conflict resolution produces the same result
+                        var secondResolutionResult = await multiTenantSyncService.ResolveDataConflictsAsync(conflicts.ToArray());
+                        var secondFinalStock = await stockRepository.GetStockByProductIdAsync(productId);
+                        
+                        Assert.Equal(finalStock.Quantity, secondFinalStock.Quantity);
+                        Assert.Equal(finalStock.LastUpdatedAt, secondFinalStock.LastUpdatedAt);
+                    }
+                    
+                    // Verify tenant isolation: Changes should only affect the correct business
+                    var businessProducts = await productRepository.GetProductsByShopIdAsync(syncTestData.ShopId);
+                    var businessStock = new List<Stock>();
+                    
+                    foreach (var product in businessProducts)
+                    {
+                        var stock = await stockRepository.GetStockByProductIdAsync(product.Id);
+                        if (stock != null)
+                        {
+                            businessStock.Add(stock);
+                        }
+                    }
+                    
+                    // All stock records should belong to the correct business
+                    var isolationValid = await multiTenantSyncService.ValidateTenantIsolationAsync(
+                        syncTestData.BusinessId, businessStock);
+                    
+                    Assert.True(isolationValid, 
+                        $"Tenant isolation should be maintained after sync in iteration {iteration}, scenario {scenario.ScenarioId}");
+                    
+                    // Verify synchronization consistency across multiple sync operations
+                    var firstSyncResult = await multiTenantSyncService.SyncShopDataAsync(syncTestData.ShopId);
+                    var secondSyncResult = await multiTenantSyncService.SyncShopDataAsync(syncTestData.ShopId);
+                    
+                    // Multiple syncs of the same data should be idempotent
+                    Assert.Equal(firstSyncResult.Success, secondSyncResult.Success);
+                    
+                    if (firstSyncResult.Success && secondSyncResult.Success)
+                    {
+                        // Second sync should have no changes if first sync was successful
+                        Assert.True(secondSyncResult.ItemsSynced <= firstSyncResult.ItemsSynced,
+                            $"Second sync should not sync more items than first sync in iteration {iteration}");
+                    }
+                }
+                
+                // Test business-level synchronization consistency
+                var businessSyncResult = await multiTenantSyncService.SyncBusinessDataAsync(syncTestData.BusinessId);
+                
+                if (businessSyncResult.Success)
+                {
+                    // Verify that all shops in the business have consistent data
+                    var shopSyncStatuses = await multiTenantSyncService.GetBusinessSyncStatusAsync(syncTestData.BusinessId);
+                    
+                    foreach (var shopStatus in shopSyncStatuses)
+                    {
+                        Assert.True(shopStatus.HealthStatus != SyncHealthStatus.Error,
+                            $"Shop {shopStatus.ShopId} should not have sync errors after business sync in iteration {iteration}");
+                        
+                        // Pending uploads should be minimal after successful sync
+                        Assert.True(shopStatus.PendingUploads <= 5,
+                            $"Shop {shopStatus.ShopId} should have minimal pending uploads after sync in iteration {iteration}. " +
+                            $"Got: {shopStatus.PendingUploads}");
+                    }
+                }
+            }
+            finally
+            {
+                CleanupTestData();
+            }
+        }
+    }
+
+                // Verify base total matches sum of line items
+                var saleItems = await saleItemRepository.FindAsync(si => si.SaleId == sale.Id);
+                var actualSumOfLineItems = saleItems.Sum(si => si.TotalPrice);
+                
+                var baseTotalDifference = Math.Abs(actualLineTotal - actualSumOfLineItems);
+                Assert.True(baseTotalDifference <= tolerance,
+                    $"Base total should match sum of line items in iteration {iteration}. " +
+                    $"Base Total: {actualLineTotal:C}, Sum of Line Items: {actualSumOfLineItems:C}, " +
+                    $"Difference: {baseTotalDifference:C}");
+
+                // Verify all amounts are non-negative
+                Assert.True(actualLineTotal >= 0, $"Base total should be non-negative in iteration {iteration}");
+                Assert.True(discountAmount >= 0, $"Discount amount should be non-negative in iteration {iteration}");
+                Assert.True(taxAmount >= 0, $"Tax amount should be non-negative in iteration {iteration}");
+                Assert.True(finalTotal >= 0, $"Final total should be non-negative in iteration {iteration}");
+
+                // Verify discounts don't exceed base total
+                Assert.True(discountAmount <= actualLineTotal,
+                    $"Discount amount should not exceed base total in iteration {iteration}. " +
+                    $"Discount: {discountAmount:C}, Base: {actualLineTotal:C}");
+
+                // Verify calculation is deterministic - same input should give same result
+                var secondCalculationResult = await enhancedSalesService.CalculateWithBusinessRulesAsync(sale);
+                Assert.Equal(calculationResult.FinalTotal, secondCalculationResult.FinalTotal);
+                Assert.Equal(calculationResult.BaseTotal, secondCalculationResult.BaseTotal);
+                Assert.Equal(calculationResult.DiscountAmount, secondCalculationResult.DiscountAmount);
+                Assert.Equal(calculationResult.TaxAmount, secondCalculationResult.TaxAmount);
+            }
+            finally
+            {
+                CleanupTestData();
+            }
+        }
+    }
+
+    /// <summary>
     /// Generates test data for a business including shops, products, sales, and stock
     /// </summary>
     private static BusinessTestData GenerateBusinessData()
@@ -628,6 +805,243 @@ public class MultiBusinessPropertyTests : IDisposable
             ProductCount = random.Next(1, 6), // 1-5 products per shop
             SaleCount = random.Next(0, 4) // 0-3 sales per shop
         };
+    }
+
+    /// <summary>
+    /// Generates random sync test data for inventory synchronization testing
+    /// </summary>
+    private static SyncTestData GenerateRandomSyncTestData()
+    {
+        var random = new Random();
+        var productCount = random.Next(2, 8); // 2-7 products for testing
+        
+        return new SyncTestData
+        {
+            BusinessId = Guid.NewGuid(),
+            ShopId = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            ProductIds = Enumerable.Range(0, productCount).Select(_ => Guid.NewGuid()).ToList(),
+            DeviceIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() } // 3 devices
+        };
+    }
+
+    /// <summary>
+    /// Sets up test data for synchronization testing
+    /// </summary>
+    private async Task SetupSyncTestDataAsync(SyncTestData syncTestData)
+    {
+        // Create business owner
+        var owner = new User
+        {
+            Id = syncTestData.UserId,
+            BusinessId = syncTestData.BusinessId,
+            Username = $"owner_{syncTestData.UserId:N}",
+            FullName = $"Owner {syncTestData.UserId:N}",
+            Email = $"owner_{syncTestData.UserId:N}@test.com",
+            PasswordHash = "hash",
+            Salt = "salt",
+            Role = UserRole.BusinessOwner,
+            DeviceId = syncTestData.DeviceIds[0]
+        };
+
+        // Create business
+        var business = new Business
+        {
+            Id = syncTestData.BusinessId,
+            Name = $"Business {syncTestData.BusinessId:N}",
+            Type = BusinessType.GeneralRetail,
+            OwnerId = syncTestData.UserId,
+            DeviceId = syncTestData.DeviceIds[0]
+        };
+
+        // Create shop
+        var shop = new Shop
+        {
+            Id = syncTestData.ShopId,
+            BusinessId = syncTestData.BusinessId,
+            Name = $"Shop {syncTestData.ShopId:N}",
+            DeviceId = syncTestData.DeviceIds[0]
+        };
+
+        _context.Users.Add(owner);
+        _context.Businesses.Add(business);
+        _context.Shops.Add(shop);
+
+        // Create products and initial stock
+        for (int i = 0; i < syncTestData.ProductIds.Count; i++)
+        {
+            var productId = syncTestData.ProductIds[i];
+            var product = new Product
+            {
+                Id = productId,
+                ShopId = syncTestData.ShopId,
+                Name = $"Product {i + 1}",
+                Barcode = $"BC{productId:N}",
+                UnitPrice = 10.00m + i,
+                DeviceId = syncTestData.DeviceIds[0]
+            };
+
+            var stock = new Stock
+            {
+                Id = Guid.NewGuid(),
+                ShopId = syncTestData.ShopId,
+                ProductId = productId,
+                Quantity = 100 + i * 10, // Initial stock: 100, 110, 120, etc.
+                LastUpdatedAt = DateTime.UtcNow.AddMinutes(-60), // 1 hour ago
+                DeviceId = syncTestData.DeviceIds[0]
+            };
+
+            _context.Products.Add(product);
+            _context.Stock.Add(stock);
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Generates inventory conflict scenarios for testing
+    /// </summary>
+    private static List<InventoryConflictScenario> GenerateInventoryConflictScenarios(SyncTestData syncTestData)
+    {
+        var random = new Random();
+        var scenarios = new List<InventoryConflictScenario>();
+        
+        // Generate 2-4 conflict scenarios per test
+        var scenarioCount = random.Next(2, 5);
+        
+        for (int i = 0; i < scenarioCount; i++)
+        {
+            var affectedProductCount = random.Next(1, Math.Min(4, syncTestData.ProductIds.Count));
+            var affectedProducts = syncTestData.ProductIds.Take(affectedProductCount).ToList();
+            
+            var scenario = new InventoryConflictScenario
+            {
+                ScenarioId = i + 1,
+                AffectedProducts = affectedProducts,
+                LocalChanges = GenerateRandomInventoryChanges(affectedProducts, syncTestData.DeviceIds[1], random),
+                ServerChanges = GenerateRandomInventoryChanges(affectedProducts, syncTestData.DeviceIds[2], random)
+            };
+            
+            scenarios.Add(scenario);
+        }
+        
+        return scenarios;
+    }
+
+    /// <summary>
+    /// Generates random inventory changes for conflict simulation
+    /// </summary>
+    private static List<InventoryChange> GenerateRandomInventoryChanges(List<Guid> productIds, Guid deviceId, Random random)
+    {
+        var changes = new List<InventoryChange>();
+        
+        foreach (var productId in productIds)
+        {
+            // 70% chance of change per product
+            if (random.Next(0, 10) < 7)
+            {
+                var changeType = (InventoryChangeType)random.Next(0, 3);
+                var quantityChange = changeType switch
+                {
+                    InventoryChangeType.Sale => -random.Next(1, 20), // Reduce stock
+                    InventoryChangeType.Purchase => random.Next(10, 100), // Increase stock
+                    InventoryChangeType.Adjustment => random.Next(-30, 50), // Can be positive or negative
+                    _ => 0
+                };
+                
+                changes.Add(new InventoryChange
+                {
+                    ProductId = productId,
+                    QuantityChange = quantityChange,
+                    ChangeType = changeType,
+                    Timestamp = DateTime.UtcNow.AddMinutes(-random.Next(1, 30)), // 1-30 minutes ago
+                    DeviceId = deviceId,
+                    Reason = $"{changeType} from device {deviceId:N}"
+                });
+            }
+        }
+        
+        return changes;
+    }
+
+    /// <summary>
+    /// Applies local inventory changes to simulate offline updates
+    /// </summary>
+    private async Task ApplyLocalInventoryChangesAsync(List<InventoryChange> localChanges)
+    {
+        foreach (var change in localChanges)
+        {
+            var stock = await _context.Stock.FirstOrDefaultAsync(s => s.ProductId == change.ProductId);
+            if (stock != null)
+            {
+                stock.Quantity = Math.Max(0, stock.Quantity + change.QuantityChange);
+                stock.LastUpdatedAt = change.Timestamp;
+                stock.DeviceId = change.DeviceId;
+                stock.SyncStatus = SyncStatus.NotSynced; // Mark as needing sync
+            }
+        }
+        
+        await _context.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Applies server inventory changes to simulate server-side updates
+    /// </summary>
+    private async Task ApplyServerInventoryChangesAsync(List<InventoryChange> serverChanges)
+    {
+        // In a real scenario, these would come from the server
+        // For testing, we'll create separate stock records to simulate server state
+        foreach (var change in serverChanges)
+        {
+            var stock = await _context.Stock.FirstOrDefaultAsync(s => s.ProductId == change.ProductId);
+            if (stock != null)
+            {
+                // Create a "server version" by modifying the timestamp and device
+                // This simulates what would happen when server data conflicts with local data
+                var serverQuantity = Math.Max(0, stock.Quantity + change.QuantityChange);
+                
+                // Store server state in a way that will create conflicts
+                stock.ServerQuantity = serverQuantity;
+                stock.ServerLastUpdatedAt = change.Timestamp;
+                stock.ServerDeviceId = change.DeviceId;
+            }
+        }
+        
+        await _context.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Creates data conflicts for testing conflict resolution
+    /// </summary>
+    private async Task<List<DataConflict>> CreateInventoryConflictsAsync(InventoryConflictScenario scenario)
+    {
+        var conflicts = new List<DataConflict>();
+        
+        foreach (var productId in scenario.AffectedProducts)
+        {
+            var stock = await _context.Stock.FirstOrDefaultAsync(s => s.ProductId == productId);
+            if (stock != null && stock.ServerQuantity.HasValue)
+            {
+                // Create conflict between local and server data
+                var conflict = new DataConflict
+                {
+                    EntityType = nameof(Stock),
+                    EntityId = stock.Id,
+                    BusinessId = stock.Shop?.BusinessId ?? Guid.Empty,
+                    ShopId = stock.ShopId,
+                    LocalData = new { Quantity = stock.Quantity, LastUpdatedAt = stock.LastUpdatedAt, DeviceId = stock.DeviceId },
+                    ServerData = new { Quantity = stock.ServerQuantity.Value, LastUpdatedAt = stock.ServerLastUpdatedAt, DeviceId = stock.ServerDeviceId },
+                    LocalTimestamp = stock.LastUpdatedAt,
+                    ServerTimestamp = stock.ServerLastUpdatedAt ?? DateTime.UtcNow,
+                    Type = ConflictType.UpdateConflict,
+                    ConflictReason = "Concurrent inventory updates from different devices"
+                };
+                
+                conflicts.Add(conflict);
+            }
+        }
+        
+        return conflicts;
     }
 
     /// <summary>
@@ -1237,5 +1651,51 @@ public class MultiBusinessPropertyTests : IDisposable
     {
         public string Action { get; set; } = string.Empty;
         public Guid? ShopId { get; set; }
+    }
+
+    /// <summary>
+    /// Test data structure for synchronization testing
+    /// </summary>
+    private class SyncTestData
+    {
+        public Guid BusinessId { get; set; }
+        public Guid ShopId { get; set; }
+        public Guid UserId { get; set; }
+        public List<Guid> ProductIds { get; set; } = new();
+        public List<Guid> DeviceIds { get; set; } = new();
+    }
+
+    /// <summary>
+    /// Inventory conflict scenario for testing
+    /// </summary>
+    private class InventoryConflictScenario
+    {
+        public int ScenarioId { get; set; }
+        public List<Guid> AffectedProducts { get; set; } = new();
+        public List<InventoryChange> LocalChanges { get; set; } = new();
+        public List<InventoryChange> ServerChanges { get; set; } = new();
+    }
+
+    /// <summary>
+    /// Inventory change for conflict simulation
+    /// </summary>
+    private class InventoryChange
+    {
+        public Guid ProductId { get; set; }
+        public int QuantityChange { get; set; }
+        public InventoryChangeType ChangeType { get; set; }
+        public DateTime Timestamp { get; set; }
+        public Guid DeviceId { get; set; }
+        public string Reason { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Types of inventory changes
+    /// </summary>
+    private enum InventoryChangeType
+    {
+        Sale,
+        Purchase,
+        Adjustment
     }
 }

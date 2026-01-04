@@ -426,3 +426,41 @@ public class ShopValidationResult
     public List<string> Errors { get; set; } = new();
     public List<string> Warnings { get; set; } = new();
 }
+
+/// <summary>
+/// Business DTO for synchronization
+/// </summary>
+public class BusinessDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public BusinessType Type { get; set; }
+    public Guid OwnerId { get; set; }
+    public string? Description { get; set; }
+    public string? Address { get; set; }
+    public string? Phone { get; set; }
+    public string? Email { get; set; }
+    public string? TaxId { get; set; }
+    public string? Configuration { get; set; }
+    public bool IsActive { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+}
+
+/// <summary>
+/// Shop DTO for synchronization
+/// </summary>
+public class ShopDto
+{
+    public Guid Id { get; set; }
+    public Guid BusinessId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? Address { get; set; }
+    public string? Phone { get; set; }
+    public string? Email { get; set; }
+    public string? Configuration { get; set; }
+    public bool IsActive { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+}
+

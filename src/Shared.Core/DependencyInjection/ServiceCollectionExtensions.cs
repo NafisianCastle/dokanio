@@ -86,6 +86,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISyncEngine, SyncEngine>();
         services.AddScoped<IConnectivityService, ConnectivityService>();
         services.AddScoped<ISyncApiClient, SyncApiClient>();
+        services.AddScoped<IMultiTenantSyncService, MultiTenantSyncService>();
         services.AddHttpClient<ISyncApiClient, SyncApiClient>();
         
         // Register hardware integration services
@@ -177,6 +178,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISyncEngine, SyncEngine>();
         services.AddScoped<IConnectivityService, ConnectivityService>();
         services.AddScoped<ISyncApiClient, SyncApiClient>();
+        services.AddScoped<IMultiTenantSyncService, MultiTenantSyncService>();
         services.AddHttpClient<ISyncApiClient, SyncApiClient>();
         
         // Register hardware integration services for testing
