@@ -229,4 +229,9 @@ public class MockCurrentUserService : ICurrentUserService
     {
         return Task.FromResult(false);
     }
+
+    public Guid GetDeviceId() => Guid.NewGuid();
+    public Guid? GetUserId() => CurrentUser?.Id;
+    public string? GetUsername() => CurrentUser?.Username;
+    public UserRole GetUserRole() => CurrentUser?.Role ?? UserRole.Cashier;
 }

@@ -1,6 +1,7 @@
 using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Repositories;
+using Shared.Core.DTOs;
 
 namespace Shared.Core.Services;
 
@@ -11,29 +12,92 @@ public class SaleService : ISaleService
     private readonly IProductService _productService;
     private readonly IInventoryService _inventoryService;
     private readonly IWeightBasedPricingService _weightBasedPricingService;
+    private readonly IMembershipService _membershipService;
+    private readonly IDiscountService _discountService;
+    private readonly IConfigurationService _configurationService;
+    private readonly ILicenseService _licenseService;
 
     public SaleService(
         ISaleRepository saleRepository,
         ISaleItemRepository saleItemRepository,
         IProductService productService,
         IInventoryService inventoryService,
-        IWeightBasedPricingService weightBasedPricingService)
+        IWeightBasedPricingService weightBasedPricingService,
+        IMembershipService membershipService,
+        IDiscountService discountService,
+        IConfigurationService configurationService,
+        ILicenseService licenseService)
     {
         _saleRepository = saleRepository;
         _saleItemRepository = saleItemRepository;
         _productService = productService;
         _inventoryService = inventoryService;
         _weightBasedPricingService = weightBasedPricingService;
+        _membershipService = membershipService;
+        _discountService = discountService;
+        _configurationService = configurationService;
+        _licenseService = licenseService;
     }
 
     public async Task<Sale> CreateSaleAsync(string invoiceNumber, Guid deviceId)
     {
+        // Check license before creating sale
+        var licenseStatus = await _licenseService.CheckLicenseStatusAsync();
+        if (licenseStatus != LicenseStatus.Active)
+        {
+            throw new InvalidOperationException($"Cannot create sale: License status is {licenseStatus}");
+        }
+
         var sale = new Sale
         {
             Id = Guid.NewGuid(),
             InvoiceNumber = invoiceNumber,
             TotalAmount = 0,
+            DiscountAmount = 0,
+            TaxAmount = 0,
+            MembershipDiscountAmount = 0,
             PaymentMethod = PaymentMethod.Cash, // Default, will be set on completion
+            DeviceId = deviceId,
+            CreatedAt = DateTime.UtcNow,
+            SyncStatus = SyncStatus.NotSynced
+        };
+
+        await _saleRepository.AddAsync(sale);
+        await _saleRepository.SaveChangesAsync();
+
+        return sale;
+    }
+
+    public async Task<Sale> CreateSaleWithCustomerAsync(string invoiceNumber, Guid deviceId, string? membershipNumber = null)
+    {
+        // Check license before creating sale
+        var licenseStatus = await _licenseService.CheckLicenseStatusAsync();
+        if (licenseStatus != LicenseStatus.Active)
+        {
+            throw new InvalidOperationException($"Cannot create sale: License status is {licenseStatus}");
+        }
+
+        Customer? customer = null;
+        if (!string.IsNullOrEmpty(membershipNumber))
+        {
+            customer = await _membershipService.GetCustomerByMembershipNumberAsync(membershipNumber);
+            if (customer == null)
+            {
+                throw new ArgumentException($"Customer with membership number {membershipNumber} not found");
+            }
+        }
+
+        var sale = new Sale
+        {
+            Id = Guid.NewGuid(),
+            InvoiceNumber = invoiceNumber,
+            TotalAmount = 0,
+            DiscountAmount = 0,
+            TaxAmount = 0,
+            MembershipDiscountAmount = 0,
+            PaymentMethod = PaymentMethod.Cash, // Default, will be set on completion
+            CustomerId = customer?.Id,
+            Customer = customer,
             DeviceId = deviceId,
             CreatedAt = DateTime.UtcNow,
             SyncStatus = SyncStatus.NotSynced
@@ -174,19 +238,68 @@ public class SaleService : ISaleService
             throw new ArgumentException("Sale not found", nameof(saleId));
         }
 
+        return await CompleteSaleAsync(sale, paymentMethod);
+    }
+
+    public async Task<Sale> CompleteSaleAsync(Sale sale, PaymentMethod paymentMethod)
+    {
+        // Check license before completing sale
+        var licenseStatus = await _licenseService.CheckLicenseStatusAsync();
+        if (licenseStatus != LicenseStatus.Active)
+        {
+            throw new InvalidOperationException($"Cannot complete sale: License status is {licenseStatus}");
+        }
+
+        // Ensure we have the tracked entity from the database
+        var trackedSale = await _saleRepository.GetByIdAsync(sale.Id);
+        if (trackedSale == null)
+        {
+            throw new ArgumentException("Sale not found", nameof(sale));
+        }
+
         // Set payment method
-        sale.PaymentMethod = paymentMethod;
+        trackedSale.PaymentMethod = paymentMethod;
         
-        // Ensure total is calculated
-        sale.TotalAmount = await CalculateSaleTotalAsync(saleId);
+        // Calculate base total from items
+        var baseTotal = await CalculateBaseSaleTotalAsync(trackedSale.Id);
         
-        await _saleRepository.UpdateAsync(sale);
+        // Apply discounts
+        var discountResult = await _discountService.CalculateDiscountsAsync(trackedSale, trackedSale.Customer);
+        trackedSale.DiscountAmount = discountResult.TotalDiscountAmount;
+        
+        // Apply membership discounts if customer exists
+        decimal membershipDiscountAmount = 0;
+        if (trackedSale.Customer != null)
+        {
+            var membershipDiscount = await _membershipService.CalculateMembershipDiscountAsync(trackedSale.Customer, trackedSale);
+            membershipDiscountAmount = membershipDiscount.DiscountAmount;
+            trackedSale.MembershipDiscountAmount = membershipDiscountAmount;
+        }
+        
+        // Calculate tax
+        var taxSettings = await _configurationService.GetTaxSettingsAsync();
+        var taxableAmount = baseTotal - trackedSale.DiscountAmount - membershipDiscountAmount;
+        trackedSale.TaxAmount = Math.Round(taxableAmount * (taxSettings.DefaultTaxRate / 100), 2, MidpointRounding.AwayFromZero);
+        
+        // Calculate final total
+        trackedSale.TotalAmount = baseTotal - trackedSale.DiscountAmount - membershipDiscountAmount + trackedSale.TaxAmount;
+        
+        // Save applied discounts
+        await SaveAppliedDiscountsAsync(trackedSale, discountResult);
+        
+        await _saleRepository.UpdateAsync(trackedSale);
         await _saleRepository.SaveChangesAsync();
 
         // Update inventory for all items in the sale
-        await _inventoryService.ProcessSaleInventoryUpdateAsync(sale);
+        await _inventoryService.ProcessSaleInventoryUpdateAsync(trackedSale);
+        
+        // Update customer purchase history if customer exists
+        if (trackedSale.Customer != null)
+        {
+            await _membershipService.UpdateCustomerPurchaseHistoryAsync(trackedSale.Customer, trackedSale);
+        }
 
-        return sale;
+        return trackedSale;
     }
 
     public async Task<decimal> CalculateSaleTotalAsync(Guid saleId)
@@ -208,6 +321,54 @@ public class SaleService : ISaleService
         return await Task.FromResult(total);
     }
 
+    public async Task<SaleCalculationResult> CalculateFullSaleTotalAsync(Guid saleId)
+    {
+        var sale = await _saleRepository.GetByIdAsync(saleId);
+        if (sale == null)
+        {
+            throw new ArgumentException("Sale not found", nameof(saleId));
+        }
+
+        return await CalculateFullSaleTotalAsync(sale);
+    }
+
+    public async Task<SaleCalculationResult> CalculateFullSaleTotalAsync(Sale sale)
+    {
+        // Calculate base total from items
+        var baseTotal = await CalculateBaseSaleTotalAsync(sale.Id);
+        
+        // Apply discounts
+        var discountResult = await _discountService.CalculateDiscountsAsync(sale, sale.Customer);
+        var discountAmount = discountResult.TotalDiscountAmount;
+        
+        // Apply membership discounts if customer exists
+        decimal membershipDiscountAmount = 0;
+        if (sale.Customer != null)
+        {
+            var membershipDiscount = await _membershipService.CalculateMembershipDiscountAsync(sale.Customer, sale);
+            membershipDiscountAmount = membershipDiscount.DiscountAmount;
+        }
+        
+        // Calculate tax
+        var taxSettings = await _configurationService.GetTaxSettingsAsync();
+        var taxableAmount = baseTotal - discountAmount - membershipDiscountAmount;
+        var taxAmount = Math.Round(taxableAmount * (taxSettings.DefaultTaxRate / 100), 2, MidpointRounding.AwayFromZero);
+        
+        // Calculate final total
+        var finalTotal = baseTotal - discountAmount - membershipDiscountAmount + taxAmount;
+        
+        return new SaleCalculationResult
+        {
+            BaseTotal = baseTotal,
+            DiscountAmount = discountAmount,
+            MembershipDiscountAmount = membershipDiscountAmount,
+            TaxAmount = taxAmount,
+            FinalTotal = finalTotal,
+            AppliedDiscounts = discountResult.AppliedDiscounts,
+            DiscountReasons = discountResult.DiscountReasons
+        };
+    }
+
     public async Task<bool> ValidateProductForSaleAsync(Guid productId)
     {
         // Check if product is active
@@ -227,16 +388,21 @@ public class SaleService : ISaleService
 
     public async Task<Sale> CompleteSaleAsync(Sale sale)
     {
-        // Ensure total is calculated
-        sale.TotalAmount = await CalculateSaleTotalAsync(sale.Id);
-        
-        await _saleRepository.UpdateAsync(sale);
-        await _saleRepository.SaveChangesAsync();
+        return await CompleteSaleAsync(sale, sale.PaymentMethod);
+    }
 
-        // Update inventory for all items in the sale
-        await _inventoryService.ProcessSaleInventoryUpdateAsync(sale);
+    private async Task<decimal> CalculateBaseSaleTotalAsync(Guid saleId)
+    {
+        var saleItems = await _saleItemRepository.FindAsync(si => si.SaleId == saleId);
+        return saleItems.Sum(item => item.TotalPrice);
+    }
 
-        return sale;
+    private async Task SaveAppliedDiscountsAsync(Sale sale, DiscountCalculationResult discountResult)
+    {
+        // For now, skip saving applied discounts to avoid Entity Framework issues
+        // This would typically be handled by a separate SaleDiscountRepository
+        // TODO: Implement proper SaleDiscount management
+        await Task.CompletedTask;
     }
 
     public async Task<Sale?> GetSaleByInvoiceNumberAsync(string invoiceNumber)

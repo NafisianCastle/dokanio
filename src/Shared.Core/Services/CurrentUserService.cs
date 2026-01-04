@@ -1,4 +1,5 @@
 using Shared.Core.Entities;
+using Shared.Core.Enums;
 
 namespace Shared.Core.Services;
 
@@ -10,10 +11,12 @@ public class CurrentUserService : ICurrentUserService
     private User? _currentUser;
     private UserSession? _currentSession;
     private readonly ISessionService _sessionService;
+    private readonly Guid _deviceId;
 
     public CurrentUserService(ISessionService sessionService)
     {
         _sessionService = sessionService;
+        _deviceId = Guid.NewGuid(); // In a real implementation, this would come from device configuration
     }
 
     public User? CurrentUser => _currentUser;
@@ -71,4 +74,12 @@ public class CurrentUserService : ICurrentUserService
 
         return await _sessionService.IsSessionExpiredAsync(_currentSession.SessionToken, inactivityTimeoutMinutes);
     }
+
+    public Guid GetDeviceId() => _deviceId;
+
+    public Guid? GetUserId() => _currentUser?.Id;
+
+    public string? GetUsername() => _currentUser?.Username;
+
+    public UserRole GetUserRole() => _currentUser?.Role ?? UserRole.Cashier;
 }

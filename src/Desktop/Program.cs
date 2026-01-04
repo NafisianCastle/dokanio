@@ -29,7 +29,7 @@ public partial class App : Application
         services.AddLogging(builder =>
         {
             builder.AddConsole();
-            builder.SetMinimumLevel(LogLevel.Information);
+            builder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
         });
 
         // Get database path
@@ -65,12 +65,6 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
-    }
-
-    protected override void OnExit(ControlledApplicationLifetimeExitEventArgs e)
-    {
-        _serviceProvider?.Dispose();
-        base.OnExit(e);
     }
 }
 
