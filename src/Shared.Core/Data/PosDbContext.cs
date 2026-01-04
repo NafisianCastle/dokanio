@@ -16,6 +16,9 @@ public class PosDbContext : DbContext
     public DbSet<SaleItem> SaleItems { get; set; } = null!;
     public DbSet<Stock> Stock { get; set; } = null!;
     public DbSet<TransactionLogEntry> TransactionLogs { get; set; } = null!;
+    public DbSet<User> Users { get; set; } = null!;
+    public DbSet<AuditLog> AuditLogs { get; set; } = null!;
+    public DbSet<UserSession> UserSessions { get; set; } = null!;
 
     public PosDbContext(DbContextOptions<PosDbContext> options) : base(options)
     {
@@ -51,6 +54,7 @@ public class PosDbContext : DbContext
         ConfigureSoftDelete<Sale>(modelBuilder);
         ConfigureSoftDelete<SaleItem>(modelBuilder);
         ConfigureSoftDelete<Stock>(modelBuilder);
+        ConfigureSoftDelete<User>(modelBuilder);
 
         // TransactionLogEntry configuration (not soft deletable)
         modelBuilder.Entity<TransactionLogEntry>(entity =>
@@ -143,6 +147,80 @@ public class PosDbContext : DbContext
             entity.HasOne(e => e.Product)
                   .WithMany(p => p.StockEntries)
                   .HasForeignKey(e => e.ProductId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // User configuration
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Username).IsUnique();
+            entity.HasIndex(e => e.Email).IsUnique();
+            entity.HasIndex(e => e.Role);
+            entity.HasIndex(e => e.IsActive);
+            entity.HasIndex(e => e.SyncStatus);
+            entity.HasIndex(e => e.DeviceId);
+            
+            entity.Property(e => e.Username).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.FullName).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.PasswordHash).IsRequired();
+            entity.Property(e => e.Salt).IsRequired();
+            
+            // Convert enums to integers for SQLite
+            entity.Property(e => e.Role).HasConversion<int>();
+            entity.Property(e => e.SyncStatus).HasConversion<int>();
+        });
+
+        // AuditLog configuration
+        modelBuilder.Entity<AuditLog>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.Action);
+            entity.HasIndex(e => e.CreatedAt);
+            entity.HasIndex(e => e.EntityType);
+            entity.HasIndex(e => e.EntityId);
+            entity.HasIndex(e => e.SyncStatus);
+            entity.HasIndex(e => e.DeviceId);
+            
+            entity.Property(e => e.Username).HasMaxLength(100);
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.EntityType).HasMaxLength(50);
+            entity.Property(e => e.OldValues).HasMaxLength(1000);
+            entity.Property(e => e.NewValues).HasMaxLength(1000);
+            entity.Property(e => e.IpAddress).HasMaxLength(45);
+            entity.Property(e => e.UserAgent).HasMaxLength(500);
+            
+            // Convert enums to integers for SQLite
+            entity.Property(e => e.Action).HasConversion<int>();
+            entity.Property(e => e.SyncStatus).HasConversion<int>();
+            
+            // Foreign key relationship
+            entity.HasOne(e => e.User)
+                  .WithMany(u => u.AuditLogs)
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // UserSession configuration
+        modelBuilder.Entity<UserSession>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.SessionToken).IsUnique();
+            entity.HasIndex(e => e.IsActive);
+            entity.HasIndex(e => e.LastActivityAt);
+            entity.HasIndex(e => e.DeviceId);
+            
+            entity.Property(e => e.SessionToken).IsRequired();
+            entity.Property(e => e.IpAddress).HasMaxLength(45);
+            entity.Property(e => e.UserAgent).HasMaxLength(500);
+            
+            // Foreign key relationship
+            entity.HasOne(e => e.User)
+                  .WithMany()
+                  .HasForeignKey(e => e.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
     }

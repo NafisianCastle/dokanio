@@ -1,0 +1,116 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Desktop.ViewModels"
+             x:Class="Desktop.Views.LoginView"
+             x:DataType="vm:LoginViewModel">
+
+  <Design.DataContext>
+    <vm:LoginViewModel />
+  </Design.DataContext>
+
+  <Border Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+          CornerRadius="8"
+          Padding="40"
+          MaxWidth="400"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Center">
+    
+    <StackPanel Spacing="20">
+      
+      <!-- Header -->
+      <StackPanel Spacing="8" HorizontalAlignment="Center">
+        <TextBlock Text="POS System Login"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center" />
+        <TextBlock Text="Please sign in to continue"
+                   FontSize="14"
+                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                   HorizontalAlignment="Center" />
+      </StackPanel>
+
+      <!-- Login Form -->
+      <StackPanel Spacing="16">
+        
+        <!-- Username -->
+        <StackPanel Spacing="4">
+          <TextBlock Text="Username" FontWeight="Medium" />
+          <TextBox Text="{Binding Username}"
+                   Watermark="Enter your username"
+                   IsEnabled="{Binding !IsLoading}" />
+        </StackPanel>
+
+        <!-- Password -->
+        <StackPanel Spacing="4">
+          <TextBlock Text="Password" FontWeight="Medium" />
+          <TextBox Text="{Binding Password}"
+                   Watermark="Enter your password"
+                   PasswordChar="*"
+                   IsEnabled="{Binding !IsLoading}" />
+        </StackPanel>
+
+        <!-- Remember Me -->
+        <CheckBox Content="Remember me"
+                  IsChecked="{Binding RememberMe}"
+                  IsEnabled="{Binding !IsLoading}" />
+
+        <!-- Error Message -->
+        <Border Background="{DynamicResource SystemFillColorCriticalBrush}"
+                CornerRadius="4"
+                Padding="12,8"
+                IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock Text="⚠"
+                       Foreground="White"
+                       FontWeight="Bold" />
+            <TextBlock Text="{Binding ErrorMessage}"
+                       Foreground="White"
+                       TextWrapping="Wrap" />
+          </StackPanel>
+        </Border>
+
+        <!-- Login Button -->
+        <Button Content="Sign In"
+                Command="{Binding LoginCommand}"
+                IsEnabled="{Binding !IsLoading}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
+                Padding="0,12"
+                FontWeight="Medium">
+          <Button.Styles>
+            <Style Selector="Button">
+              <Setter Property="Background" Value="{DynamicResource SystemAccentColor}" />
+              <Setter Property="Foreground" Value="White" />
+            </Style>
+            <Style Selector="Button:pointerover">
+              <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight1}" />
+            </Style>
+          </Button.Styles>
+        </Button>
+
+        <!-- Loading Indicator -->
+        <StackPanel Orientation="Horizontal"
+                    Spacing="8"
+                    HorizontalAlignment="Center"
+                    IsVisible="{Binding IsLoading}">
+          <ProgressBar IsIndeterminate="True"
+                       Width="20"
+                       Height="20" />
+          <TextBlock Text="Signing in..."
+                     VerticalAlignment="Center" />
+        </StackPanel>
+
+      </StackPanel>
+
+      <!-- Footer -->
+      <StackPanel Spacing="8" HorizontalAlignment="Center">
+        <TextBlock Text="Offline-First POS System"
+                   FontSize="12"
+                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                   HorizontalAlignment="Center" />
+      </StackPanel>
+
+    </StackPanel>
+  </Border>
+
+</UserControl>
