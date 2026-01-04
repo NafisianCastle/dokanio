@@ -183,6 +183,11 @@ public class ShopResponse
 public class BusinessConfiguration
 {
     /// <summary>
+    /// Business type
+    /// </summary>
+    public BusinessType BusinessType { get; set; }
+    
+    /// <summary>
     /// Default currency for the business
     /// </summary>
     public string Currency { get; set; } = "USD";
@@ -196,6 +201,36 @@ public class BusinessConfiguration
     /// Business type-specific settings
     /// </summary>
     public BusinessTypeSettings TypeSettings { get; set; } = new();
+    
+    /// <summary>
+    /// Business type settings as dictionary for flexibility
+    /// </summary>
+    public Dictionary<string, object> BusinessTypeSettings { get; set; } = new();
+    
+    /// <summary>
+    /// Required product attributes for this business type
+    /// </summary>
+    public List<string> RequiredProductAttributes { get; set; } = new();
+    
+    /// <summary>
+    /// Optional product attributes for this business type
+    /// </summary>
+    public List<string> OptionalProductAttributes { get; set; } = new();
+    
+    /// <summary>
+    /// Business settings
+    /// </summary>
+    public BusinessSettings BusinessSettings { get; set; } = new();
+    
+    /// <summary>
+    /// Tax settings
+    /// </summary>
+    public TaxSettings TaxSettings { get; set; } = new();
+    
+    /// <summary>
+    /// Currency settings
+    /// </summary>
+    public CurrencySettings CurrencySettings { get; set; } = new();
     
     /// <summary>
     /// Custom attributes for extensibility
@@ -247,12 +282,12 @@ public class ShopConfiguration
     /// <summary>
     /// Currency for this shop (overrides business default)
     /// </summary>
-    public string? Currency { get; set; }
+    public string Currency { get; set; } = "USD";
     
     /// <summary>
     /// Tax rate for this shop (overrides business default)
     /// </summary>
-    public decimal? TaxRate { get; set; }
+    public decimal TaxRate { get; set; } = 0.0m;
     
     /// <summary>
     /// Pricing rules specific to this shop
@@ -263,6 +298,16 @@ public class ShopConfiguration
     /// Inventory settings for this shop
     /// </summary>
     public InventorySettings InventorySettings { get; set; } = new();
+    
+    /// <summary>
+    /// Business settings for this shop
+    /// </summary>
+    public BusinessSettings BusinessSettings { get; set; } = new();
+    
+    /// <summary>
+    /// Localization settings for this shop
+    /// </summary>
+    public LocalizationSettings LocalizationSettings { get; set; } = new();
     
     /// <summary>
     /// Custom settings for this shop
@@ -289,6 +334,26 @@ public class PricingRules
     /// Enable dynamic pricing based on demand
     /// </summary>
     public bool EnableDynamicPricing { get; set; } = false;
+    
+    /// <summary>
+    /// Require manager approval for discounts above threshold
+    /// </summary>
+    public bool RequireManagerApprovalForDiscounts { get; set; } = false;
+    
+    /// <summary>
+    /// Manager approval threshold percentage
+    /// </summary>
+    public decimal ManagerApprovalThreshold { get; set; } = 0.1m; // 10%
+    
+    /// <summary>
+    /// Enable bundle pricing
+    /// </summary>
+    public bool EnableBundlePricing { get; set; } = false;
+    
+    /// <summary>
+    /// Enable tiered pricing
+    /// </summary>
+    public bool EnableTieredPricing { get; set; } = false;
 }
 
 /// <summary>
@@ -312,9 +377,34 @@ public class InventorySettings
     public bool EnableAutoReorder { get; set; } = false;
     
     /// <summary>
+    /// Auto reorder threshold
+    /// </summary>
+    public int AutoReorderThreshold { get; set; } = 5;
+    
+    /// <summary>
+    /// Auto reorder quantity
+    /// </summary>
+    public int AutoReorderQuantity { get; set; } = 50;
+    
+    /// <summary>
+    /// Enable expiry alerts
+    /// </summary>
+    public bool EnableExpiryAlerts { get; set; } = true;
+    
+    /// <summary>
     /// Days before expiry to show alerts (for pharmacy)
     /// </summary>
     public int ExpiryAlertDays { get; set; } = 30;
+    
+    /// <summary>
+    /// Enable batch tracking
+    /// </summary>
+    public bool EnableBatchTracking { get; set; } = false;
+    
+    /// <summary>
+    /// Enable serial number tracking
+    /// </summary>
+    public bool EnableSerialNumberTracking { get; set; } = false;
 }
 
 /// <summary>
