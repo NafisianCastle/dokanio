@@ -30,6 +30,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IEnhancedSalesService, EnhancedSalesService>();
         services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IEnhancedInventoryService, EnhancedInventoryService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
         services.AddScoped<IDiscountService, DiscountService>();
@@ -151,6 +152,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IEnhancedSalesService, EnhancedSalesService>();
         services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IEnhancedInventoryService, EnhancedInventoryService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
         services.AddScoped<IDiscountService, DiscountService>();

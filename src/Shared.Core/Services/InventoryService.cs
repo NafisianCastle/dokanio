@@ -6,9 +6,9 @@ namespace Shared.Core.Services;
 
 public class InventoryService : IInventoryService
 {
-    private readonly IStockRepository _stockRepository;
-    private readonly IProductRepository _productRepository;
-    private readonly ISaleItemRepository _saleItemRepository;
+    protected readonly IStockRepository _stockRepository;
+    protected readonly IProductRepository _productRepository;
+    protected readonly ISaleItemRepository _saleItemRepository;
 
     public InventoryService(
         IStockRepository stockRepository,
