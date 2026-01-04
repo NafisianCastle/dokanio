@@ -262,8 +262,8 @@ public class ReceiptService : IReceiptService
             }
             else
             {
-                var itemLine = FormatItemLine(productName, item.Quantity, item.UnitPrice);
-                
+                var itemLine = FormatItemLine(productName, item.Quantity, item.UnitPrice, item.TotalPrice);
+    
                 lines.Add(new ReceiptLine
                 {
                     Text = itemLine,
