@@ -273,4 +273,30 @@ public class StockRepository : Repository<Stock>, IStockRepository
             throw;
         }
     }
+
+    /// <summary>
+    /// Gets all stock entries for a specific shop from Local_Storage
+    /// </summary>
+    public async Task<IEnumerable<Stock>> GetStockByShopAsync(Guid shopId)
+    {
+        try
+        {
+            _logger.LogDebug("Getting stock for shop {ShopId} from Local_Storage", shopId);
+            
+            // Local-first: Query Local_Storage only
+            var shopStock = await _dbSet
+                .Include(s => s.Product)
+                .Where(s => s.ShopId == shopId)
+                .ToListAsync();
+            
+            _logger.LogDebug("Found {Count} stock entries for shop {ShopId} in Local_Storage", shopStock.Count, shopId);
+            
+            return shopStock;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting stock for shop {ShopId} from Local_Storage", shopId);
+            throw;
+        }
+    }
 }

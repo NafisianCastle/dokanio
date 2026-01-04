@@ -259,4 +259,36 @@ public class SaleRepository : Repository<Sale>, ISaleRepository
             throw;
         }
     }
+
+    /// <summary>
+    /// Gets all sales within a date range for a specific shop from Local_Storage
+    /// </summary>
+    public async Task<IEnumerable<Sale>> GetSalesByShopAndDateRangeAsync(Guid shopId, DateTime from, DateTime to)
+    {
+        try
+        {
+            _logger.LogDebug("Getting sales for shop {ShopId} from {From} to {To} from Local_Storage", shopId, from, to);
+            
+            var startDate = from.Date;
+            var endDate = to.Date.AddDays(1).AddTicks(-1);
+            
+            // Local-first: Query Local_Storage only
+            var salesInRange = await _dbSet
+                .Include(s => s.Items)
+                .Where(s => s.ShopId == shopId && s.CreatedAt >= startDate && s.CreatedAt <= endDate)
+                .OrderByDescending(s => s.CreatedAt)
+                .ToListAsync();
+            
+            _logger.LogDebug("Found {Count} sales for shop {ShopId} from {From} to {To} in Local_Storage", 
+                salesInRange.Count, shopId, from, to);
+            
+            return salesInRange;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting sales for shop {ShopId} from {From} to {To} from Local_Storage", 
+                shopId, from, to);
+            throw;
+        }
+    }
 }

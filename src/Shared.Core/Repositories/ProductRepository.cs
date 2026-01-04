@@ -189,4 +189,29 @@ public class ProductRepository : Repository<Product>, IProductRepository
             throw;
         }
     }
+
+    /// <summary>
+    /// Gets all products for a specific shop from Local_Storage
+    /// </summary>
+    public async Task<IEnumerable<Product>> GetProductsByShopAsync(Guid shopId)
+    {
+        try
+        {
+            _logger.LogDebug("Getting products for shop {ShopId} from Local_Storage", shopId);
+            
+            // Local-first: Query Local_Storage only
+            var shopProducts = await _dbSet
+                .Where(p => p.ShopId == shopId && p.IsActive)
+                .ToListAsync();
+            
+            _logger.LogDebug("Found {Count} products for shop {ShopId} in Local_Storage", shopProducts.Count, shopId);
+            
+            return shopProducts;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting products for shop {ShopId} from Local_Storage", shopId);
+            throw;
+        }
+    }
 }

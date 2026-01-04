@@ -46,4 +46,11 @@ public interface IProductRepository : IRepository<Product>
     /// <param name="searchTerm">Search term</param>
     /// <returns>Collection of matching products</returns>
     Task<IEnumerable<Product>> SearchAsync(string searchTerm);
+    
+    /// <summary>
+    /// Gets all products for a specific shop
+    /// </summary>
+    /// <param name="shopId">Shop identifier</param>
+    /// <returns>Collection of products for the shop</returns>
+    Task<IEnumerable<Product>> GetProductsByShopAsync(Guid shopId);
 }

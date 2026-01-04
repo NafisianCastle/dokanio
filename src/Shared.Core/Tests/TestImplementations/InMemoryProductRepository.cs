@@ -98,4 +98,11 @@ public class InMemoryProductRepository : IProductRepository
             .Where(p => p.Name.Contains(searchTerm) || (p.Barcode != null && p.Barcode.Contains(searchTerm)))
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<Product>> GetProductsByShopAsync(Guid shopId)
+    {
+        return await _context.Products
+            .Where(p => p.ShopId == shopId && p.IsActive)
+            .ToListAsync();
+    }
 }
