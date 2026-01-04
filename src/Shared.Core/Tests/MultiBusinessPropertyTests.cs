@@ -41,6 +41,14 @@ public class MultiBusinessPropertyTests : IDisposable
         
         // Add services
         services.AddScoped<IBusinessManagementService, BusinessManagementService>();
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<IAuthorizationService, AuthorizationService>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ISessionService, SessionService>();
+        services.AddScoped<IAuditService, AuditService>();
+        services.AddScoped<IEncryptionService, EncryptionService>();
+        services.AddScoped<IUserSessionRepository, UserSessionRepository>();
+        services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         
         _serviceProvider = services.BuildServiceProvider();
         _context = _serviceProvider.GetRequiredService<PosDbContext>();
@@ -208,6 +216,210 @@ public class MultiBusinessPropertyTests : IDisposable
                 var secondValidationResult = await businessManagementService.ValidateProductAttributesAsync(businessType, attributes);
                 Assert.Equal(validationResult.IsValid, secondValidationResult.IsValid);
                 Assert.Equal(validationResult.Errors.Count, secondValidationResult.Errors.Count);
+            }
+            finally
+            {
+                CleanupTestData();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Property 2: Role-Based Access Enforcement
+    /// For any user and permission, the system should only allow access to resources that match the user's role and assigned permissions.
+    /// Validates: Requirements 4.2, 4.3, 4.4, 4.5, 4.6
+    /// Feature: multi-business-pos, Property 2: Role-Based Access Enforcement
+    /// </summary>
+    [Fact]
+    public async Task RoleBasedAccessEnforcement_UsersShouldOnlyAccessResourcesMatchingTheirRoleAndPermissions()
+    {
+        var authenticationService = _serviceProvider.GetRequiredService<IAuthenticationService>();
+        var authorizationService = _serviceProvider.GetRequiredService<IAuthorizationService>();
+        var userService = _serviceProvider.GetRequiredService<IUserService>();
+        
+        // Test with multiple random user/permission scenarios
+        for (int iteration = 0; iteration < 20; iteration++)
+        {
+            try
+            {
+                // Generate random user with random role and business/shop assignment
+                var userData = GenerateRandomUserData();
+                var user = await CreateTestUser(userData);
+
+                // Get user permissions
+                var userPermissions = await authenticationService.GetUserPermissionsAsync(user.Id);
+
+                // Test various permission scenarios
+                var testPermissions = GenerateTestPermissions();
+                
+                foreach (var permission in testPermissions)
+                {
+                    // Test permission validation
+                    var hasPermission = await authenticationService.ValidatePermissionAsync(
+                        user.Id, permission.Action, permission.ShopId);
+                    
+                    // Verify role-based access enforcement
+                    var expectedAccess = ShouldUserHaveAccess(userData.Role, permission, userData.BusinessId, userData.ShopId);
+                    
+                    if (expectedAccess != hasPermission)
+                    {
+                        Assert.True(false, 
+                            $"User with role {userData.Role} should {(expectedAccess ? "have" : "not have")} " +
+                            $"access to {permission.Action} for shop {permission.ShopId} in iteration {iteration}");
+                    }
+
+                    // Test authorization service consistency
+                    var authServiceResult = authorizationService.HasPermission(user.Role, 
+                        Enum.Parse<AuditAction>(permission.Action));
+                    
+                    // For basic role permissions (without shop context), results should be consistent
+                    if (permission.ShopId == null || userData.CanAccessShop(permission.ShopId.Value))
+                    {
+                        if (authServiceResult != hasPermission)
+                        {
+                            Assert.True(false,
+                                $"Authorization service and authentication service should be consistent " +
+                                $"for role {userData.Role} and action {permission.Action} in iteration {iteration}");
+                        }
+                    }
+                }
+
+                // Test shop-level access control
+                if (userData.ShopId.HasValue)
+                {
+                    // User should be able to access their assigned shop
+                    var canAccessOwnShop = userPermissions.CanAccessShop(userData.ShopId.Value);
+                    Assert.True(canAccessOwnShop, 
+                        $"User should be able to access their assigned shop in iteration {iteration}");
+
+                    // User should not be able to access other shops (unless BusinessOwner)
+                    var otherShopId = Guid.NewGuid();
+                    var canAccessOtherShop = userPermissions.CanAccessShop(otherShopId);
+                    
+                    if (userData.Role == UserRole.BusinessOwner)
+                    {
+                        Assert.True(canAccessOtherShop, 
+                            $"Business owner should be able to access any shop in iteration {iteration}");
+                    }
+                    else
+                    {
+                        Assert.False(canAccessOtherShop, 
+                            $"Non-business-owner should not be able to access other shops in iteration {iteration}");
+                    }
+                }
+
+                // Test business-level isolation
+                var otherBusinessUser = GenerateRandomUserData();
+                otherBusinessUser.BusinessId = Guid.NewGuid(); // Different business
+                var otherUser = await CreateTestUser(otherBusinessUser);
+
+                // Ensure we have a shop to test cross-business access
+                var testShopId = userData.ShopId ?? Guid.NewGuid();
+                if (!userData.ShopId.HasValue)
+                {
+                    // Create a shop for the original user's business to test cross-business access
+                    var testShop = new Shop
+                    {
+                        Id = testShopId,
+                        BusinessId = userData.BusinessId,
+                        Name = $"Test Shop {testShopId:N}",
+                        DeviceId = Guid.NewGuid()
+                    };
+                    _context.Shops.Add(testShop);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Users from different businesses should not be able to access each other's resources
+                var crossBusinessAccess = await authenticationService.ValidatePermissionAsync(
+                    otherUser.Id, "CreateSale", testShopId);
+                
+                Assert.False(crossBusinessAccess, 
+                    $"Users from different businesses should not have cross-business access in iteration {iteration}");
+            }
+            finally
+            {
+                CleanupTestData();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Property 5: Offline Authentication Expiration
+    /// For any cached authentication token, access should be denied when the token has exceeded its configured expiration time.
+    /// Validates: Requirements 3.4, 3.5
+    /// Feature: multi-business-pos, Property 5: Offline Authentication Expiration
+    /// </summary>
+    [Fact]
+    public async Task OfflineAuthenticationExpiration_AccessShouldBeDeniedWhenTokenExpired()
+    {
+        var authenticationService = _serviceProvider.GetRequiredService<IAuthenticationService>();
+        var userService = _serviceProvider.GetRequiredService<IUserService>();
+        
+        // Test with multiple random expiration scenarios
+        for (int iteration = 0; iteration < 15; iteration++)
+        {
+            try
+            {
+                // Generate random user and expiration time
+                var userData = GenerateRandomUserData();
+                var user = await CreateTestUser(userData);
+                
+                var random = new Random();
+                var expirationMinutes = random.Next(-60, 120); // -60 to 120 minutes (past to future)
+                var expiration = TimeSpan.FromMinutes(expirationMinutes);
+                
+                // Create a cached token
+                var token = GenerateRandomToken();
+                await authenticationService.CacheCredentialsAsync(user.Id, token, expiration);
+
+                // Test offline authentication
+                var authResult = await authenticationService.AuthenticateOfflineAsync(userData.Username, token);
+
+                // Verify expiration behavior
+                var shouldBeValid = expirationMinutes > 0; // Only future expiration times should be valid
+                
+                if (shouldBeValid != authResult.IsSuccess)
+                {
+                    Assert.True(false,
+                        $"Token with expiration {expirationMinutes} minutes should {(shouldBeValid ? "be valid" : "be expired")} " +
+                        $"but authentication result was {authResult.IsSuccess} in iteration {iteration}");
+                }
+
+                // For expired tokens, verify error message indicates expiration
+                if (!shouldBeValid && !authResult.IsSuccess)
+                {
+                    var errorMessage = authResult.ErrorMessage?.ToLower() ?? "";
+                    Assert.True(errorMessage.Contains("expired"), 
+                        $"Error message should indicate expiration in iteration {iteration}. Got: {authResult.ErrorMessage}");
+                }
+
+                // For valid tokens, verify user is returned
+                if (shouldBeValid && authResult.IsSuccess)
+                {
+                    Assert.NotNull(authResult.User);
+                    Assert.Equal(user.Id, authResult.User.Id);
+                    Assert.True(authResult.IsOfflineMode, 
+                        $"Offline authentication should set IsOfflineMode to true in iteration {iteration}");
+                }
+
+                // Test token validation directly
+                var isTokenValid = await authenticationService.ValidateCachedTokenAsync(user.Id, token);
+                if (shouldBeValid != isTokenValid)
+                {
+                    Assert.True(false,
+                        $"Direct token validation should match authentication result in iteration {iteration}");
+                }
+
+                // Test with wrong token - should always fail
+                var wrongToken = GenerateRandomToken();
+                var wrongTokenResult = await authenticationService.AuthenticateOfflineAsync(userData.Username, wrongToken);
+                Assert.False(wrongTokenResult.IsSuccess, 
+                    $"Authentication with wrong token should always fail in iteration {iteration}");
+
+                // Test with non-existent user - should always fail
+                var nonExistentResult = await authenticationService.AuthenticateOfflineAsync("nonexistent", token);
+                Assert.False(nonExistentResult.IsSuccess, 
+                    $"Authentication with non-existent user should always fail in iteration {iteration}");
             }
             finally
             {
@@ -568,6 +780,153 @@ public class MultiBusinessPropertyTests : IDisposable
         return System.Text.Json.JsonSerializer.Serialize(config);
     }
 
+    /// <summary>
+    /// Generates random user data for testing
+    /// </summary>
+    private static UserTestData GenerateRandomUserData()
+    {
+        var random = new Random();
+        var roles = Enum.GetValues<UserRole>();
+        var role = roles[random.Next(roles.Length)];
+        
+        return new UserTestData
+        {
+            UserId = Guid.NewGuid(),
+            BusinessId = Guid.NewGuid(),
+            ShopId = random.Next(0, 3) == 0 ? null : Guid.NewGuid(), // 33% chance of no shop assignment
+            Role = role,
+            Username = $"user_{Guid.NewGuid():N}",
+            Email = $"user_{Guid.NewGuid():N}@test.com"
+        };
+    }
+
+    /// <summary>
+    /// Creates a test user in the database
+    /// </summary>
+    private async Task<User> CreateTestUser(UserTestData userData)
+    {
+        var userService = _serviceProvider.GetRequiredService<IUserService>();
+        
+        // Create business first
+        var business = new Business
+        {
+            Id = userData.BusinessId,
+            Name = $"Business {userData.BusinessId:N}",
+            Type = BusinessType.GeneralRetail,
+            OwnerId = userData.UserId,
+            DeviceId = Guid.NewGuid()
+        };
+        _context.Businesses.Add(business);
+
+        // Create shop if specified
+        if (userData.ShopId.HasValue)
+        {
+            var shop = new Shop
+            {
+                Id = userData.ShopId.Value,
+                BusinessId = userData.BusinessId,
+                Name = $"Shop {userData.ShopId:N}",
+                DeviceId = Guid.NewGuid()
+            };
+            _context.Shops.Add(shop);
+        }
+
+        await _context.SaveChangesAsync();
+
+        // Create user
+        var user = await userService.CreateUserAsync(
+            userData.Username, 
+            $"Test User {userData.UserId:N}", 
+            userData.Email, 
+            "Password123!", 
+            userData.Role);
+
+        // Update user with business and shop assignments
+        user.BusinessId = userData.BusinessId;
+        user.ShopId = userData.ShopId;
+        
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync();
+
+        return user;
+    }
+
+    /// <summary>
+    /// Generates test permissions for validation
+    /// </summary>
+    private static List<TestPermission> GenerateTestPermissions()
+    {
+        var permissions = new List<TestPermission>();
+        var actions = new[] { "Login", "CreateSale", "RefundSale", "AccessReports", "UpdateInventory", "ChangeUserRole" };
+        
+        foreach (var action in actions)
+        {
+            // Test with no shop context
+            permissions.Add(new TestPermission { Action = action, ShopId = null });
+            
+            // Test with specific shop context
+            permissions.Add(new TestPermission { Action = action, ShopId = Guid.NewGuid() });
+        }
+
+        return permissions;
+    }
+
+    /// <summary>
+    /// Determines if a user should have access based on role and context
+    /// </summary>
+    private static bool ShouldUserHaveAccess(UserRole role, TestPermission permission, Guid businessId, Guid? userShopId)
+    {
+        // Parse the action to AuditAction enum
+        if (!Enum.TryParse<AuditAction>(permission.Action, out var auditAction))
+        {
+            return false;
+        }
+
+        // Check basic role permissions first
+        var hasRolePermission = role switch
+        {
+            UserRole.Cashier => auditAction is AuditAction.Login or AuditAction.Logout or AuditAction.CreateSale,
+            UserRole.InventoryStaff => auditAction is AuditAction.Login or AuditAction.Logout or AuditAction.CreateProduct or AuditAction.UpdateProduct or AuditAction.UpdateInventory,
+            UserRole.ShopManager => auditAction is AuditAction.Login or AuditAction.Logout or AuditAction.CreateSale or AuditAction.RefundSale or AuditAction.CreateProduct or AuditAction.UpdateProduct or AuditAction.DeleteProduct or AuditAction.UpdateInventory or AuditAction.AccessReports or AuditAction.DataExport or AuditAction.DataImport,
+            UserRole.BusinessOwner => true, // Business owners have all permissions
+            UserRole.Administrator => true, // Administrators have all permissions
+            UserRole.Supervisor => auditAction is AuditAction.Login or AuditAction.Logout or AuditAction.CreateSale or AuditAction.RefundSale or AuditAction.AccessReports or AuditAction.UpdateInventory,
+            UserRole.Manager => auditAction is AuditAction.Login or AuditAction.Logout or AuditAction.CreateSale or AuditAction.RefundSale or AuditAction.CreateProduct or AuditAction.UpdateProduct or AuditAction.DeleteProduct or AuditAction.UpdateInventory or AuditAction.AccessReports or AuditAction.DataExport or AuditAction.DataImport,
+            _ => false
+        };
+
+        if (!hasRolePermission)
+        {
+            return false;
+        }
+
+        // Check shop-level access if shop context is provided
+        if (permission.ShopId.HasValue)
+        {
+            // Business owners can access all shops
+            if (role == UserRole.BusinessOwner)
+            {
+                return true;
+            }
+
+            // Other roles need specific shop assignment or no shop restriction
+            return userShopId == null || userShopId == permission.ShopId;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Generates a random authentication token for testing
+    /// </summary>
+    private static string GenerateRandomToken()
+    {
+        var random = new Random();
+        var bytes = new byte[32];
+        random.NextBytes(bytes);
+        return Convert.ToBase64String(bytes);
+    }
+
     public void Dispose()
     {
         _context?.Dispose();
@@ -596,5 +955,32 @@ public class MultiBusinessPropertyTests : IDisposable
         public int ShopCount { get; set; }
         public int ProductCount { get; set; }
         public int SaleCount { get; set; }
+    }
+
+    /// <summary>
+    /// Test data structure for user testing
+    /// </summary>
+    private class UserTestData
+    {
+        public Guid UserId { get; set; }
+        public Guid BusinessId { get; set; }
+        public Guid? ShopId { get; set; }
+        public UserRole Role { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+
+        public bool CanAccessShop(Guid shopId)
+        {
+            return Role == UserRole.BusinessOwner || ShopId == null || ShopId == shopId;
+        }
+    }
+
+    /// <summary>
+    /// Test permission structure
+    /// </summary>
+    private class TestPermission
+    {
+        public string Action { get; set; } = string.Empty;
+        public Guid? ShopId { get; set; }
     }
 }
