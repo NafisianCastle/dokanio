@@ -57,6 +57,13 @@ public static class ServiceCollectionExtensions
         // Register security and authentication services
         services.AddScoped<IEncryptionService, EncryptionService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IAuthenticationService>(provider => new AuthenticationService(
+            provider.GetRequiredService<IUserRepository>(),
+            provider.GetRequiredService<IShopRepository>(),
+            provider.GetRequiredService<ISessionService>(),
+            provider.GetRequiredService<IAuthorizationService>(),
+            provider.GetRequiredService<IEncryptionService>(),
+            provider.GetRequiredService<IAuditService>()));
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();
@@ -177,6 +184,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITransactionLogService, TransactionLogService>();
         services.AddScoped<IEncryptionService, EncryptionService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IAuthenticationService>(provider => new AuthenticationService(
+            provider.GetRequiredService<IUserRepository>(),
+            provider.GetRequiredService<IShopRepository>(),
+            provider.GetRequiredService<ISessionService>(),
+            provider.GetRequiredService<IAuthorizationService>(),
+            provider.GetRequiredService<IEncryptionService>(),
+            provider.GetRequiredService<IAuditService>()));
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();

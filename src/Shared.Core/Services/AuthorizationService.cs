@@ -66,6 +66,48 @@ public class AuthorizationService : IAuthorizationService
                 AuditAction.CreateSale
             },
             
+            [UserRole.InventoryStaff] = new HashSet<AuditAction>
+            {
+                AuditAction.Login,
+                AuditAction.Logout,
+                AuditAction.CreateProduct,
+                AuditAction.UpdateProduct,
+                AuditAction.UpdateInventory
+            },
+            
+            [UserRole.ShopManager] = new HashSet<AuditAction>
+            {
+                AuditAction.Login,
+                AuditAction.Logout,
+                AuditAction.CreateSale,
+                AuditAction.RefundSale,
+                AuditAction.CreateProduct,
+                AuditAction.UpdateProduct,
+                AuditAction.DeleteProduct,
+                AuditAction.UpdateInventory,
+                AuditAction.AccessReports,
+                AuditAction.DataExport,
+                AuditAction.DataImport
+            },
+            
+            [UserRole.BusinessOwner] = new HashSet<AuditAction>
+            {
+                AuditAction.Login,
+                AuditAction.Logout,
+                AuditAction.CreateSale,
+                AuditAction.RefundSale,
+                AuditAction.CreateProduct,
+                AuditAction.UpdateProduct,
+                AuditAction.DeleteProduct,
+                AuditAction.UpdateInventory,
+                AuditAction.AccessReports,
+                AuditAction.ChangeUserRole,
+                AuditAction.SystemConfiguration,
+                AuditAction.DataExport,
+                AuditAction.DataImport
+            },
+            
+            // Legacy roles for backward compatibility
             [UserRole.Supervisor] = new HashSet<AuditAction>
             {
                 AuditAction.Login,
