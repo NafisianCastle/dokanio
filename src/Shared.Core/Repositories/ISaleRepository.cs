@@ -49,9 +49,11 @@ public interface ISaleRepository : IRepository<Sale>
     Task<Sale?> GetByInvoiceNumberAsync(string invoiceNumber);
     
     /// <summary>
-    /// Gets sales count for a specific date
+    /// Gets all sales within a date range for a specific shop
     /// </summary>
-    /// <param name="date">Date to count sales for</param>
-    /// <returns>Number of sales for the date</returns>
-    Task<int> GetDailySalesCountAsync(DateTime date);
+    /// <param name="shopId">Shop identifier</param>
+    /// <param name="from">Start date (inclusive)</param>
+    /// <param name="to">End date (inclusive)</param>
+    /// <returns>Collection of sales within the date range for the shop</returns>
+    Task<IEnumerable<Sale>> GetSalesByShopAndDateRangeAsync(Guid shopId, DateTime from, DateTime to);
 }

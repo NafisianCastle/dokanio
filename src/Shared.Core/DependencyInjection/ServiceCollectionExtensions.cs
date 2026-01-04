@@ -79,6 +79,9 @@ public static class ServiceCollectionExtensions
         // Register cross-platform configuration service
         services.AddSingleton<ICrossPlatformConfigurationService, CrossPlatformConfigurationService>();
         
+        // Register AI Analytics Engine
+        services.AddScoped<IAIAnalyticsEngine, AIAnalyticsEngine>();
+        
         // Register background services
         services.AddHostedService<SessionCleanupService>();
         
@@ -194,6 +197,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITransactionLogService, TransactionLogService>();
         services.AddScoped<IEncryptionService, EncryptionService>();
         services.AddScoped<IUserService, UserService>();
+        
+        // Register AI Analytics Engine
+        services.AddScoped<IAIAnalyticsEngine, AIAnalyticsEngine>();
+        
         services.AddScoped<IAuthenticationService>(provider => new AuthenticationService(
             provider.GetRequiredService<IUserRepository>(),
             provider.GetRequiredService<IShopRepository>(),
