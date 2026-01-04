@@ -3,6 +3,7 @@ using FsCheck.Xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Core.Data;
+using Shared.Core.DTOs;
 using Shared.Core.Services;
 using System.Net;
 using Xunit;

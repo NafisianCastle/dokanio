@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Shared.Core.Data;
+using Shared.Core.DTOs;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Repositories;
@@ -577,6 +578,10 @@ public class TestConnectivityService : IConnectivityService
     
     public event EventHandler<ConnectivityChangedEventArgs>? ConnectivityChanged;
     
+    public Task<bool> IsConnectedAsync()
+    {
+        return Task.FromResult(_isConnected);
+    }
     public void SetConnectivity(bool isConnected)
     {
         if (_isConnected != isConnected)

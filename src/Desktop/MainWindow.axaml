@@ -1,9 +1,170 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Desktop.ViewModels"
+        xmlns:views="using:Desktop.Views"
         x:Class="Desktop.MainWindow"
-        Title="POS Desktop App">
-    <StackPanel Margin="20">
-        <TextBlock Text="POS Desktop Application" FontSize="24" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-        <Button Content="Start POS" HorizontalAlignment="Center"/>
-    </StackPanel>
+        x:DataType="vm:MainViewModel"
+        Title="POS Desktop Application"
+        Width="1200"
+        Height="800"
+        WindowStartupLocation="CenterScreen">
+    
+    <Design.DataContext>
+        <vm:MainViewModel />
+    </Design.DataContext>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2196F3" Padding="20,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="POS Desktop Application" 
+                               FontSize="20" 
+                               FontWeight="Bold" 
+                               Foreground="White" 
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding CurrentUser, StringFormat='Welcome, {0}'}" 
+                               FontSize="14" 
+                               Foreground="White" 
+                               VerticalAlignment="Center" 
+                               Margin="20,0,0,0"/>
+                </StackPanel>
+                
+                <Button Grid.Column="1" 
+                        Content="Sync Data" 
+                        Command="{Binding SyncDataCommand}"
+                        IsEnabled="{Binding !IsBusy}"
+                        Classes="accent"/>
+            </Grid>
+        </Border>
+        
+        <!-- Main Content -->
+        <TabControl Grid.Row="1" Margin="10">
+            <!-- Dashboard Tab -->
+            <TabItem Header="Dashboard">
+                <ScrollViewer>
+                    <StackPanel Spacing="20" Margin="20">
+                        <!-- Summary Cards -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Border Grid.Column="0" Classes="card" Margin="0,0,10,0">
+                                <StackPanel>
+                                    <TextBlock Text="Today's Sales" FontWeight="Bold" FontSize="14"/>
+                                    <TextBlock Text="{Binding TodaysSales, StringFormat='₹{0:N2}'}" 
+                                               FontSize="24" FontWeight="Bold" Foreground="#4CAF50"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <Border Grid.Column="1" Classes="card" Margin="5,0">
+                                <StackPanel>
+                                    <TextBlock Text="Transactions" FontWeight="Bold" FontSize="14"/>
+                                    <TextBlock Text="{Binding TodaysTransactions}" 
+                                               FontSize="24" FontWeight="Bold" Foreground="#2196F3"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <Border Grid.Column="2" Classes="card" Margin="5,0">
+                                <StackPanel>
+                                    <TextBlock Text="Low Stock Items" FontWeight="Bold" FontSize="14"/>
+                                    <TextBlock Text="{Binding LowStockItems}" 
+                                               FontSize="24" FontWeight="Bold" Foreground="#FF9800"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <Border Grid.Column="3" Classes="card" Margin="10,0,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="Sync Status" FontWeight="Bold" FontSize="14"/>
+                                    <TextBlock Text="{Binding SyncStatus}" 
+                                               FontSize="16" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                        
+                        <!-- Recent Activities -->
+                        <Border Classes="card">
+                            <StackPanel>
+                                <TextBlock Text="Recent Activities" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                                <ListBox ItemsSource="{Binding RecentActivities}" MaxHeight="200">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" Margin="5"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            
+            <!-- Sales Tab -->
+            <TabItem Header="New Sale">
+                <views:SaleView DataContext="{Binding SaleViewModel}"/>
+            </TabItem>
+            
+            <!-- Products Tab -->
+            <TabItem Header="Products">
+                <views:ProductView DataContext="{Binding ProductViewModel}"/>
+            </TabItem>
+            
+            <!-- Purchase Entry Tab -->
+            <TabItem Header="Purchase Entry">
+                <views:PurchaseView DataContext="{Binding PurchaseViewModel}"/>
+            </TabItem>
+            
+            <!-- Suppliers Tab -->
+            <TabItem Header="Suppliers">
+                <views:SupplierView DataContext="{Binding SupplierViewModel}"/>
+            </TabItem>
+            
+            <!-- Refunds Tab -->
+            <TabItem Header="Refunds">
+                <TextBlock Text="Refund processing functionality will be implemented here" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center"
+                           FontSize="16"/>
+            </TabItem>
+            
+            <!-- Reports Tab -->
+            <TabItem Header="Reports">
+                <views:ReportsView DataContext="{Binding ReportsViewModel}"/>
+            </TabItem>
+        </TabControl>
+        
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="#F5F5F5" Padding="10,5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0" 
+                           Text="{Binding ErrorMessage}" 
+                           Foreground="Red" 
+                           IsVisible="{Binding HasError}"/>
+                
+                <TextBlock Grid.Column="1" 
+                           Text="{Binding LastSyncTime, StringFormat='Last Sync: {0:HH:mm}'}" 
+                           FontSize="12"/>
+            </Grid>
+        </Border>
+    </Grid>
 </Window>

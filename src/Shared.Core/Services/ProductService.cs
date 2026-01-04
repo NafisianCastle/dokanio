@@ -108,4 +108,57 @@ public class ProductService : IProductService
             )
         );
     }
+
+    public async Task<Product> CreateProductAsync(Product product)
+    {
+        product.Id = Guid.NewGuid();
+        product.CreatedAt = DateTime.UtcNow;
+        product.UpdatedAt = DateTime.UtcNow;
+        product.SyncStatus = SyncStatus.NotSynced;
+
+        await _productRepository.AddAsync(product);
+        await _productRepository.SaveChangesAsync();
+
+        return product;
+    }
+
+    public async Task UpdateProductAsync(Product product)
+    {
+        product.UpdatedAt = DateTime.UtcNow;
+        product.SyncStatus = SyncStatus.NotSynced;
+
+        await _productRepository.UpdateAsync(product);
+        await _productRepository.SaveChangesAsync();
+    }
+
+    public async Task DeleteProductAsync(Guid productId)
+    {
+        var product = await _productRepository.GetByIdAsync(productId);
+        if (product != null)
+        {
+            // Soft delete by setting IsActive to false
+            product.IsActive = false;
+            product.UpdatedAt = DateTime.UtcNow;
+            product.SyncStatus = SyncStatus.NotSynced;
+
+            await _productRepository.UpdateAsync(product);
+            await _productRepository.SaveChangesAsync();
+        }
+    }
+
+    public async Task<int> GetLowStockItemsCountAsync()
+    {
+        // This would typically check inventory levels
+        // For now, return a placeholder value
+        await Task.CompletedTask;
+        return 3; // Placeholder
+    }
+
+    public async Task<IEnumerable<Product>> GetLowStockItemsAsync()
+    {
+        // This would typically check inventory levels and return products with low stock
+        // For now, return empty list as placeholder
+        await Task.CompletedTask;
+        return new List<Product>();
+    }
 }

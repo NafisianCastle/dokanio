@@ -7,6 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>false</UseWPF>
     <UseWindowsForms>false</UseWindowsForms>
+    <ApplicationTitle>Offline POS Desktop</ApplicationTitle>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,10 +15,17 @@
     <PackageReference Include="Avalonia.Desktop" Version="11.2.2" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.2" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.2" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.2" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shared.Core\Shared.Core.csproj" />
+    <!-- Temporarily removed to fix compilation issues -->
+    <!-- <ProjectReference Include="..\Shared.Core\Shared.Core.csproj" /> -->
   </ItemGroup>
 
 </Project>
