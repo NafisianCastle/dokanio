@@ -395,7 +395,7 @@ public class SyncEnginePropertyTests : IDisposable
             }
             
             // All sync results should be successful (idempotent operations should succeed)
-            if (!syncResults.All(r => r.IsSuccess))
+            if (!syncResults.All(r => r.Success))
             {
                 return false; // All sync operations should succeed
             }
@@ -489,7 +489,7 @@ public class SyncEnginePropertyTests : IDisposable
             var syncResult = _syncEngine.SyncAllAsync().Result;
             
             // Verify that sync was successful
-            if (!syncResult.IsSuccess)
+            if (!syncResult.Success)
             {
                 return false; // Sync should succeed even with conflicts
             }

@@ -4,6 +4,7 @@ using Shared.Core.Entities;
 using Shared.Core.Services;
 using System.Linq.Expressions;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Shared.Core.Data;
 
@@ -295,7 +296,11 @@ public class PosDbContext : DbContext
 
                 var entityType = entry.Entity.GetType().Name;
                 var entityId = GetEntityId(entry.Entity);
-                var entityData = JsonSerializer.Serialize(entry.Entity);
+                var entityData = JsonSerializer.Serialize(entry.Entity, new JsonSerializerOptions
+                {
+                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                    WriteIndented = false
+                });
                 var deviceId = GetDeviceId(entry.Entity);
 
                 var logEntry = new TransactionLogEntry

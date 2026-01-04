@@ -69,11 +69,11 @@ public class SyncEngine : ISyncEngine, IDisposable
         if (_isSyncing)
         {
             _logger.LogDebug("Sync already in progress, skipping");
-            return new SyncResult { IsSuccess = false, ErrorMessage = "Sync already in progress" };
+            return new SyncResult { Success = false, Message = "Sync already in progress" };
         }
 
         _isSyncing = true;
-        var overallResult = new SyncResult { IsSuccess = true };
+        var overallResult = new SyncResult { Success = true };
         var totalItemsSynced = 0;
 
         try
@@ -84,7 +84,7 @@ public class SyncEngine : ISyncEngine, IDisposable
             if (!_connectivityService.IsConnected)
             {
                 _logger.LogWarning("No connectivity available, skipping sync");
-                return new SyncResult { IsSuccess = false, ErrorMessage = "No network connectivity" };
+                return new SyncResult { Success = false, Message = "No network connectivity" };
             }
 
             // Sync in order: Sales (upload first), then Products and Stock (download)
@@ -95,20 +95,20 @@ public class SyncEngine : ISyncEngine, IDisposable
             // Combine results
             totalItemsSynced = salesResult.ItemsSynced + productsResult.ItemsSynced + stockResult.ItemsSynced;
             
-            overallResult.IsSuccess = salesResult.IsSuccess && productsResult.IsSuccess && stockResult.IsSuccess;
+            overallResult.Success = salesResult.Success && productsResult.Success && stockResult.Success;
             overallResult.ItemsSynced = totalItemsSynced;
             overallResult.SyncTime = DateTime.UtcNow;
 
-            if (!overallResult.IsSuccess)
+            if (!overallResult.Success)
             {
                 var errors = new List<string>();
-                if (!string.IsNullOrEmpty(salesResult.ErrorMessage)) errors.Add($"Sales: {salesResult.ErrorMessage}");
-                if (!string.IsNullOrEmpty(productsResult.ErrorMessage)) errors.Add($"Products: {productsResult.ErrorMessage}");
-                if (!string.IsNullOrEmpty(stockResult.ErrorMessage)) errors.Add($"Stock: {stockResult.ErrorMessage}");
-                overallResult.ErrorMessage = string.Join("; ", errors);
+                if (!string.IsNullOrEmpty(salesResult.Message)) errors.Add($"Sales: {salesResult.Message}");
+                if (!string.IsNullOrEmpty(productsResult.Message)) errors.Add($"Products: {productsResult.Message}");
+                if (!string.IsNullOrEmpty(stockResult.Message)) errors.Add($"Stock: {stockResult.Message}");
+                overallResult.Message = string.Join("; ", errors);
             }
 
-            if (overallResult.IsSuccess)
+            if (overallResult.Success)
             {
                 // Reset retry attempts on successful sync
                 _retryAttempts.Clear();
@@ -116,14 +116,14 @@ public class SyncEngine : ISyncEngine, IDisposable
             }
 
             _logger.LogInformation("Full synchronization completed. Success: {Success}, Items synced: {ItemsSynced}",
-                overallResult.IsSuccess, overallResult.ItemsSynced);
+                overallResult.Success, overallResult.ItemsSynced);
 
             return overallResult;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error during full synchronization");
-            return new SyncResult { IsSuccess = false, ErrorMessage = ex.Message, SyncTime = DateTime.UtcNow };
+            return new SyncResult { Success = false, Message = ex.Message, SyncTime = DateTime.UtcNow };
         }
         finally
         {
@@ -152,7 +152,7 @@ public class SyncEngine : ISyncEngine, IDisposable
             if (!unsyncedSales.Any())
             {
                 _logger.LogDebug("No unsynced sales found");
-                result.IsSuccess = true;
+                result.Success = true;
                 result.ItemsSynced = 0;
                 return result;
             }
@@ -205,7 +205,7 @@ public class SyncEngine : ISyncEngine, IDisposable
 
                 await _context.SaveChangesAsync();
 
-                result.IsSuccess = true;
+                result.Success = true;
                 result.ItemsSynced = unsyncedSales.Count;
                 _lastSyncTimes["sales"] = DateTime.UtcNow;
 
@@ -221,8 +221,8 @@ public class SyncEngine : ISyncEngine, IDisposable
 
                 await _context.SaveChangesAsync();
 
-                result.IsSuccess = false;
-                result.ErrorMessage = uploadResult.Message;
+                result.Success = false;
+                result.Message = uploadResult.Message;
                 result.ItemsSynced = 0;
 
                 _logger.LogWarning("Failed to sync sales: {Message}", uploadResult.Message);
@@ -234,8 +234,8 @@ public class SyncEngine : ISyncEngine, IDisposable
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error during sales synchronization");
-            result.IsSuccess = false;
-            result.ErrorMessage = ex.Message;
+            result.Success = false;
+            result.Message = ex.Message;
             result.ItemsSynced = 0;
             return result;
         }
@@ -263,8 +263,8 @@ public class SyncEngine : ISyncEngine, IDisposable
 
             if (!downloadResult.Success || downloadResult.Data == null)
             {
-                result.IsSuccess = false;
-                result.ErrorMessage = downloadResult.Message;
+                result.Success = false;
+                result.Message = downloadResult.Message;
                 result.ItemsSynced = 0;
                 return result;
             }
@@ -275,7 +275,7 @@ public class SyncEngine : ISyncEngine, IDisposable
             if (!serverProducts.Any())
             {
                 _logger.LogDebug("No product updates from server");
-                result.IsSuccess = true;
+                result.Success = true;
                 result.ItemsSynced = 0;
                 return result;
             }
@@ -346,7 +346,7 @@ public class SyncEngine : ISyncEngine, IDisposable
 
             await _context.SaveChangesAsync();
 
-            result.IsSuccess = true;
+            result.Success = true;
             result.ItemsSynced = processedCount;
             _lastSyncTimes["products"] = serverData.ServerTimestamp;
 
@@ -357,8 +357,8 @@ public class SyncEngine : ISyncEngine, IDisposable
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error during products synchronization");
-            result.IsSuccess = false;
-            result.ErrorMessage = ex.Message;
+            result.Success = false;
+            result.Message = ex.Message;
             result.ItemsSynced = 0;
             return result;
         }
@@ -386,8 +386,8 @@ public class SyncEngine : ISyncEngine, IDisposable
 
             if (!downloadResult.Success || downloadResult.Data == null)
             {
-                result.IsSuccess = false;
-                result.ErrorMessage = downloadResult.Message;
+                result.Success = false;
+                result.Message = downloadResult.Message;
                 result.ItemsSynced = 0;
                 return result;
             }
@@ -398,7 +398,7 @@ public class SyncEngine : ISyncEngine, IDisposable
             if (!serverStock.Any())
             {
                 _logger.LogDebug("No stock updates from server");
-                result.IsSuccess = true;
+                result.Success = true;
                 result.ItemsSynced = 0;
                 return result;
             }
@@ -452,7 +452,7 @@ public class SyncEngine : ISyncEngine, IDisposable
 
             await _context.SaveChangesAsync();
 
-            result.IsSuccess = true;
+            result.Success = true;
             result.ItemsSynced = processedCount;
             _lastSyncTimes["stock"] = serverData.ServerTimestamp;
 
@@ -463,8 +463,8 @@ public class SyncEngine : ISyncEngine, IDisposable
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error during stock synchronization");
-            result.IsSuccess = false;
-            result.ErrorMessage = ex.Message;
+            result.Success = false;
+            result.Message = ex.Message;
             result.ItemsSynced = 0;
             return result;
         }
