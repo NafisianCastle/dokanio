@@ -1,0 +1,2208 @@
+{
+  "settings": {
+    "components": {
+      "code": false,
+      "binaries": false
+    },
+    "targetId": "net10.0",
+    "targetDisplayName": ".NETCoreApp,Version=v10.0"
+  },
+  "analysisStartTime": "2026-01-04T17:31:33.457542Z",
+  "analysisEndTime": "2026-01-04T17:31:38.3530002Z",
+  "privacyModeHelpUrl": "https://go.microsoft.com/fwlink/?linkid=2270980",
+  "stats": {
+    "summary": {
+      "projects": 4,
+      "issues": 7,
+      "incidents": 80,
+      "effort": 80
+    },
+    "charts": {
+      "severity": {
+        "Mandatory": 19,
+        "Optional": 0,
+        "Potential": 61,
+        "Information": 0
+      },
+      "category": {
+        "NuGet": 18,
+        "Project": 3,
+        "Api": 59
+      }
+    }
+  },
+  "projects": [
+    {
+      "path": "src\\Desktop\\Desktop.csproj",
+      "startingProject": true,
+      "issues": 3,
+      "storyPoints": 5,
+      "properties": {
+        "appName": "Desktop",
+        "projectKind": "WinForms",
+        "frameworks": [
+          "net8.0-windows"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 21,
+        "numberOfCodeFiles": 21,
+        "linesTotal": 1968,
+        "linesOfCode": 1968,
+        "totalApiScanned": 4344,
+        "minLinesOfCodeToChange": 1,
+        "maxLinesOfCodeToChange": 1
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "2e665c03-b103-4cad-97e8-04f9819732f9",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Desktop\\Desktop.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.DependencyInjection, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection 10.0.1",
+              "protected": "Microsoft.Extensions.DependencyInjection, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Desktop\\Desktop.csproj",
+            "snippet": "Microsoft.Extensions.DependencyInjection, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection 10.0.1",
+            "protectedSnippet": "Microsoft.Extensions.DependencyInjection, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection 10.0.1",
+            "label": "Microsoft.Extensions.DependencyInjection 8.0.1",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.DependencyInjection",
+              "PackageVersion": "8.0.1",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "cb68c9dc-bcae-4f81-8ca0-d772df7b79bb",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Desktop\\Desktop.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Hosting, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.Hosting, and replace with new package Microsoft.Extensions.Hosting 10.0.1",
+              "protected": "Microsoft.Extensions.Hosting, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.Hosting, and replace with new package Microsoft.Extensions.Hosting 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Desktop\\Desktop.csproj",
+            "snippet": "Microsoft.Extensions.Hosting, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.Hosting, and replace with new package Microsoft.Extensions.Hosting 10.0.1",
+            "protectedSnippet": "Microsoft.Extensions.Hosting, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.Hosting, and replace with new package Microsoft.Extensions.Hosting 10.0.1",
+            "label": "Microsoft.Extensions.Hosting 8.0.1",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Hosting",
+              "PackageVersion": "8.0.1",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "148cef58-4026-4817-a109-e0bf3963afbd",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Desktop\\Desktop.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Logging, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging, and replace with new package Microsoft.Extensions.Logging 10.0.1",
+              "protected": "Microsoft.Extensions.Logging, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging, and replace with new package Microsoft.Extensions.Logging 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Desktop\\Desktop.csproj",
+            "snippet": "Microsoft.Extensions.Logging, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging, and replace with new package Microsoft.Extensions.Logging 10.0.1",
+            "protectedSnippet": "Microsoft.Extensions.Logging, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.Logging, and replace with new package Microsoft.Extensions.Logging 10.0.1",
+            "label": "Microsoft.Extensions.Logging 8.0.1",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Logging",
+              "PackageVersion": "8.0.1",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "c16b9594-1bc6-4eeb-8020-131dc6ff7933",
+          "ruleId": "Project.0002",
+          "projectPath": "src\\Desktop\\Desktop.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net8.0-windows\nRecommended target framework: net10.0-windows",
+              "protected": "Current target framework: net8.0-windows\nRecommended target framework: net10.0-windows"
+            },
+            "kind": "File",
+            "path": "src\\Desktop\\Desktop.csproj",
+            "snippet": "Current target framework: net8.0-windows\nRecommended target framework: net10.0-windows",
+            "protectedSnippet": "Current target framework: net8.0-windows\nRecommended target framework: net10.0-windows",
+            "properties": {
+              "CurrentTargetFramework": "net8.0-windows",
+              "RecommendedTargetFramework": "net10.0-windows"
+            }
+          }
+        },
+        {
+          "incidentId": "f4c54df7-2fc7-4868-84b4-23c5bcf95aaf",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Message no longer duplicated in Console log output ",
+          "projectPath": "src\\Desktop\\Desktop.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "builder.AddConsole();",
+              "protected": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)"
+            },
+            "kind": "File",
+            "path": "src\\Desktop\\Program.cs",
+            "snippet": "builder.AddConsole();",
+            "protectedSnippet": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "label": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/extensions/10.0/console-json-logging-duplicate-messages.md",
+                "isCustom": false
+              }
+            ],
+            "line": 30,
+            "column": 12
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "src\\Mobile\\Mobile.csproj",
+      "startingProject": true,
+      "issues": 0,
+      "storyPoints": 0,
+      "properties": {
+        "appName": "Mobile",
+        "projectKind": "ClassLibrary",
+        "frameworks": [
+          "net10.0-android",
+          "net10.0-ios",
+          "net10.0-maccatalyst",
+          "net10.0-windows10.0.19041.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 25,
+        "numberOfCodeFiles": 25,
+        "linesTotal": 1203,
+        "linesOfCode": 1203,
+        "totalApiScanned": 0,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [],
+      "features": []
+    },
+    {
+      "path": "src\\Server\\Server.csproj",
+      "startingProject": true,
+      "issues": 5,
+      "storyPoints": 33,
+      "properties": {
+        "appName": "Server",
+        "projectKind": "AspNetCore",
+        "frameworks": [
+          "net8.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 10,
+        "numberOfCodeFiles": 8,
+        "linesTotal": 1242,
+        "linesOfCode": 1207,
+        "totalApiScanned": 1576,
+        "minLinesOfCodeToChange": 29,
+        "maxLinesOfCodeToChange": 29
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "a17d957a-4e45-46ee-a8c7-ee06c26b1dc4",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.AspNetCore.OpenApi, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.OpenApi, and replace with new package Microsoft.AspNetCore.OpenApi 10.0.1",
+              "protected": "Microsoft.AspNetCore.OpenApi, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.OpenApi, and replace with new package Microsoft.AspNetCore.OpenApi 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Server.csproj",
+            "snippet": "Microsoft.AspNetCore.OpenApi, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.OpenApi, and replace with new package Microsoft.AspNetCore.OpenApi 10.0.1",
+            "protectedSnippet": "Microsoft.AspNetCore.OpenApi, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.OpenApi, and replace with new package Microsoft.AspNetCore.OpenApi 10.0.1",
+            "label": "Microsoft.AspNetCore.OpenApi 8.0.11",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.OpenApi",
+              "PackageVersion": "8.0.11",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "6a55d342-2a1c-4e94-8278-bf377d03a291",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.EntityFrameworkCore.Design, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design 10.0.1",
+              "protected": "Microsoft.EntityFrameworkCore.Design, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Server.csproj",
+            "snippet": "Microsoft.EntityFrameworkCore.Design, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design 10.0.1",
+            "protectedSnippet": "Microsoft.EntityFrameworkCore.Design, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design 10.0.1",
+            "label": "Microsoft.EntityFrameworkCore.Design 8.0.11",
+            "properties": {
+              "PackageId": "Microsoft.EntityFrameworkCore.Design",
+              "PackageVersion": "8.0.11",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "d9e00119-d3d3-47de-ac33-e65a8b62ba06",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Authentication.JwtBearer, and replace with new package Microsoft.AspNetCore.Authentication.JwtBearer 10.0.1",
+              "protected": "Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Authentication.JwtBearer, and replace with new package Microsoft.AspNetCore.Authentication.JwtBearer 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Server.csproj",
+            "snippet": "Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Authentication.JwtBearer, and replace with new package Microsoft.AspNetCore.Authentication.JwtBearer 10.0.1",
+            "protectedSnippet": "Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Authentication.JwtBearer, and replace with new package Microsoft.AspNetCore.Authentication.JwtBearer 10.0.1",
+            "label": "Microsoft.AspNetCore.Authentication.JwtBearer 8.0.11",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+              "PackageVersion": "8.0.11",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "a0d1dc59-a35a-4b30-afdd-baa1833f9ae8",
+          "ruleId": "Project.0002",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net8.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net8.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Server.csproj",
+            "snippet": "Current target framework: net8.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net8.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net8.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        },
+        {
+          "incidentId": "d7972452-cdbe-443c-bef2-5b47e145a53e",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "if (validatedToken is JwtSecurityToken jwtToken \u0026\u0026\r\n                jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))\r\n            {\r\n                var deviceIdClaim = principal.FindFirst(\u0022device_id\u0022);\r\n                if (deviceIdClaim != null \u0026\u0026 Guid.TryParse(deviceIdClaim.Value, out var deviceId))\r\n                {\r\n                    return deviceId;\r\n                }\r\n            }",
+              "protected": "T:System.IdentityModel.Tokens.Jwt.JwtHeader"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Services\\JwtService.cs",
+            "snippet": "if (validatedToken is JwtSecurityToken jwtToken \u0026\u0026\r\n                jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))\r\n            {\r\n                var deviceIdClaim = principal.FindFirst(\u0022device_id\u0022);\r\n                if (deviceIdClaim != null \u0026\u0026 Guid.TryParse(deviceIdClaim.Value, out var deviceId))\r\n                {\r\n                    return deviceId;\r\n                }\r\n            }",
+            "protectedSnippet": "T:System.IdentityModel.Tokens.Jwt.JwtHeader",
+            "label": "T:System.IdentityModel.Tokens.Jwt.JwtHeader",
+            "line": 73,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "8b12f936-cf99-4eca-b504-636e34beae14",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "if (validatedToken is JwtSecurityToken jwtToken \u0026\u0026\r\n                jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))\r\n            {\r\n                var deviceIdClaim = principal.FindFirst(\u0022device_id\u0022);\r\n                if (deviceIdClaim != null \u0026\u0026 Guid.TryParse(deviceIdClaim.Value, out var deviceId))\r\n                {\r\n                    return deviceId;\r\n                }\r\n            }",
+              "protected": "P:System.IdentityModel.Tokens.Jwt.JwtSecurityToken.Header"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Services\\JwtService.cs",
+            "snippet": "if (validatedToken is JwtSecurityToken jwtToken \u0026\u0026\r\n                jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))\r\n            {\r\n                var deviceIdClaim = principal.FindFirst(\u0022device_id\u0022);\r\n                if (deviceIdClaim != null \u0026\u0026 Guid.TryParse(deviceIdClaim.Value, out var deviceId))\r\n                {\r\n                    return deviceId;\r\n                }\r\n            }",
+            "protectedSnippet": "P:System.IdentityModel.Tokens.Jwt.JwtSecurityToken.Header",
+            "label": "P:System.IdentityModel.Tokens.Jwt.JwtSecurityToken.Header",
+            "line": 73,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "2c326b6a-a1a0-4657-91bc-4b7e7d49058f",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "if (validatedToken is JwtSecurityToken jwtToken \u0026\u0026\r\n                jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))\r\n            {\r\n                var deviceIdClaim = principal.FindFirst(\u0022device_id\u0022);\r\n                if (deviceIdClaim != null \u0026\u0026 Guid.TryParse(deviceIdClaim.Value, out var deviceId))\r\n                {\r\n                    return deviceId;\r\n                }\r\n            }",
+              "protected": "P:System.IdentityModel.Tokens.Jwt.JwtHeader.Alg"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Services\\JwtService.cs",
+            "snippet": "if (validatedToken is JwtSecurityToken jwtToken \u0026\u0026\r\n                jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))\r\n            {\r\n                var deviceIdClaim = principal.FindFirst(\u0022device_id\u0022);\r\n                if (deviceIdClaim != null \u0026\u0026 Guid.TryParse(deviceIdClaim.Value, out var deviceId))\r\n                {\r\n                    return deviceId;\r\n                }\r\n            }",
+            "protectedSnippet": "P:System.IdentityModel.Tokens.Jwt.JwtHeader.Alg",
+            "label": "P:System.IdentityModel.Tokens.Jwt.JwtHeader.Alg",
+            "line": 73,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "3ad69c92-dbd6-46c4-8aab-d89bacbe57d1",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);",
+              "protected": "M:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.ValidateToken(System.String,Microsoft.IdentityModel.Tokens.TokenValidationParameters,Microsoft.IdentityModel.Tokens.SecurityToken@)"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Services\\JwtService.cs",
+            "snippet": "var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);",
+            "protectedSnippet": "M:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.ValidateToken(System.String,Microsoft.IdentityModel.Tokens.TokenValidationParameters,Microsoft.IdentityModel.Tokens.SecurityToken@)",
+            "label": "M:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.ValidateToken(System.String,Microsoft.IdentityModel.Tokens.TokenValidationParameters,Microsoft.IdentityModel.Tokens.SecurityToken@)",
+            "line": 71,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "ac6ab0b8-79d1-4468-9535-72dadc8a803c",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var tokenHandler = new JwtSecurityTokenHandler();",
+              "protected": "T:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Services\\JwtService.cs",
+            "snippet": "var tokenHandler = new JwtSecurityTokenHandler();",
+            "protectedSnippet": "T:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler",
+            "label": "T:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler",
+            "line": 56,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "79ac1b63-476c-42d4-bc78-83d82bdc252f",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var tokenHandler = new JwtSecurityTokenHandler();",
+              "protected": "M:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.#ctor"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Services\\JwtService.cs",
+            "snippet": "var tokenHandler = new JwtSecurityTokenHandler();",
+            "protectedSnippet": "M:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.#ctor",
+            "label": "M:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.#ctor",
+            "line": 56,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "0cbfecad-006e-495b-bcf9-62f6a58fe2e8",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var tokenString = new JwtSecurityTokenHandler().WriteToken(token);",
+              "protected": "T:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Services\\JwtService.cs",
+            "snippet": "var tokenString = new JwtSecurityTokenHandler().WriteToken(token);",
+            "protectedSnippet": "T:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler",
+            "label": "T:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler",
+            "line": 46,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "ab63257c-9c50-48bd-822c-291ce37d78f6",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var tokenString = new JwtSecurityTokenHandler().WriteToken(token);",
+              "protected": "M:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.#ctor"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Services\\JwtService.cs",
+            "snippet": "var tokenString = new JwtSecurityTokenHandler().WriteToken(token);",
+            "protectedSnippet": "M:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.#ctor",
+            "label": "M:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.#ctor",
+            "line": 46,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "af2de465-97d5-48d7-a90b-acb161d63420",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var tokenString = new JwtSecurityTokenHandler().WriteToken(token);",
+              "protected": "M:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.WriteToken(Microsoft.IdentityModel.Tokens.SecurityToken)"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Services\\JwtService.cs",
+            "snippet": "var tokenString = new JwtSecurityTokenHandler().WriteToken(token);",
+            "protectedSnippet": "M:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.WriteToken(Microsoft.IdentityModel.Tokens.SecurityToken)",
+            "label": "M:System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.WriteToken(Microsoft.IdentityModel.Tokens.SecurityToken)",
+            "line": 46,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "a1c1e396-82ae-4f2a-b479-831b5d6ccb5c",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var token = new JwtSecurityToken(\r\n            issuer: _configuration[\u0022Jwt:Issuer\u0022] ?? \u0022POS-Server\u0022,\r\n            audience: _configuration[\u0022Jwt:Audience\u0022] ?? \u0022POS-Devices\u0022,\r\n            claims: claims,\r\n            expires: DateTime.UtcNow.AddHours(GetTokenExpirationHours()),\r\n            signingCredentials: credentials\r\n        );",
+              "protected": "T:System.IdentityModel.Tokens.Jwt.JwtSecurityToken"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Services\\JwtService.cs",
+            "snippet": "var token = new JwtSecurityToken(\r\n            issuer: _configuration[\u0022Jwt:Issuer\u0022] ?? \u0022POS-Server\u0022,\r\n            audience: _configuration[\u0022Jwt:Audience\u0022] ?? \u0022POS-Devices\u0022,\r\n            claims: claims,\r\n            expires: DateTime.UtcNow.AddHours(GetTokenExpirationHours()),\r\n            signingCredentials: credentials\r\n        );",
+            "protectedSnippet": "T:System.IdentityModel.Tokens.Jwt.JwtSecurityToken",
+            "label": "T:System.IdentityModel.Tokens.Jwt.JwtSecurityToken",
+            "line": 38,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "1aecfcad-6080-4ef4-a507-e2a9126ea190",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var token = new JwtSecurityToken(\r\n            issuer: _configuration[\u0022Jwt:Issuer\u0022] ?? \u0022POS-Server\u0022,\r\n            audience: _configuration[\u0022Jwt:Audience\u0022] ?? \u0022POS-Devices\u0022,\r\n            claims: claims,\r\n            expires: DateTime.UtcNow.AddHours(GetTokenExpirationHours()),\r\n            signingCredentials: credentials\r\n        );",
+              "protected": "M:System.IdentityModel.Tokens.Jwt.JwtSecurityToken.#ctor(System.String,System.String,System.Collections.Generic.IEnumerable{System.Security.Claims.Claim},System.Nullable{System.DateTime},System.Nullable{System.DateTime},Microsoft.IdentityModel.Tokens.SigningCredentials)"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Services\\JwtService.cs",
+            "snippet": "var token = new JwtSecurityToken(\r\n            issuer: _configuration[\u0022Jwt:Issuer\u0022] ?? \u0022POS-Server\u0022,\r\n            audience: _configuration[\u0022Jwt:Audience\u0022] ?? \u0022POS-Devices\u0022,\r\n            claims: claims,\r\n            expires: DateTime.UtcNow.AddHours(GetTokenExpirationHours()),\r\n            signingCredentials: credentials\r\n        );",
+            "protectedSnippet": "M:System.IdentityModel.Tokens.Jwt.JwtSecurityToken.#ctor(System.String,System.String,System.Collections.Generic.IEnumerable{System.Security.Claims.Claim},System.Nullable{System.DateTime},System.Nullable{System.DateTime},Microsoft.IdentityModel.Tokens.SigningCredentials)",
+            "label": "M:System.IdentityModel.Tokens.Jwt.JwtSecurityToken.#ctor(System.String,System.String,System.Collections.Generic.IEnumerable{System.Security.Claims.Claim},System.Nullable{System.DateTime},System.Nullable{System.DateTime},Microsoft.IdentityModel.Tokens.SigningCredentials)",
+            "line": 38,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "94099366-8757-4e67-ae09-8609b0461644",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var claims = new[]\r\n        {\r\n            new Claim(ClaimTypes.NameIdentifier, device.Id.ToString()),\r\n            new Claim(ClaimTypes.Name, device.Name),\r\n            new Claim(\u0022device_id\u0022, device.Id.ToString()),\r\n            new Claim(\u0022api_key\u0022, device.ApiKey),\r\n            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),\r\n            new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)\r\n        };",
+              "protected": "T:System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Services\\JwtService.cs",
+            "snippet": "var claims = new[]\r\n        {\r\n            new Claim(ClaimTypes.NameIdentifier, device.Id.ToString()),\r\n            new Claim(ClaimTypes.Name, device.Name),\r\n            new Claim(\u0022device_id\u0022, device.Id.ToString()),\r\n            new Claim(\u0022api_key\u0022, device.ApiKey),\r\n            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),\r\n            new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)\r\n        };",
+            "protectedSnippet": "T:System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames",
+            "label": "T:System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames",
+            "line": 28,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "f3b03b74-8c94-4ba1-adef-53abee0deb6b",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var claims = new[]\r\n        {\r\n            new Claim(ClaimTypes.NameIdentifier, device.Id.ToString()),\r\n            new Claim(ClaimTypes.Name, device.Name),\r\n            new Claim(\u0022device_id\u0022, device.Id.ToString()),\r\n            new Claim(\u0022api_key\u0022, device.ApiKey),\r\n            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),\r\n            new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)\r\n        };",
+              "protected": "F:System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Iat"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Services\\JwtService.cs",
+            "snippet": "var claims = new[]\r\n        {\r\n            new Claim(ClaimTypes.NameIdentifier, device.Id.ToString()),\r\n            new Claim(ClaimTypes.Name, device.Name),\r\n            new Claim(\u0022device_id\u0022, device.Id.ToString()),\r\n            new Claim(\u0022api_key\u0022, device.ApiKey),\r\n            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),\r\n            new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)\r\n        };",
+            "protectedSnippet": "F:System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Iat",
+            "label": "F:System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Iat",
+            "line": 28,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "d39dba1c-49cd-43a9-9d4f-6c6da638a2f5",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var claims = new[]\r\n        {\r\n            new Claim(ClaimTypes.NameIdentifier, device.Id.ToString()),\r\n            new Claim(ClaimTypes.Name, device.Name),\r\n            new Claim(\u0022device_id\u0022, device.Id.ToString()),\r\n            new Claim(\u0022api_key\u0022, device.ApiKey),\r\n            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),\r\n            new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)\r\n        };",
+              "protected": "T:System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Services\\JwtService.cs",
+            "snippet": "var claims = new[]\r\n        {\r\n            new Claim(ClaimTypes.NameIdentifier, device.Id.ToString()),\r\n            new Claim(ClaimTypes.Name, device.Name),\r\n            new Claim(\u0022device_id\u0022, device.Id.ToString()),\r\n            new Claim(\u0022api_key\u0022, device.ApiKey),\r\n            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),\r\n            new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)\r\n        };",
+            "protectedSnippet": "T:System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames",
+            "label": "T:System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames",
+            "line": 28,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "11384582-668b-48e2-8ee1-61e535c14a24",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var claims = new[]\r\n        {\r\n            new Claim(ClaimTypes.NameIdentifier, device.Id.ToString()),\r\n            new Claim(ClaimTypes.Name, device.Name),\r\n            new Claim(\u0022device_id\u0022, device.Id.ToString()),\r\n            new Claim(\u0022api_key\u0022, device.ApiKey),\r\n            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),\r\n            new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)\r\n        };",
+              "protected": "F:System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Services\\JwtService.cs",
+            "snippet": "var claims = new[]\r\n        {\r\n            new Claim(ClaimTypes.NameIdentifier, device.Id.ToString()),\r\n            new Claim(ClaimTypes.Name, device.Name),\r\n            new Claim(\u0022device_id\u0022, device.Id.ToString()),\r\n            new Claim(\u0022api_key\u0022, device.ApiKey),\r\n            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),\r\n            new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)\r\n        };",
+            "protectedSnippet": "F:System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti",
+            "label": "F:System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti",
+            "line": 28,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "f59b9f61-bbfd-4a16-941a-433bdf788495",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Message no longer duplicated in Console log output ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "logging.AddConsole();",
+              "protected": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Program.cs",
+            "snippet": "logging.AddConsole();",
+            "protectedSnippet": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "label": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/extensions/10.0/console-json-logging-duplicate-messages.md",
+                "isCustom": false
+              }
+            ],
+            "line": 130,
+            "column": 4
+          }
+        },
+        {
+          "incidentId": "a4caff5a-a194-47c3-87ba-1a994869f4b1",
+          "ruleId": "Api.0002",
+          "description": "API is available in package Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6. Add package reference to Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };",
+              "protected": "P:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents.OnTokenValidated"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Program.cs",
+            "snippet": "options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };",
+            "protectedSnippet": "P:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents.OnTokenValidated",
+            "label": "P:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents.OnTokenValidated",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+              "PackageNewVersion": "8.0.6"
+            },
+            "line": 93,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "aecf57c3-a982-4ce7-8e69-059ec24f96ea",
+          "ruleId": "Api.0002",
+          "description": "API is available in package Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6. Add package reference to Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);",
+              "protected": "P:Microsoft.AspNetCore.Authentication.JwtBearer.AuthenticationFailedContext.Exception"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Program.cs",
+            "snippet": "logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);",
+            "protectedSnippet": "P:Microsoft.AspNetCore.Authentication.JwtBearer.AuthenticationFailedContext.Exception",
+            "label": "P:Microsoft.AspNetCore.Authentication.JwtBearer.AuthenticationFailedContext.Exception",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+              "PackageNewVersion": "8.0.6"
+            },
+            "line": 98,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "abba631c-27e8-4ea5-84fb-55638e243d9c",
+          "ruleId": "Api.0002",
+          "description": "API is available in package Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6. Add package reference to Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };",
+              "protected": "P:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents.OnAuthenticationFailed"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Program.cs",
+            "snippet": "options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };",
+            "protectedSnippet": "P:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents.OnAuthenticationFailed",
+            "label": "P:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents.OnAuthenticationFailed",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+              "PackageNewVersion": "8.0.6"
+            },
+            "line": 93,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "b7c51c2d-1432-4a44-9b84-cc54365f285e",
+          "ruleId": "Api.0002",
+          "description": "API is available in package Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6. Add package reference to Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };",
+              "protected": "T:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Program.cs",
+            "snippet": "options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents",
+            "label": "T:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+              "PackageNewVersion": "8.0.6"
+            },
+            "line": 93,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "773f710c-995f-412a-8e46-40de76b73c24",
+          "ruleId": "Api.0002",
+          "description": "API is available in package Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6. Add package reference to Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };",
+              "protected": "M:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents.#ctor"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Program.cs",
+            "snippet": "options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };",
+            "protectedSnippet": "M:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents.#ctor",
+            "label": "M:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents.#ctor",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+              "PackageNewVersion": "8.0.6"
+            },
+            "line": 93,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "3fe752f8-b159-4f3d-8cdf-9d8141adf23e",
+          "ruleId": "Api.0002",
+          "description": "API is available in package Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6. Add package reference to Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };",
+              "protected": "T:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Program.cs",
+            "snippet": "options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents",
+            "label": "T:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+              "PackageNewVersion": "8.0.6"
+            },
+            "line": 93,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "11f13374-02af-42a5-b83e-1abd69c0d0a7",
+          "ruleId": "Api.0002",
+          "description": "API is available in package Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6. Add package reference to Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };",
+              "protected": "P:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions.Events"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Program.cs",
+            "snippet": "options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };",
+            "protectedSnippet": "P:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions.Events",
+            "label": "P:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions.Events",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+              "PackageNewVersion": "8.0.6"
+            },
+            "line": 93,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "4aceb329-15e8-4fea-b784-1b4c82f00fa6",
+          "ruleId": "Api.0002",
+          "description": "API is available in package Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6. Add package reference to Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "options.TokenValidationParameters = new TokenValidationParameters\r\n        {\r\n            ValidateIssuerSigningKey = true,\r\n            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),\r\n            ValidateIssuer = true,\r\n            ValidIssuer = builder.Configuration[\u0022Jwt:Issuer\u0022] ?? \u0022POS-Server\u0022,\r\n            ValidateAudience = true,\r\n            ValidAudience = builder.Configuration[\u0022Jwt:Audience\u0022] ?? \u0022POS-Devices\u0022,\r\n            ValidateLifetime = true,\r\n            ClockSkew = TimeSpan.Zero\r\n        };",
+              "protected": "P:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions.TokenValidationParameters"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Program.cs",
+            "snippet": "options.TokenValidationParameters = new TokenValidationParameters\r\n        {\r\n            ValidateIssuerSigningKey = true,\r\n            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),\r\n            ValidateIssuer = true,\r\n            ValidIssuer = builder.Configuration[\u0022Jwt:Issuer\u0022] ?? \u0022POS-Server\u0022,\r\n            ValidateAudience = true,\r\n            ValidAudience = builder.Configuration[\u0022Jwt:Audience\u0022] ?? \u0022POS-Devices\u0022,\r\n            ValidateLifetime = true,\r\n            ClockSkew = TimeSpan.Zero\r\n        };",
+            "protectedSnippet": "P:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions.TokenValidationParameters",
+            "label": "P:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions.TokenValidationParameters",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+              "PackageNewVersion": "8.0.6"
+            },
+            "line": 81,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "8c896842-a4e9-41e3-9b00-d9e5ae6e0bd8",
+          "ruleId": "Api.0002",
+          "description": "API is available in package Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6. Add package reference to Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\r\n    .AddJwtBearer(options =\u003E\r\n    {\r\n        options.TokenValidationParameters = new TokenValidationParameters\r\n        {\r\n            ValidateIssuerSigningKey = true,\r\n            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),\r\n            ValidateIssuer = true,\r\n            ValidIssuer = builder.Configuration[\u0022Jwt:Issuer\u0022] ?? \u0022POS-Server\u0022,\r\n            ValidateAudience = true,\r\n            ValidAudience = builder.Configuration[\u0022Jwt:Audience\u0022] ?? \u0022POS-Devices\u0022,\r\n            ValidateLifetime = true,\r\n            ClockSkew = TimeSpan.Zero\r\n        };\r\n        \r\n        options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };\r\n    });",
+              "protected": "T:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Program.cs",
+            "snippet": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\r\n    .AddJwtBearer(options =\u003E\r\n    {\r\n        options.TokenValidationParameters = new TokenValidationParameters\r\n        {\r\n            ValidateIssuerSigningKey = true,\r\n            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),\r\n            ValidateIssuer = true,\r\n            ValidIssuer = builder.Configuration[\u0022Jwt:Issuer\u0022] ?? \u0022POS-Server\u0022,\r\n            ValidateAudience = true,\r\n            ValidAudience = builder.Configuration[\u0022Jwt:Audience\u0022] ?? \u0022POS-Devices\u0022,\r\n            ValidateLifetime = true,\r\n            ClockSkew = TimeSpan.Zero\r\n        };\r\n        \r\n        options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };\r\n    });",
+            "protectedSnippet": "T:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults",
+            "label": "T:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+              "PackageNewVersion": "8.0.6"
+            },
+            "line": 78,
+            "column": 0
+          }
+        },
+        {
+          "incidentId": "cd528e3b-3363-4bc4-b4d7-e1d3405590e3",
+          "ruleId": "Api.0002",
+          "description": "API is available in package Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6. Add package reference to Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\r\n    .AddJwtBearer(options =\u003E\r\n    {\r\n        options.TokenValidationParameters = new TokenValidationParameters\r\n        {\r\n            ValidateIssuerSigningKey = true,\r\n            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),\r\n            ValidateIssuer = true,\r\n            ValidIssuer = builder.Configuration[\u0022Jwt:Issuer\u0022] ?? \u0022POS-Server\u0022,\r\n            ValidateAudience = true,\r\n            ValidAudience = builder.Configuration[\u0022Jwt:Audience\u0022] ?? \u0022POS-Devices\u0022,\r\n            ValidateLifetime = true,\r\n            ClockSkew = TimeSpan.Zero\r\n        };\r\n        \r\n        options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };\r\n    });",
+              "protected": "F:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Program.cs",
+            "snippet": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\r\n    .AddJwtBearer(options =\u003E\r\n    {\r\n        options.TokenValidationParameters = new TokenValidationParameters\r\n        {\r\n            ValidateIssuerSigningKey = true,\r\n            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),\r\n            ValidateIssuer = true,\r\n            ValidIssuer = builder.Configuration[\u0022Jwt:Issuer\u0022] ?? \u0022POS-Server\u0022,\r\n            ValidateAudience = true,\r\n            ValidAudience = builder.Configuration[\u0022Jwt:Audience\u0022] ?? \u0022POS-Devices\u0022,\r\n            ValidateLifetime = true,\r\n            ClockSkew = TimeSpan.Zero\r\n        };\r\n        \r\n        options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };\r\n    });",
+            "protectedSnippet": "F:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme",
+            "label": "F:Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+              "PackageNewVersion": "8.0.6"
+            },
+            "line": 78,
+            "column": 0
+          }
+        },
+        {
+          "incidentId": "73c4a0a0-72e4-4e5e-88b5-1837e8aecbe2",
+          "ruleId": "Api.0002",
+          "description": "API is available in package Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6. Add package reference to Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\r\n    .AddJwtBearer(options =\u003E\r\n    {\r\n        options.TokenValidationParameters = new TokenValidationParameters\r\n        {\r\n            ValidateIssuerSigningKey = true,\r\n            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),\r\n            ValidateIssuer = true,\r\n            ValidIssuer = builder.Configuration[\u0022Jwt:Issuer\u0022] ?? \u0022POS-Server\u0022,\r\n            ValidateAudience = true,\r\n            ValidAudience = builder.Configuration[\u0022Jwt:Audience\u0022] ?? \u0022POS-Devices\u0022,\r\n            ValidateLifetime = true,\r\n            ClockSkew = TimeSpan.Zero\r\n        };\r\n        \r\n        options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };\r\n    });",
+              "protected": "T:Microsoft.Extensions.DependencyInjection.JwtBearerExtensions"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Program.cs",
+            "snippet": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\r\n    .AddJwtBearer(options =\u003E\r\n    {\r\n        options.TokenValidationParameters = new TokenValidationParameters\r\n        {\r\n            ValidateIssuerSigningKey = true,\r\n            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),\r\n            ValidateIssuer = true,\r\n            ValidIssuer = builder.Configuration[\u0022Jwt:Issuer\u0022] ?? \u0022POS-Server\u0022,\r\n            ValidateAudience = true,\r\n            ValidAudience = builder.Configuration[\u0022Jwt:Audience\u0022] ?? \u0022POS-Devices\u0022,\r\n            ValidateLifetime = true,\r\n            ClockSkew = TimeSpan.Zero\r\n        };\r\n        \r\n        options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };\r\n    });",
+            "protectedSnippet": "T:Microsoft.Extensions.DependencyInjection.JwtBearerExtensions",
+            "label": "T:Microsoft.Extensions.DependencyInjection.JwtBearerExtensions",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+              "PackageNewVersion": "8.0.6"
+            },
+            "line": 78,
+            "column": 0
+          }
+        },
+        {
+          "incidentId": "e7fe1b60-0312-4190-ac15-3d43c232b3a6",
+          "ruleId": "Api.0002",
+          "description": "API is available in package Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6. Add package reference to Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.6",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\r\n    .AddJwtBearer(options =\u003E\r\n    {\r\n        options.TokenValidationParameters = new TokenValidationParameters\r\n        {\r\n            ValidateIssuerSigningKey = true,\r\n            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),\r\n            ValidateIssuer = true,\r\n            ValidIssuer = builder.Configuration[\u0022Jwt:Issuer\u0022] ?? \u0022POS-Server\u0022,\r\n            ValidateAudience = true,\r\n            ValidAudience = builder.Configuration[\u0022Jwt:Audience\u0022] ?? \u0022POS-Devices\u0022,\r\n            ValidateLifetime = true,\r\n            ClockSkew = TimeSpan.Zero\r\n        };\r\n        \r\n        options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };\r\n    });",
+              "protected": "M:Microsoft.Extensions.DependencyInjection.JwtBearerExtensions.AddJwtBearer(Microsoft.AspNetCore.Authentication.AuthenticationBuilder,System.Action{Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions})"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Program.cs",
+            "snippet": "builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\r\n    .AddJwtBearer(options =\u003E\r\n    {\r\n        options.TokenValidationParameters = new TokenValidationParameters\r\n        {\r\n            ValidateIssuerSigningKey = true,\r\n            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),\r\n            ValidateIssuer = true,\r\n            ValidIssuer = builder.Configuration[\u0022Jwt:Issuer\u0022] ?? \u0022POS-Server\u0022,\r\n            ValidateAudience = true,\r\n            ValidAudience = builder.Configuration[\u0022Jwt:Audience\u0022] ?? \u0022POS-Devices\u0022,\r\n            ValidateLifetime = true,\r\n            ClockSkew = TimeSpan.Zero\r\n        };\r\n        \r\n        options.Events = new JwtBearerEvents\r\n        {\r\n            OnAuthenticationFailed = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                logger.LogWarning(\u0022JWT authentication failed: {Exception}\u0022, context.Exception.Message);\r\n                return Task.CompletedTask;\r\n            },\r\n            OnTokenValidated = context =\u003E\r\n            {\r\n                var logger = context.HttpContext.RequestServices.GetRequiredService\u003CILogger\u003CProgram\u003E\u003E();\r\n                var deviceId = context.Principal?.FindFirst(\u0022device_id\u0022)?.Value;\r\n                logger.LogDebug(\u0022JWT token validated for device {DeviceId}\u0022, deviceId);\r\n                return Task.CompletedTask;\r\n            }\r\n        };\r\n    });",
+            "protectedSnippet": "M:Microsoft.Extensions.DependencyInjection.JwtBearerExtensions.AddJwtBearer(Microsoft.AspNetCore.Authentication.AuthenticationBuilder,System.Action{Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions})",
+            "label": "M:Microsoft.Extensions.DependencyInjection.JwtBearerExtensions.AddJwtBearer(Microsoft.AspNetCore.Authentication.AuthenticationBuilder,System.Action{Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions})",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+              "PackageNewVersion": "8.0.6"
+            },
+            "line": 78,
+            "column": 0
+          }
+        },
+        {
+          "incidentId": "9c9fb57a-c5ab-40cf-b17f-c42b73ba213d",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Server\\Server.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "options.MaxAge = TimeSpan.FromDays(365);",
+              "protected": "M:System.TimeSpan.FromDays(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Server\\Program.cs",
+            "snippet": "options.MaxAge = TimeSpan.FromDays(365);",
+            "protectedSnippet": "M:System.TimeSpan.FromDays(System.Double)",
+            "label": "M:System.TimeSpan.FromDays(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 14,
+            "column": 4
+          }
+        }
+      ],
+      "features": [
+        {
+          "featureId": "IdentityModel",
+          "incidents": [
+            "11384582-668b-48e2-8ee1-61e535c14a24",
+            "d39dba1c-49cd-43a9-9d4f-6c6da638a2f5",
+            "f3b03b74-8c94-4ba1-adef-53abee0deb6b",
+            "94099366-8757-4e67-ae09-8609b0461644",
+            "1aecfcad-6080-4ef4-a507-e2a9126ea190",
+            "a1c1e396-82ae-4f2a-b479-831b5d6ccb5c",
+            "af2de465-97d5-48d7-a90b-acb161d63420",
+            "ab63257c-9c50-48bd-822c-291ce37d78f6",
+            "0cbfecad-006e-495b-bcf9-62f6a58fe2e8",
+            "79ac1b63-476c-42d4-bc78-83d82bdc252f",
+            "ac6ab0b8-79d1-4468-9535-72dadc8a803c",
+            "3ad69c92-dbd6-46c4-8aab-d89bacbe57d1",
+            "2c326b6a-a1a0-4657-91bc-4b7e7d49058f",
+            "8b12f936-cf99-4eca-b504-636e34beae14",
+            "d7972452-cdbe-443c-bef2-5b47e145a53e"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src\\Shared.Core\\Shared.Core.csproj",
+      "startingProject": true,
+      "issues": 5,
+      "storyPoints": 42,
+      "properties": {
+        "appName": "Shared.Core",
+        "projectKind": "DotNetCoreApp",
+        "frameworks": [
+          "net8.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "numberOfFiles": 128,
+        "numberOfCodeFiles": 126,
+        "linesTotal": 20376,
+        "linesOfCode": 18588,
+        "totalApiScanned": 19208,
+        "minLinesOfCodeToChange": 29,
+        "maxLinesOfCodeToChange": 29
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "19e28459-c2b8-493c-9ff8-933408f7bdd7",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.EntityFrameworkCore, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore, and replace with new package Microsoft.EntityFrameworkCore 10.0.1",
+              "protected": "Microsoft.EntityFrameworkCore, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore, and replace with new package Microsoft.EntityFrameworkCore 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Shared.Core.csproj",
+            "snippet": "Microsoft.EntityFrameworkCore, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore, and replace with new package Microsoft.EntityFrameworkCore 10.0.1",
+            "protectedSnippet": "Microsoft.EntityFrameworkCore, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore, and replace with new package Microsoft.EntityFrameworkCore 10.0.1",
+            "label": "Microsoft.EntityFrameworkCore 8.0.11",
+            "properties": {
+              "PackageId": "Microsoft.EntityFrameworkCore",
+              "PackageVersion": "8.0.11",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "42fc537a-2c57-4398-bbd0-4435d6fb9711",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.EntityFrameworkCore.Sqlite, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Sqlite, and replace with new package Microsoft.EntityFrameworkCore.Sqlite 10.0.1",
+              "protected": "Microsoft.EntityFrameworkCore.Sqlite, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Sqlite, and replace with new package Microsoft.EntityFrameworkCore.Sqlite 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Shared.Core.csproj",
+            "snippet": "Microsoft.EntityFrameworkCore.Sqlite, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Sqlite, and replace with new package Microsoft.EntityFrameworkCore.Sqlite 10.0.1",
+            "protectedSnippet": "Microsoft.EntityFrameworkCore.Sqlite, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Sqlite, and replace with new package Microsoft.EntityFrameworkCore.Sqlite 10.0.1",
+            "label": "Microsoft.EntityFrameworkCore.Sqlite 8.0.11",
+            "properties": {
+              "PackageId": "Microsoft.EntityFrameworkCore.Sqlite",
+              "PackageVersion": "8.0.11",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "1ffb5b5d-6d02-4bcc-905f-0f0ad71bfe70",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.EntityFrameworkCore.InMemory, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.InMemory, and replace with new package Microsoft.EntityFrameworkCore.InMemory 10.0.1",
+              "protected": "Microsoft.EntityFrameworkCore.InMemory, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.InMemory, and replace with new package Microsoft.EntityFrameworkCore.InMemory 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Shared.Core.csproj",
+            "snippet": "Microsoft.EntityFrameworkCore.InMemory, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.InMemory, and replace with new package Microsoft.EntityFrameworkCore.InMemory 10.0.1",
+            "protectedSnippet": "Microsoft.EntityFrameworkCore.InMemory, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.InMemory, and replace with new package Microsoft.EntityFrameworkCore.InMemory 10.0.1",
+            "label": "Microsoft.EntityFrameworkCore.InMemory 8.0.11",
+            "properties": {
+              "PackageId": "Microsoft.EntityFrameworkCore.InMemory",
+              "PackageVersion": "8.0.11",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "9d4c66b3-b060-451b-b28e-37737e25ab8b",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.EntityFrameworkCore.Tools, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Tools, and replace with new package Microsoft.EntityFrameworkCore.Tools 10.0.1",
+              "protected": "Microsoft.EntityFrameworkCore.Tools, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Tools, and replace with new package Microsoft.EntityFrameworkCore.Tools 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Shared.Core.csproj",
+            "snippet": "Microsoft.EntityFrameworkCore.Tools, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Tools, and replace with new package Microsoft.EntityFrameworkCore.Tools 10.0.1",
+            "protectedSnippet": "Microsoft.EntityFrameworkCore.Tools, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Tools, and replace with new package Microsoft.EntityFrameworkCore.Tools 10.0.1",
+            "label": "Microsoft.EntityFrameworkCore.Tools 8.0.11",
+            "properties": {
+              "PackageId": "Microsoft.EntityFrameworkCore.Tools",
+              "PackageVersion": "8.0.11",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "eb6967a3-6443-4f74-8843-ca34197b9602",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.EntityFrameworkCore.Design, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design 10.0.1",
+              "protected": "Microsoft.EntityFrameworkCore.Design, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Shared.Core.csproj",
+            "snippet": "Microsoft.EntityFrameworkCore.Design, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design 10.0.1",
+            "protectedSnippet": "Microsoft.EntityFrameworkCore.Design, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.EntityFrameworkCore.Design, and replace with new package Microsoft.EntityFrameworkCore.Design 10.0.1",
+            "label": "Microsoft.EntityFrameworkCore.Design 8.0.11",
+            "properties": {
+              "PackageId": "Microsoft.EntityFrameworkCore.Design",
+              "PackageVersion": "8.0.11",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "66621093-12df-4055-83d1-c50879ec680c",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.DependencyInjection, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection 10.0.1",
+              "protected": "Microsoft.Extensions.DependencyInjection, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Shared.Core.csproj",
+            "snippet": "Microsoft.Extensions.DependencyInjection, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection 10.0.1",
+            "protectedSnippet": "Microsoft.Extensions.DependencyInjection, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection, and replace with new package Microsoft.Extensions.DependencyInjection 10.0.1",
+            "label": "Microsoft.Extensions.DependencyInjection 8.0.1",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.DependencyInjection",
+              "PackageVersion": "8.0.1",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "51d926dc-d5a3-4564-b872-d35e71fd7342",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.DependencyInjection.Abstractions, 8.0.2\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection.Abstractions, and replace with new package Microsoft.Extensions.DependencyInjection.Abstractions 10.0.1",
+              "protected": "Microsoft.Extensions.DependencyInjection.Abstractions, 8.0.2\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection.Abstractions, and replace with new package Microsoft.Extensions.DependencyInjection.Abstractions 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Shared.Core.csproj",
+            "snippet": "Microsoft.Extensions.DependencyInjection.Abstractions, 8.0.2\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection.Abstractions, and replace with new package Microsoft.Extensions.DependencyInjection.Abstractions 10.0.1",
+            "protectedSnippet": "Microsoft.Extensions.DependencyInjection.Abstractions, 8.0.2\n\nRecommendation:\n\nRemove Microsoft.Extensions.DependencyInjection.Abstractions, and replace with new package Microsoft.Extensions.DependencyInjection.Abstractions 10.0.1",
+            "label": "Microsoft.Extensions.DependencyInjection.Abstractions 8.0.2",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.DependencyInjection.Abstractions",
+              "PackageVersion": "8.0.2",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "be1fc73b-23fc-47e5-ae70-f2b63c53d436",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.Http, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.Http, and replace with new package Microsoft.Extensions.Http 10.0.1",
+              "protected": "Microsoft.Extensions.Http, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.Http, and replace with new package Microsoft.Extensions.Http 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Shared.Core.csproj",
+            "snippet": "Microsoft.Extensions.Http, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.Http, and replace with new package Microsoft.Extensions.Http 10.0.1",
+            "protectedSnippet": "Microsoft.Extensions.Http, 8.0.1\n\nRecommendation:\n\nRemove Microsoft.Extensions.Http, and replace with new package Microsoft.Extensions.Http 10.0.1",
+            "label": "Microsoft.Extensions.Http 8.0.1",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.Http",
+              "PackageVersion": "8.0.1",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "87c7bd87-77bf-416b-a6fc-239aaadaa4d7",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.AspNetCore.Mvc.Testing, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Mvc.Testing, and replace with new package Microsoft.AspNetCore.Mvc.Testing 10.0.1",
+              "protected": "Microsoft.AspNetCore.Mvc.Testing, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Mvc.Testing, and replace with new package Microsoft.AspNetCore.Mvc.Testing 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Shared.Core.csproj",
+            "snippet": "Microsoft.AspNetCore.Mvc.Testing, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Mvc.Testing, and replace with new package Microsoft.AspNetCore.Mvc.Testing 10.0.1",
+            "protectedSnippet": "Microsoft.AspNetCore.Mvc.Testing, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Mvc.Testing, and replace with new package Microsoft.AspNetCore.Mvc.Testing 10.0.1",
+            "label": "Microsoft.AspNetCore.Mvc.Testing 8.0.11",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Mvc.Testing",
+              "PackageVersion": "8.0.11",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "7a65d008-78fe-4d85-a6a5-8c70d214fbd7",
+          "ruleId": "NuGet.0003",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.Security.Cryptography.Algorithms, 4.3.1\n\nRecommendation:\n\nPackage functionality included with new framework reference",
+              "protected": "System.Security.Cryptography.Algorithms, 4.3.1\n\nRecommendation:\n\nPackage functionality included with new framework reference"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Shared.Core.csproj",
+            "snippet": "System.Security.Cryptography.Algorithms, 4.3.1\n\nRecommendation:\n\nPackage functionality included with new framework reference",
+            "protectedSnippet": "System.Security.Cryptography.Algorithms, 4.3.1\n\nRecommendation:\n\nPackage functionality included with new framework reference",
+            "label": "System.Security.Cryptography.Algorithms 4.3.1",
+            "properties": {
+              "PackageId": "System.Security.Cryptography.Algorithms",
+              "PackageVersion": "4.3.1",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "e3ce7436-5f88-4118-a76e-7a1850c87f30",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.AspNetCore.DataProtection, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.DataProtection, and replace with new package Microsoft.AspNetCore.DataProtection 10.0.1",
+              "protected": "Microsoft.AspNetCore.DataProtection, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.DataProtection, and replace with new package Microsoft.AspNetCore.DataProtection 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Shared.Core.csproj",
+            "snippet": "Microsoft.AspNetCore.DataProtection, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.DataProtection, and replace with new package Microsoft.AspNetCore.DataProtection 10.0.1",
+            "protectedSnippet": "Microsoft.AspNetCore.DataProtection, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.DataProtection, and replace with new package Microsoft.AspNetCore.DataProtection 10.0.1",
+            "label": "Microsoft.AspNetCore.DataProtection 8.0.11",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.DataProtection",
+              "PackageVersion": "8.0.11",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "3b21504b-b865-472a-b651-bce4301e515b",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Authentication.JwtBearer, and replace with new package Microsoft.AspNetCore.Authentication.JwtBearer 10.0.1",
+              "protected": "Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Authentication.JwtBearer, and replace with new package Microsoft.AspNetCore.Authentication.JwtBearer 10.0.1"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Shared.Core.csproj",
+            "snippet": "Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Authentication.JwtBearer, and replace with new package Microsoft.AspNetCore.Authentication.JwtBearer 10.0.1",
+            "protectedSnippet": "Microsoft.AspNetCore.Authentication.JwtBearer, 8.0.11\n\nRecommendation:\n\nRemove Microsoft.AspNetCore.Authentication.JwtBearer, and replace with new package Microsoft.AspNetCore.Authentication.JwtBearer 10.0.1",
+            "label": "Microsoft.AspNetCore.Authentication.JwtBearer 8.0.11",
+            "properties": {
+              "PackageId": "Microsoft.AspNetCore.Authentication.JwtBearer",
+              "PackageVersion": "8.0.11",
+              "PackageNewVersion": "10.0.1",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "7deb5ac2-2b50-43ac-8919-bb7733ef8147",
+          "ruleId": "Project.0002",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net8.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net8.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Shared.Core.csproj",
+            "snippet": "Current target framework: net8.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net8.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net8.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        },
+        {
+          "incidentId": "471176fe-626c-46ca-9771-adea76866208",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddSingleton(provider =\u003E new SyncConfiguration\r\n        {\r\n            DeviceId = Guid.NewGuid(), // Should be set by the application\r\n            ServerBaseUrl = \u0022https://api.example.com\u0022, // Should be configured\r\n            SyncInterval = TimeSpan.FromMinutes(5),\r\n            MaxRetryAttempts = 3,\r\n            InitialRetryDelay = TimeSpan.FromSeconds(1),\r\n            RetryBackoffMultiplier = 2.0\r\n        });",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\DependencyInjection\\ServiceCollectionExtensions.cs",
+            "snippet": "services.AddSingleton(provider =\u003E new SyncConfiguration\r\n        {\r\n            DeviceId = Guid.NewGuid(), // Should be set by the application\r\n            ServerBaseUrl = \u0022https://api.example.com\u0022, // Should be configured\r\n            SyncInterval = TimeSpan.FromMinutes(5),\r\n            MaxRetryAttempts = 3,\r\n            InitialRetryDelay = TimeSpan.FromSeconds(1),\r\n            RetryBackoffMultiplier = 2.0\r\n        });",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 102,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "2d38dfcf-f497-406e-862e-a2b54916fa3d",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddSingleton(provider =\u003E new SyncConfiguration\r\n        {\r\n            DeviceId = Guid.NewGuid(), // Should be set by the application\r\n            ServerBaseUrl = \u0022https://api.example.com\u0022, // Should be configured\r\n            SyncInterval = TimeSpan.FromMinutes(5),\r\n            MaxRetryAttempts = 3,\r\n            InitialRetryDelay = TimeSpan.FromSeconds(1),\r\n            RetryBackoffMultiplier = 2.0\r\n        });",
+              "protected": "M:System.TimeSpan.FromMinutes(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\DependencyInjection\\ServiceCollectionExtensions.cs",
+            "snippet": "services.AddSingleton(provider =\u003E new SyncConfiguration\r\n        {\r\n            DeviceId = Guid.NewGuid(), // Should be set by the application\r\n            ServerBaseUrl = \u0022https://api.example.com\u0022, // Should be configured\r\n            SyncInterval = TimeSpan.FromMinutes(5),\r\n            MaxRetryAttempts = 3,\r\n            InitialRetryDelay = TimeSpan.FromSeconds(1),\r\n            RetryBackoffMultiplier = 2.0\r\n        });",
+            "protectedSnippet": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "label": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 102,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "77a5ae7a-0968-4641-bbab-5e5e18bc090e",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddSingleton(provider =\u003E new CashDrawerConfiguration\r\n        {\r\n            Port = \u0022COM1\u0022,\r\n            BaudRate = 9600,\r\n            OpenTimeout = TimeSpan.FromSeconds(5)\r\n        });",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\DependencyInjection\\ServiceCollectionExtensions.cs",
+            "snippet": "services.AddSingleton(provider =\u003E new CashDrawerConfiguration\r\n        {\r\n            Port = \u0022COM1\u0022,\r\n            BaudRate = 9600,\r\n            OpenTimeout = TimeSpan.FromSeconds(5)\r\n        });",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 94,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "81e5cb47-ade3-4b8c-8eee-6c6255e09c64",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddSingleton(provider =\u003E new ScannerConfiguration\r\n        {\r\n            ScanTimeout = TimeSpan.FromSeconds(30),\r\n            EnableBeep = true,\r\n            EnableVibration = true\r\n        });",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\DependencyInjection\\ServiceCollectionExtensions.cs",
+            "snippet": "services.AddSingleton(provider =\u003E new ScannerConfiguration\r\n        {\r\n            ScanTimeout = TimeSpan.FromSeconds(30),\r\n            EnableBeep = true,\r\n            EnableVibration = true\r\n        });",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 87,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "50c73b6b-cce6-421d-80b9-c6b96fe04f34",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Message no longer duplicated in Console log output ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var loggerFactory = LoggerFactory.Create(builder =\u003E builder.AddConsole());",
+              "protected": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Tests\\PropertyTests\\MembershipPropertyTests.cs",
+            "snippet": "var loggerFactory = LoggerFactory.Create(builder =\u003E builder.AddConsole());",
+            "protectedSnippet": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "label": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/extensions/10.0/console-json-logging-duplicate-messages.md",
+                "isCustom": false
+              }
+            ],
+            "line": 39,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "e0a995ae-7e5b-4f3e-9070-ff3ff65a03c3",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Message no longer duplicated in Console log output ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var loggerFactory = LoggerFactory.Create(builder =\u003E builder.AddConsole());",
+              "protected": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Tests\\PropertyTests\\MembershipPropertyTests.cs",
+            "snippet": "var loggerFactory = LoggerFactory.Create(builder =\u003E builder.AddConsole());",
+            "protectedSnippet": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "label": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/extensions/10.0/console-json-logging-duplicate-messages.md",
+                "isCustom": false
+              }
+            ],
+            "line": 39,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "ed31a496-c037-4781-9720-e56ca8616407",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Message no longer duplicated in Console log output ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddLogging(builder =\u003E builder.AddConsole().SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Warning));",
+              "protected": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Tests\\PropertyTests\\ConfigurationPropertyTests.cs",
+            "snippet": "services.AddLogging(builder =\u003E builder.AddConsole().SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Warning));",
+            "protectedSnippet": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "label": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/extensions/10.0/console-json-logging-duplicate-messages.md",
+                "isCustom": false
+              }
+            ],
+            "line": 40,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "51628b0c-c953-4c25-9455-1511b65769fe",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Message no longer duplicated in Console log output ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddLogging(builder =\u003E builder.AddConsole().SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Warning));",
+              "protected": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Tests\\PropertyTests\\ConfigurationPropertyTests.cs",
+            "snippet": "services.AddLogging(builder =\u003E builder.AddConsole().SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Warning));",
+            "protectedSnippet": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "label": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/extensions/10.0/console-json-logging-duplicate-messages.md",
+                "isCustom": false
+              }
+            ],
+            "line": 40,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "275de60e-7951-4444-8c80-5d83d60db9f4",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Message no longer duplicated in Console log output ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddLogging(builder =\u003E builder.AddConsole().SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Warning));",
+              "protected": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Tests\\PropertyTests\\DiscountPropertyTests.cs",
+            "snippet": "services.AddLogging(builder =\u003E builder.AddConsole().SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Warning));",
+            "protectedSnippet": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "label": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/extensions/10.0/console-json-logging-duplicate-messages.md",
+                "isCustom": false
+              }
+            ],
+            "line": 31,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "ecf973d6-132e-4d7d-9d76-e17498b3eeeb",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Message no longer duplicated in Console log output ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddLogging(builder =\u003E builder.AddConsole().SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Warning));",
+              "protected": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Tests\\PropertyTests\\DiscountPropertyTests.cs",
+            "snippet": "services.AddLogging(builder =\u003E builder.AddConsole().SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Warning));",
+            "protectedSnippet": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "label": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/extensions/10.0/console-json-logging-duplicate-messages.md",
+                "isCustom": false
+              }
+            ],
+            "line": 31,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "cb396ccd-f6ff-46bd-a82a-4917a89fed96",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddSingleton(new SyncConfiguration\r\n        {\r\n            DeviceId = Guid.NewGuid(),\r\n            ServerBaseUrl = \u0022https://test.example.com\u0022,\r\n            SyncInterval = TimeSpan.FromSeconds(1), // Fast for testing\r\n            MaxRetryAttempts = 2, // Fewer retries for testing\r\n            InitialRetryDelay = TimeSpan.FromMilliseconds(10),\r\n            RetryBackoffMultiplier = 2.0\r\n        });",
+              "protected": "M:System.TimeSpan.FromMilliseconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Tests\\PropertyTests\\SyncEnginePropertyTests.cs",
+            "snippet": "services.AddSingleton(new SyncConfiguration\r\n        {\r\n            DeviceId = Guid.NewGuid(),\r\n            ServerBaseUrl = \u0022https://test.example.com\u0022,\r\n            SyncInterval = TimeSpan.FromSeconds(1), // Fast for testing\r\n            MaxRetryAttempts = 2, // Fewer retries for testing\r\n            InitialRetryDelay = TimeSpan.FromMilliseconds(10),\r\n            RetryBackoffMultiplier = 2.0\r\n        });",
+            "protectedSnippet": "M:System.TimeSpan.FromMilliseconds(System.Double)",
+            "label": "M:System.TimeSpan.FromMilliseconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 59,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "125d7f02-2fd6-42d4-ab96-5cc84849d054",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddSingleton(new SyncConfiguration\r\n        {\r\n            DeviceId = Guid.NewGuid(),\r\n            ServerBaseUrl = \u0022https://test.example.com\u0022,\r\n            SyncInterval = TimeSpan.FromSeconds(1), // Fast for testing\r\n            MaxRetryAttempts = 2, // Fewer retries for testing\r\n            InitialRetryDelay = TimeSpan.FromMilliseconds(10),\r\n            RetryBackoffMultiplier = 2.0\r\n        });",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Tests\\PropertyTests\\SyncEnginePropertyTests.cs",
+            "snippet": "services.AddSingleton(new SyncConfiguration\r\n        {\r\n            DeviceId = Guid.NewGuid(),\r\n            ServerBaseUrl = \u0022https://test.example.com\u0022,\r\n            SyncInterval = TimeSpan.FromSeconds(1), // Fast for testing\r\n            MaxRetryAttempts = 2, // Fewer retries for testing\r\n            InitialRetryDelay = TimeSpan.FromMilliseconds(10),\r\n            RetryBackoffMultiplier = 2.0\r\n        });",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 59,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "52818cf9-e8be-4117-bc28-e6c6684ac149",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddSingleton(new SyncConfiguration\r\n        {\r\n            DeviceId = Guid.NewGuid(),\r\n            ServerBaseUrl = \u0022https://test.example.com\u0022,\r\n            SyncInterval = TimeSpan.FromSeconds(1), // Fast for testing\r\n            MaxRetryAttempts = 2, // Fewer retries for testing\r\n            InitialRetryDelay = TimeSpan.FromMilliseconds(10),\r\n            RetryBackoffMultiplier = 2.0\r\n        });",
+              "protected": "M:System.TimeSpan.FromMilliseconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Tests\\PropertyTests\\SyncEnginePropertyTests.cs",
+            "snippet": "services.AddSingleton(new SyncConfiguration\r\n        {\r\n            DeviceId = Guid.NewGuid(),\r\n            ServerBaseUrl = \u0022https://test.example.com\u0022,\r\n            SyncInterval = TimeSpan.FromSeconds(1), // Fast for testing\r\n            MaxRetryAttempts = 2, // Fewer retries for testing\r\n            InitialRetryDelay = TimeSpan.FromMilliseconds(10),\r\n            RetryBackoffMultiplier = 2.0\r\n        });",
+            "protectedSnippet": "M:System.TimeSpan.FromMilliseconds(System.Double)",
+            "label": "M:System.TimeSpan.FromMilliseconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 59,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "98c5d187-0c0d-4733-b677-82b05e798a5c",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddSingleton(new SyncConfiguration\r\n        {\r\n            DeviceId = Guid.NewGuid(),\r\n            ServerBaseUrl = \u0022https://test.example.com\u0022,\r\n            SyncInterval = TimeSpan.FromSeconds(1), // Fast for testing\r\n            MaxRetryAttempts = 2, // Fewer retries for testing\r\n            InitialRetryDelay = TimeSpan.FromMilliseconds(10),\r\n            RetryBackoffMultiplier = 2.0\r\n        });",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Tests\\PropertyTests\\SyncEnginePropertyTests.cs",
+            "snippet": "services.AddSingleton(new SyncConfiguration\r\n        {\r\n            DeviceId = Guid.NewGuid(),\r\n            ServerBaseUrl = \u0022https://test.example.com\u0022,\r\n            SyncInterval = TimeSpan.FromSeconds(1), // Fast for testing\r\n            MaxRetryAttempts = 2, // Fewer retries for testing\r\n            InitialRetryDelay = TimeSpan.FromMilliseconds(10),\r\n            RetryBackoffMultiplier = 2.0\r\n        });",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 59,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "b55ddb8e-9566-4e28-bc5c-41eb59818b8f",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Message no longer duplicated in Console log output ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddLogging(builder =\u003E builder.AddConsole());",
+              "protected": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Tests\\SecurityTests.cs",
+            "snippet": "services.AddLogging(builder =\u003E builder.AddConsole());",
+            "protectedSnippet": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "label": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/extensions/10.0/console-json-logging-duplicate-messages.md",
+                "isCustom": false
+              }
+            ],
+            "line": 29,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "a906202f-3d7e-47ef-80f3-a772061a02b5",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: Message no longer duplicated in Console log output ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "services.AddLogging(builder =\u003E builder.AddConsole());",
+              "protected": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Tests\\SecurityTests.cs",
+            "snippet": "services.AddLogging(builder =\u003E builder.AddConsole());",
+            "protectedSnippet": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "label": "M:Microsoft.Extensions.Logging.ConsoleLoggerExtensions.AddConsole(Microsoft.Extensions.Logging.ILoggingBuilder)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/extensions/10.0/console-json-logging-duplicate-messages.md",
+                "isCustom": false
+              }
+            ],
+            "line": 29,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "5c34511a-ceda-4c41-be63-8eebeeda6796",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_monitoringTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(10));",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Services\\ConnectivityService.cs",
+            "snippet": "_monitoringTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(10));",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 73,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "b7a6cb68-52e5-4e14-8f7c-7147a540826d",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: URI length limits removed ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var uri = new Uri(serverUrl);",
+              "protected": "T:System.Uri"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Services\\ConnectivityService.cs",
+            "snippet": "var uri = new Uri(serverUrl);",
+            "protectedSnippet": "T:System.Uri",
+            "label": "T:System.Uri",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/networking/10.0/uri-length-limits-removed.md",
+                "isCustom": false
+              }
+            ],
+            "line": 46,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "e48cda37-edff-444f-a57f-1fd6f8822974",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: URI length limits removed ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var uri = new Uri(serverUrl);",
+              "protected": "M:System.Uri.#ctor(System.String)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Services\\ConnectivityService.cs",
+            "snippet": "var uri = new Uri(serverUrl);",
+            "protectedSnippet": "M:System.Uri.#ctor(System.String)",
+            "label": "M:System.Uri.#ctor(System.String)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/networking/10.0/uri-length-limits-removed.md",
+                "isCustom": false
+              }
+            ],
+            "line": 46,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "1d33c607-0f98-4bd5-b71d-87b1731a7144",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "timeout = TimeSpan.FromSeconds(5);",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Services\\ConnectivityService.cs",
+            "snippet": "timeout = TimeSpan.FromSeconds(5);",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 41,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "93a42e83-ec7e-4591-aa73-0f079965e38f",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);",
+              "protected": "M:System.TimeSpan.FromMinutes(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Services\\SessionCleanupService.cs",
+            "snippet": "await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);",
+            "protectedSnippet": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "label": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 41,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "9a59ab24-a532-4bdb-8f96-4dcd1c0ef264",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "statistics.AverageRecoveryTime = TimeSpan.FromSeconds(30);",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Services\\ErrorRecoveryService.cs",
+            "snippet": "statistics.AverageRecoveryTime = TimeSpan.FromSeconds(30);",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 455,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "6ff8163c-7b38-4462-9267-a00e80f923dc",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: MacCatalyst version normalization ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "config[\u0022OSVersion\u0022] = Environment.OSVersion.ToString();",
+              "protected": "P:System.Environment.OSVersion"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Services\\SystemHealthMonitoringService.cs",
+            "snippet": "config[\u0022OSVersion\u0022] = Environment.OSVersion.ToString();",
+            "protectedSnippet": "P:System.Environment.OSVersion",
+            "label": "P:System.Environment.OSVersion",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/10.0/maccatalyst-version-normalization.md",
+                "isCustom": false
+              }
+            ],
+            "line": 404,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "6ab36716-8497-4f38-b15c-4cf9a3aa33cf",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: MacCatalyst version normalization ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "return Environment.OSVersion.ToString();",
+              "protected": "P:System.Environment.OSVersion"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Services\\SystemHealthMonitoringService.cs",
+            "snippet": "return Environment.OSVersion.ToString();",
+            "protectedSnippet": "P:System.Environment.OSVersion",
+            "label": "P:System.Environment.OSVersion",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/10.0/maccatalyst-version-normalization.md",
+                "isCustom": false
+              }
+            ],
+            "line": 374,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "33c3d707-8c85-408a-b9b1-f817b3b6b84a",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: .NET 10 obsoletions with custom IDs ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "using var pbkdf2 = new Rfc2898DeriveBytes(password, Convert.FromBase64String(salt), 10000, HashAlgorithmName.SHA256);",
+              "protected": "T:System.Security.Cryptography.Rfc2898DeriveBytes"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Services\\EncryptionService.cs",
+            "snippet": "using var pbkdf2 = new Rfc2898DeriveBytes(password, Convert.FromBase64String(salt), 10000, HashAlgorithmName.SHA256);",
+            "protectedSnippet": "T:System.Security.Cryptography.Rfc2898DeriveBytes",
+            "label": "T:System.Security.Cryptography.Rfc2898DeriveBytes",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/10.0/obsolete-apis.md",
+                "isCustom": false
+              }
+            ],
+            "line": 73,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "5a7af768-e2b9-4c18-a93e-f8610f14732e",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "delay = TimeSpan.FromMilliseconds(delay.TotalMilliseconds * _configuration.RetryBackoffMultiplier);",
+              "protected": "M:System.TimeSpan.FromMilliseconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Services\\SyncEngine.cs",
+            "snippet": "delay = TimeSpan.FromMilliseconds(delay.TotalMilliseconds * _configuration.RetryBackoffMultiplier);",
+            "protectedSnippet": "M:System.TimeSpan.FromMilliseconds(System.Double)",
+            "label": "M:System.TimeSpan.FromMilliseconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 556,
+            "column": 20
+          }
+        },
+        {
+          "incidentId": "a618809a-9f04-49c2-9159-d045ab22e4c0",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "delay = TimeSpan.FromMilliseconds(delay.TotalMilliseconds * _configuration.RetryBackoffMultiplier);",
+              "protected": "M:System.TimeSpan.FromMilliseconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Services\\SyncEngine.cs",
+            "snippet": "delay = TimeSpan.FromMilliseconds(delay.TotalMilliseconds * _configuration.RetryBackoffMultiplier);",
+            "protectedSnippet": "M:System.TimeSpan.FromMilliseconds(System.Double)",
+            "label": "M:System.TimeSpan.FromMilliseconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 536,
+            "column": 20
+          }
+        },
+        {
+          "incidentId": "fc8314c8-4e55-41c4-907a-c29e5868597e",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_syncConfiguration = new SyncConfiguration\r\n            {\r\n                DeviceId = deviceConfig.DeviceId,\r\n                ServerBaseUrl = GetDefaultServerUrl(),\r\n                SyncInterval = TimeSpan.FromMinutes(5),\r\n                MaxRetryAttempts = 3,\r\n                InitialRetryDelay = TimeSpan.FromSeconds(1),\r\n                RetryBackoffMultiplier = 2.0\r\n            };",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Services\\CrossPlatformConfigurationService.cs",
+            "snippet": "_syncConfiguration = new SyncConfiguration\r\n            {\r\n                DeviceId = deviceConfig.DeviceId,\r\n                ServerBaseUrl = GetDefaultServerUrl(),\r\n                SyncInterval = TimeSpan.FromMinutes(5),\r\n                MaxRetryAttempts = 3,\r\n                InitialRetryDelay = TimeSpan.FromSeconds(1),\r\n                RetryBackoffMultiplier = 2.0\r\n            };",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 89,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "f02a0efc-34a1-4a71-9c18-ec98dd424b09",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\Shared.Core\\Shared.Core.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_syncConfiguration = new SyncConfiguration\r\n            {\r\n                DeviceId = deviceConfig.DeviceId,\r\n                ServerBaseUrl = GetDefaultServerUrl(),\r\n                SyncInterval = TimeSpan.FromMinutes(5),\r\n                MaxRetryAttempts = 3,\r\n                InitialRetryDelay = TimeSpan.FromSeconds(1),\r\n                RetryBackoffMultiplier = 2.0\r\n            };",
+              "protected": "M:System.TimeSpan.FromMinutes(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\Shared.Core\\Services\\CrossPlatformConfigurationService.cs",
+            "snippet": "_syncConfiguration = new SyncConfiguration\r\n            {\r\n                DeviceId = deviceConfig.DeviceId,\r\n                ServerBaseUrl = GetDefaultServerUrl(),\r\n                SyncInterval = TimeSpan.FromMinutes(5),\r\n                MaxRetryAttempts = 3,\r\n                InitialRetryDelay = TimeSpan.FromSeconds(1),\r\n                RetryBackoffMultiplier = 2.0\r\n            };",
+            "protectedSnippet": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "label": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "links": [
+              {
+                "title": "API documentation",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 89,
+            "column": 12
+          }
+        }
+      ],
+      "features": []
+    }
+  ],
+  "rules": {
+    "NuGet.0002": {
+      "id": "NuGet.0002",
+      "isFeature": false,
+      "description": "NuGet package upgrade is recommended for selected target framework.\n\nStandard .NET packages are recommended to have versions matching version of .NET that project targets.\n\nSome other packages also are known to work better for selected target frameworks.",
+      "label": "NuGet package upgrade is recommended",
+      "severity": "Potential",
+      "effort": 1,
+      "links": [
+        {
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262530",
+          "isCustom": false
+        }
+      ]
+    },
+    "NuGet.0003": {
+      "id": "NuGet.0003",
+      "isFeature": false,
+      "description": "NuGet package functionality is included with framework reference.\n\nPackage needs to be removed.",
+      "label": "NuGet package functionality is included with framework reference",
+      "severity": "Mandatory",
+      "effort": 1,
+      "links": [
+        {
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262609",
+          "isCustom": false
+        }
+      ]
+    },
+    "Project.0002": {
+      "id": "Project.0002",
+      "isFeature": false,
+      "description": "Project\u0027s target framework(s) needs to be changed to the new target framework that you selected for this upgrade.\n\nDuring upgrade target framework will be adjusted to corresponding platform when applicable. In some cases project would result in multiple target frameworks after the upgrade if it was using features that now have their own platforms in modern .NET frameworks (windows, iOS, Android etc).",
+      "label": "Project\u0027s target framework(s) needs to be changed",
+      "severity": "Mandatory",
+      "effort": 1,
+      "links": [
+        {
+          "title": "Overview of porting from .NET Framework to .NET",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2265227",
+          "isCustom": false
+        },
+        {
+          "title": ".NET project SDKs",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2265226",
+          "isCustom": false
+        }
+      ]
+    },
+    "Api.0002": {
+      "id": "Api.0002",
+      "isFeature": false,
+      "description": "API is source incompatible for selected .NET version: requires code changes to compile successfully when targeting a new version, such as removing obsolete APIs or changing method signatures.",
+      "label": "Source incompatible for selected .NET version",
+      "severity": "Potential",
+      "effort": 1,
+      "links": [
+        {
+          "title": "Breaking changes in .NET",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262679",
+          "isCustom": false
+        }
+      ]
+    },
+    "Api.0003": {
+      "id": "Api.0003",
+      "isFeature": false,
+      "description": "API has a behavioral change in selected .NET version: code and binaries may behave differently at runtime without needing recompilation, but the new behavior might be undesirable and require updates.",
+      "label": "Behavioral change in selected .NET version",
+      "severity": "Potential",
+      "effort": 1
+    },
+    "Api.0001": {
+      "id": "Api.0001",
+      "isFeature": false,
+      "description": "API is binary incompatible for selected .NET version: affects existing binaries, often requiring recompilation, because the API has changed in a way that prevents older binaries from loading or executing.",
+      "label": "Binary incompatible for selected .NET version",
+      "severity": "Mandatory",
+      "effort": 1,
+      "links": [
+        {
+          "title": "Breaking changes in .NET",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262679",
+          "isCustom": false
+        }
+      ]
+    },
+    "IdentityModel": {
+      "id": "IdentityModel",
+      "isFeature": false,
+      "description": "Windows Identity Foundation (WIF), SAML, and claims-based authentication APIs that have been replaced by modern identity libraries. WIF was the original identity framework for .NET Framework. Migrate to Microsoft.IdentityModel.* packages (modern identity stack).",
+      "label": "IdentityModel \u0026 Claims-based Security",
+      "severity": "Mandatory",
+      "effort": 4,
+      "links": [
+        {
+          "title": "Microsoft.IdentityModel packages",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2341614",
+          "isCustom": false
+        }
+      ]
+    }
+  }
+}
