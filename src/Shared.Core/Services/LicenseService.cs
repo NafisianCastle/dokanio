@@ -153,13 +153,8 @@ public class LicenseService : ILicenseService
                 return false;
             }
 
-            // Trial licenses have basic features
-            if (license.Type == LicenseType.Trial)
-            {
-                var trialFeatures = new[] { "basic_pos", "inventory", "sales_reports" };
-                return trialFeatures.Contains(featureName);
-            }
-
+            // For trial licenses, use the features defined in the license
+            // For other license types, also use the features defined in the license
             return license.Features.Contains(featureName);
         }
         catch (Exception ex)
@@ -178,7 +173,7 @@ public class LicenseService : ILicenseService
         try
         {
             var license = await GetCurrentLicenseAsync();
-            if (license == null || license.Type != LicenseType.Trial)
+            if (license == null)
             {
                 return TimeSpan.Zero;
             }
