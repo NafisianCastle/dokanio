@@ -7,6 +7,18 @@ public class Sale : ISoftDeletable
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     
+    /// <summary>
+    /// The shop where this sale was processed
+    /// </summary>
+    [Required]
+    public Guid ShopId { get; set; }
+    
+    /// <summary>
+    /// The user who processed this sale
+    /// </summary>
+    [Required]
+    public Guid UserId { get; set; }
+    
     [Required]
     [MaxLength(50)]
     public string InvoiceNumber { get; set; } = string.Empty;
@@ -42,6 +54,8 @@ public class Sale : ISoftDeletable
     public DateTime? DeletedAt { get; set; }
     
     // Navigation properties
+    public virtual Shop Shop { get; set; } = null!;
+    public virtual User User { get; set; } = null!;
     public virtual ICollection<SaleItem> Items { get; set; } = new List<SaleItem>();
     public virtual ICollection<SaleDiscount> AppliedDiscounts { get; set; } = new List<SaleDiscount>();
 }
