@@ -336,7 +336,7 @@ public class AdvancedFeaturesIntegrationTests : IDisposable
         // Set initial currency configuration
         await _configurationService.SetConfigurationAsync("Currency.Symbol", "$");
         await _configurationService.SetConfigurationAsync("Currency.DecimalPlaces", 2);
-        await _configurationService.SetConfigurationAsync("Tax.Rate", 8.5m);
+        await _configurationService.SetConfigurationAsync("Tax.DefaultRate", 8.5m);
         await _configurationService.SetConfigurationAsync("Business.Name", "Test Store");
 
         // Create a product for testing
@@ -369,7 +369,7 @@ public class AdvancedFeaturesIntegrationTests : IDisposable
 
         // Act 1: Verify initial configuration
         var initialCurrency = await _configurationService.GetConfigurationAsync<string>("Currency.Symbol");
-        var initialTaxRate = await _configurationService.GetConfigurationAsync<decimal>("Tax.Rate");
+        var initialTaxRate = await _configurationService.GetConfigurationAsync<decimal>("Tax.DefaultRate");
         var initialBusinessName = await _configurationService.GetConfigurationAsync<string>("Business.Name");
 
         Assert.Equal("$", initialCurrency);
@@ -378,12 +378,12 @@ public class AdvancedFeaturesIntegrationTests : IDisposable
 
         // Act 2: Change configuration
         await _configurationService.SetConfigurationAsync("Currency.Symbol", "€");
-        await _configurationService.SetConfigurationAsync("Tax.Rate", 10.0m);
+        await _configurationService.SetConfigurationAsync("Tax.DefaultRate", 10.0m);
         await _configurationService.SetConfigurationAsync("Business.Name", "Updated Store");
 
         // Act 3: Verify configuration changes
         var updatedCurrency = await _configurationService.GetConfigurationAsync<string>("Currency.Symbol");
-        var updatedTaxRate = await _configurationService.GetConfigurationAsync<decimal>("Tax.Rate");
+        var updatedTaxRate = await _configurationService.GetConfigurationAsync<decimal>("Tax.DefaultRate");
         var updatedBusinessName = await _configurationService.GetConfigurationAsync<string>("Business.Name");
 
         Assert.Equal("€", updatedCurrency);
@@ -536,7 +536,7 @@ public class AdvancedFeaturesIntegrationTests : IDisposable
         // Set up configuration
         await _configurationService.SetConfigurationAsync("Currency.Symbol", "$");
         await _configurationService.SetConfigurationAsync("Currency.DecimalPlaces", 2);
-        await _configurationService.SetConfigurationAsync("Tax.Rate", 7.5m);
+        await _configurationService.SetConfigurationAsync("Tax.DefaultRate", 7.5m);
         await _configurationService.SetConfigurationAsync("Business.Name", "Advanced POS Store");
 
         // Create products
@@ -685,42 +685,44 @@ public class AdvancedFeaturesIntegrationTests : IDisposable
         sale.DiscountAmount = discountResult.TotalDiscountAmount;
         sale.MembershipDiscountAmount = membershipDiscount.DiscountAmount;
         sale.CustomerId = customer.Id;
+        sale.Customer = customer; // Ensure the navigation property is set
         sale.TotalAmount = expectedSubtotal - discountResult.TotalDiscountAmount - membershipDiscount.DiscountAmount;
 
         // Add tax
-        var taxRate = await _configurationService.GetConfigurationAsync<decimal>("Tax.Rate");
+        var taxRate = await _configurationService.GetConfigurationAsync<decimal>("Tax.DefaultRate");
         sale.TaxAmount = Math.Round(sale.TotalAmount * (taxRate / 100), 2);
         sale.TotalAmount += sale.TaxAmount;
 
         await _saleRepository.UpdateAsync(sale);
         await _dbContext.SaveChangesAsync();
 
+        // Capture original customer values before completing the sale
+        var originalSpentBeforeSale = customer.TotalSpent; // Should be 2500
+        var originalVisitCountBeforeSale = customer.VisitCount; // Should be 100
+
         // Act 4: Complete sale and update customer
         var completedSale = await _saleService.CompleteSaleAsync(sale.Id, PaymentMethod.Card);
-        var customerFromDb = await _customerRepository.GetByIdAsync(customer.Id);
-        Assert.NotNull(customerFromDb);
-        await _membershipService.UpdateCustomerPurchaseHistoryAsync(customerFromDb, completedSale);
-
+        
         // Assert: Verify all integrations worked correctly
         Assert.NotNull(completedSale);
         Assert.True(completedSale.DiscountAmount > 0);
-        Assert.True(completedSale.MembershipDiscountAmount > 0);
-        Assert.True(completedSale.TaxAmount > 0);
+        Assert.True(completedSale.MembershipDiscountAmount > 0, 
+            $"Membership discount should be > 0, but was {completedSale.MembershipDiscountAmount}. Customer: {completedSale.Customer?.Name ?? "NULL"}");
+        Assert.True(completedSale.TaxAmount > 0, 
+            $"Tax amount should be > 0, but was {completedSale.TaxAmount}. Total: {completedSale.TotalAmount}");
         Assert.Equal(customer.Id, completedSale.CustomerId);
 
-        // Verify customer was updated
+        // Verify customer was updated (get fresh data from database)
+        // Clear the context to ensure we get fresh data
+        _dbContext.ChangeTracker.Clear();
         var updatedCustomer = await _customerRepository.GetByIdAsync(customer.Id);
         Assert.NotNull(updatedCustomer);
         
-        // Debug output
-        var originalSpent = customerFromDb.TotalSpent;
-        var updatedSpent = updatedCustomer.TotalSpent;
-        var saleAmount = completedSale.TotalAmount;
-        var expectedSpent = originalSpent + saleAmount;
-        
-        Assert.True(updatedSpent > originalSpent, 
-            $"Customer total spent should increase. Original: {originalSpent}, Updated: {updatedSpent}, Sale: {saleAmount}, Expected: {expectedSpent}");
-        Assert.Equal(customerFromDb.VisitCount + 1, updatedCustomer.VisitCount);
+        // Verify customer purchase history was updated correctly
+        var expectedSpent = originalSpentBeforeSale + completedSale.TotalAmount;
+        Assert.True(updatedCustomer.TotalSpent > originalSpentBeforeSale, 
+            $"Customer total spent should increase. Original: {originalSpentBeforeSale}, Updated: {updatedCustomer.TotalSpent}, Sale: {completedSale.TotalAmount}, Expected: {expectedSpent}");
+        Assert.Equal(originalVisitCountBeforeSale + 1, updatedCustomer.VisitCount);
 
         // Verify configuration was used
         var businessName = await _configurationService.GetConfigurationAsync<string>("Business.Name");

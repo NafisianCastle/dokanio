@@ -4,11 +4,22 @@ using System.ComponentModel.DataAnnotations;
 namespace Shared.Core.Entities;
 
 /// <summary>
-/// Represents a user in the POS system
+/// Represents a user in the multi-business POS system
 /// </summary>
 public class User : ISoftDeletable
 {
     public Guid Id { get; set; } = Guid.NewGuid();
+    
+    /// <summary>
+    /// The business this user belongs to
+    /// </summary>
+    [Required]
+    public Guid BusinessId { get; set; }
+    
+    /// <summary>
+    /// The specific shop this user is assigned to (nullable for business owners)
+    /// </summary>
+    public Guid? ShopId { get; set; }
     
     [Required]
     [MaxLength(100)]
@@ -29,6 +40,11 @@ public class User : ISoftDeletable
     public string Salt { get; set; } = string.Empty;
     
     public UserRole Role { get; set; } = UserRole.Cashier;
+    
+    /// <summary>
+    /// JSON representation of user permissions for fine-grained access control
+    /// </summary>
+    public string? Permissions { get; set; }
     
     public bool IsActive { get; set; } = true;
     
@@ -51,5 +67,9 @@ public class User : ISoftDeletable
     public DateTime? DeletedAt { get; set; }
     
     // Navigation properties
+    public virtual Business Business { get; set; } = null!;
+    public virtual Shop? Shop { get; set; }
+    public virtual ICollection<Business> OwnedBusinesses { get; set; } = new List<Business>();
+    public virtual ICollection<Sale> Sales { get; set; } = new List<Sale>();
     public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
 }

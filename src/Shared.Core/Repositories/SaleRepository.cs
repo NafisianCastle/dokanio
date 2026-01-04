@@ -17,6 +17,39 @@ public class SaleRepository : Repository<Sale>, ISaleRepository
     }
 
     /// <summary>
+    /// Gets a sale by ID including customer relationship from Local_Storage
+    /// </summary>
+    public override async Task<Sale?> GetByIdAsync(Guid id)
+    {
+        try
+        {
+            _logger.LogDebug("Getting sale with ID {Id} including customer from Local_Storage", id);
+            
+            // Local-first: Query Local_Storage with customer relationship
+            var sale = await _dbSet
+                .Include(s => s.Customer)
+                .Include(s => s.Items)
+                .FirstOrDefaultAsync(s => s.Id == id);
+            
+            if (sale != null)
+            {
+                _logger.LogDebug("Found sale with ID {Id} in Local_Storage", id);
+            }
+            else
+            {
+                _logger.LogDebug("Sale with ID {Id} not found in Local_Storage", id);
+            }
+            
+            return sale;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting sale with ID {Id} from Local_Storage", id);
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Gets all sales that haven't been synced to the server from Local_Storage
     /// </summary>
     public async Task<IEnumerable<Sale>> GetUnsyncedAsync()
@@ -51,7 +84,8 @@ public class SaleRepository : Repository<Sale>, ISaleRepository
         {
             _logger.LogDebug("Getting daily sales total for date {Date} from Local_Storage", date.Date);
             
-            var startOfDay = date.Date;
+            // Convert to UTC for consistent comparison with sale CreatedAt timestamps
+            var startOfDay = date.Date.ToUniversalTime();
             var endOfDay = startOfDay.AddDays(1).AddTicks(-1);
             
             // Local-first: Query Local_Storage only

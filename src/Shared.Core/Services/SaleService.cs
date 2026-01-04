@@ -413,7 +413,8 @@ public class SaleService : ISaleService
 
     public async Task<decimal> GetDailySalesAsync(DateTime date)
     {
-        var startOfDay = date.Date;
+        // Convert to UTC for consistent comparison with sale CreatedAt timestamps
+        var startOfDay = date.Date.ToUniversalTime();
         var endOfDay = startOfDay.AddDays(1);
         
         var sales = await _saleRepository.FindAsync(s => 

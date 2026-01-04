@@ -32,24 +32,9 @@ public class IntegrationTests : IDisposable
     {
         var services = new ServiceCollection();
         
-        // Use in-memory database for testing
-        services.AddDbContext<PosDbContext>(options =>
-        {
-            options.UseInMemoryDatabase($"IntegrationTest_{Guid.NewGuid()}");
-            options.EnableSensitiveDataLogging(true);
-        });
-
-        // Register all shared core services
-        services.AddSharedCore("Data Source=:memory:");
+        // Register all shared core services with in-memory database
+        services.AddSharedCoreInMemory();
         
-        // Override the DbContext registration to use our in-memory database
-        services.Remove(services.First(s => s.ServiceType == typeof(PosDbContext)));
-        services.AddDbContext<PosDbContext>(options =>
-        {
-            options.UseInMemoryDatabase($"IntegrationTest_{Guid.NewGuid()}");
-            options.EnableSensitiveDataLogging(true);
-        });
-
         _serviceProvider = services.BuildServiceProvider();
         
         _dbContext = _serviceProvider.GetRequiredService<PosDbContext>();
@@ -64,6 +49,35 @@ public class IntegrationTests : IDisposable
 
         // Ensure database is created
         _dbContext.Database.EnsureCreated();
+        
+        // Set up a valid license for testing
+        SetupValidLicense().Wait();
+    }
+
+    private async Task SetupValidLicense()
+    {
+        var currentUserService = _serviceProvider.GetRequiredService<ICurrentUserService>();
+        var licenseRepository = _serviceProvider.GetRequiredService<ILicenseRepository>();
+        var deviceId = currentUserService.GetDeviceId();
+        
+        var license = new License
+        {
+            Id = Guid.NewGuid(),
+            LicenseKey = "TEST-12345-ABCDE",
+            Type = LicenseType.Professional,
+            IssueDate = DateTime.UtcNow.AddDays(-30),
+            ExpiryDate = DateTime.UtcNow.AddYears(1),
+            Status = LicenseStatus.Active,
+            CustomerName = "Test Customer",
+            CustomerEmail = "test@example.com",
+            MaxDevices = 10,
+            Features = new List<string> { "basic_pos", "inventory", "advanced_reports", "multi_user", "weight_based", "membership", "discounts" },
+            ActivationDate = DateTime.UtcNow.AddDays(-30),
+            DeviceId = deviceId
+        };
+        
+        await licenseRepository.AddAsync(license);
+        await _dbContext.SaveChangesAsync();
     }
 
     [Fact]
@@ -331,7 +345,7 @@ public class IntegrationTests : IDisposable
     {
         // Arrange: Create multiple sales for today
         var deviceId = Guid.NewGuid();
-        var today = DateTime.Today;
+        var today = DateTime.UtcNow.Date; // Use UTC date to match sale CreatedAt timestamps
         
         var testProduct = new Product
         {
