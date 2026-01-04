@@ -279,7 +279,7 @@ public class LicenseService : ILicenseService
             await _licenseRepository.SaveChangesAsync();
 
             var licenseKeyHash = HashLicenseKey(licenseKey);
-            _logger.LogInformation("Trial license created: {LicenseKeyHash} for device {DeviceId}", licenseKeyHash, request.DeviceId);
+            _logger.LogInformation("Trial license created for device {DeviceId}", request.DeviceId);
 
             return new LicenseActivationResult
             {
