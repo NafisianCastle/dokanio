@@ -19,6 +19,7 @@ public class PosDbContext : DbContext
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<AuditLog> AuditLogs { get; set; } = null!;
     public DbSet<UserSession> UserSessions { get; set; } = null!;
+    public DbSet<SystemLogEntry> SystemLogs { get; set; } = null!;
 
     public PosDbContext(DbContextOptions<PosDbContext> options) : base(options)
     {
@@ -223,6 +224,25 @@ public class PosDbContext : DbContext
                   .HasForeignKey(e => e.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
+
+        // SystemLogEntry configuration (not soft deletable)
+        modelBuilder.Entity<SystemLogEntry>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Level);
+            entity.HasIndex(e => e.Category);
+            entity.HasIndex(e => e.CreatedAt);
+            entity.HasIndex(e => e.DeviceId);
+            entity.HasIndex(e => e.UserId);
+            
+            entity.Property(e => e.Message).IsRequired().HasMaxLength(1000);
+            entity.Property(e => e.ExceptionDetails).HasMaxLength(4000);
+            entity.Property(e => e.AdditionalData).HasMaxLength(2000);
+            
+            // Convert enums to integers for SQLite
+            entity.Property(e => e.Level).HasConversion<int>();
+            entity.Property(e => e.Category).HasConversion<int>();
+        });
     }
 
     private void ConfigureSoftDelete<T>(ModelBuilder modelBuilder) where T : class, ISoftDeletable
@@ -258,7 +278,7 @@ public class PosDbContext : DbContext
                 .Where(e => e.State == EntityState.Added || 
                            e.State == EntityState.Modified || 
                            e.State == EntityState.Deleted)
-                .Where(e => e.Entity is not TransactionLogEntry) // Don't log transaction log entries themselves
+                .Where(e => e.Entity is not TransactionLogEntry && e.Entity is not SystemLogEntry) // Don't log transaction log entries or system log entries themselves
                 .ToList();
 
             var transactionLogs = new List<TransactionLogEntry>();

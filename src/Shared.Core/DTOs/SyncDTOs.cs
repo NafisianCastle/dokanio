@@ -32,6 +32,7 @@ public class SaleDto
 public class SaleItemDto
 {
     public Guid Id { get; set; }
+    public Guid SaleId { get; set; }
     public Guid ProductId { get; set; }
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
@@ -48,6 +49,7 @@ public class ProductDto
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public Guid DeviceId { get; set; }
     public string? BatchNumber { get; set; }
     public DateTime? ExpiryDate { get; set; }
     public decimal? PurchasePrice { get; set; }
@@ -72,10 +74,35 @@ public class StockUpdateDto
 
 public class SyncConfiguration
 {
+    public Guid DeviceId { get; set; }
     public string ServerUrl { get; set; } = string.Empty;
+    public string ServerBaseUrl { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
     public TimeSpan SyncInterval { get; set; } = TimeSpan.FromMinutes(5);
+    public TimeSpan ConnectivityCheckInterval { get; set; } = TimeSpan.FromMinutes(1);
     public int MaxRetryAttempts { get; set; } = 3;
     public TimeSpan RetryDelay { get; set; } = TimeSpan.FromSeconds(30);
+    public TimeSpan InitialRetryDelay { get; set; } = TimeSpan.FromSeconds(5);
+    public double RetryBackoffMultiplier { get; set; } = 2.0;
     public int BatchSize { get; set; } = 100;
+}
+
+public class SyncResult
+{
+    public bool Success { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public int RecordsUploaded { get; set; }
+    public int RecordsDownloaded { get; set; }
+    public int ConflictsResolved { get; set; }
+    public List<string> Errors { get; set; } = new();
+    public DateTime SyncTimestamp { get; set; } = DateTime.UtcNow;
+    public TimeSpan SyncDuration { get; set; }
+}
+
+public class SyncProgressEventArgs : EventArgs
+{
+    public string Operation { get; set; } = string.Empty;
+    public int TotalRecords { get; set; }
+    public int ProcessedRecords { get; set; }
+    public double ProgressPercentage => TotalRecords > 0 ? (double)ProcessedRecords / TotalRecords * 100 : 0;
 }
