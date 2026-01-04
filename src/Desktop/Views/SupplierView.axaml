@@ -1,0 +1,161 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Desktop.ViewModels"
+             x:Class="Desktop.Views.SupplierView"
+             x:DataType="vm:SupplierViewModel">
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- Left Panel - Supplier List -->
+        <Grid Grid.Column="0" Margin="0,0,10,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Search and Add -->
+            <Border Grid.Row="0" Classes="card" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBox Grid.Column="0" 
+                             Text="{Binding SearchText}" 
+                             Watermark="Search suppliers..."
+                             Margin="0,0,10,0"/>
+                    
+                    <Button Grid.Column="1" 
+                            Content="Add Supplier" 
+                            Command="{Binding AddNewSupplierCommand}"
+                            Classes="accent"/>
+                </Grid>
+            </Border>
+            
+            <!-- Supplier List -->
+            <Border Grid.Row="1" Classes="card">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Grid.Row="0" Text="Suppliers" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                    
+                    <DataGrid Grid.Row="1" 
+                              ItemsSource="{Binding FilteredSuppliers}"
+                              AutoGenerateColumns="False"
+                              CanUserReorderColumns="False"
+                              CanUserResizeColumns="True"
+                              GridLinesVisibility="Horizontal">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                            <DataGridTextColumn Header="Contact Person" Binding="{Binding ContactPerson}" Width="150"/>
+                            <DataGridTextColumn Header="Phone" Binding="{Binding Phone}" Width="120"/>
+                            <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="180"/>
+                            <DataGridTemplateColumn Header="Actions" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="5">
+                                            <Button Content="Edit" 
+                                                    Command="{Binding $parent[UserControl].((vm:SupplierViewModel)DataContext).EditSupplierCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Classes="accent"
+                                                    FontSize="12"
+                                                    Padding="8,4"/>
+                                            <Button Content="Delete" 
+                                                    Command="{Binding $parent[UserControl].((vm:SupplierViewModel)DataContext).DeleteSupplierCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Classes="danger"
+                                                    FontSize="12"
+                                                    Padding="8,4"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+        
+        <!-- Right Panel - Supplier Form -->
+        <Grid Grid.Column="1" IsVisible="{Binding IsAddingSupplier}">
+            <Border Classes="card">
+                <ScrollViewer>
+                    <StackPanel Spacing="15">
+                        <TextBlock Text="Supplier Details" FontWeight="Bold" FontSize="16"/>
+                        
+                        <StackPanel>
+                            <TextBlock Text="Supplier Name *" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <TextBox Text="{Binding SupplierName}" Watermark="Enter supplier name"/>
+                        </StackPanel>
+                        
+                        <StackPanel>
+                            <TextBlock Text="Contact Person" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <TextBox Text="{Binding ContactPerson}" Watermark="Enter contact person name"/>
+                        </StackPanel>
+                        
+                        <StackPanel>
+                            <TextBlock Text="Phone Number" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <TextBox Text="{Binding Phone}" Watermark="Enter phone number"/>
+                        </StackPanel>
+                        
+                        <StackPanel>
+                            <TextBlock Text="Email Address" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <TextBox Text="{Binding Email}" Watermark="Enter email address"/>
+                        </StackPanel>
+                        
+                        <StackPanel>
+                            <TextBlock Text="Address" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <TextBox Text="{Binding Address}" 
+                                     Watermark="Enter full address"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     Height="80"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="10">
+                            <Button Content="Save Supplier" 
+                                    Command="{Binding SaveSupplierCommand}"
+                                    IsEnabled="{Binding !IsBusy}"
+                                    Classes="accent"
+                                    HorizontalAlignment="Stretch"/>
+                            
+                            <Button Content="Cancel" 
+                                    Command="{Binding CancelEditCommand}"
+                                    HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                        
+                        <TextBlock Text="{Binding ErrorMessage}" 
+                                   Foreground="Red" 
+                                   IsVisible="{Binding HasError}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+        
+        <!-- Placeholder when not adding/editing -->
+        <Grid Grid.Column="1" IsVisible="{Binding !IsAddingSupplier}">
+            <Border Classes="card">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="Select a supplier to edit" 
+                               FontSize="14" 
+                               Opacity="0.7"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="or click 'Add Supplier' to create a new one" 
+                               FontSize="12" 
+                               Opacity="0.5"
+                               HorizontalAlignment="Center"
+                               Margin="0,5,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

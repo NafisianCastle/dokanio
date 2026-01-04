@@ -1,0 +1,175 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Desktop.ViewModels"
+             x:Class="Desktop.Views.ReportsView"
+             x:DataType="vm:ReportsViewModel">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Report Controls -->
+        <Border Grid.Row="0" Classes="card" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                    <TextBlock Text="Report Type" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <ComboBox ItemsSource="{Binding ReportTypes}"
+                              SelectedItem="{Binding SelectedReportType}"
+                              HorizontalAlignment="Stretch"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1" Margin="5,0">
+                    <TextBlock Text="From Date" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <DatePicker SelectedDate="{Binding FromDate}"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="2" Margin="10,0,10,0">
+                    <TextBlock Text="To Date" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <DatePicker SelectedDate="{Binding ToDate}"/>
+                </StackPanel>
+                
+                <Button Grid.Column="3" 
+                        Content="Generate Report" 
+                        Command="{Binding GenerateReportCommand}"
+                        IsEnabled="{Binding !IsBusy}"
+                        Classes="accent"
+                        VerticalAlignment="Bottom"
+                        Margin="0,0,10,0"/>
+                
+                <Button Grid.Column="4" 
+                        Content="Export" 
+                        Command="{Binding ExportReportCommand}"
+                        IsEnabled="{Binding !IsBusy}"
+                        VerticalAlignment="Bottom"/>
+            </Grid>
+        </Border>
+        
+        <!-- Summary Cards -->
+        <Grid Grid.Row="1" Margin="0,0,0,10" IsVisible="{Binding SelectedReportType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter='Sales Summary'}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <Border Grid.Column="0" Classes="card" Margin="0,0,5,0">
+                <StackPanel>
+                    <TextBlock Text="Total Sales" FontWeight="Bold" FontSize="14"/>
+                    <TextBlock Text="{Binding TotalSales, StringFormat='₹{0:N2}'}" 
+                               FontSize="24" FontWeight="Bold" Foreground="#4CAF50"/>
+                </StackPanel>
+            </Border>
+            
+            <Border Grid.Column="1" Classes="card" Margin="5,0">
+                <StackPanel>
+                    <TextBlock Text="Total Transactions" FontWeight="Bold" FontSize="14"/>
+                    <TextBlock Text="{Binding TotalTransactions}" 
+                               FontSize="24" FontWeight="Bold" Foreground="#2196F3"/>
+                </StackPanel>
+            </Border>
+            
+            <Border Grid.Column="2" Classes="card" Margin="5,0,0,0">
+                <StackPanel>
+                    <TextBlock Text="Average Transaction" FontWeight="Bold" FontSize="14"/>
+                    <TextBlock Text="{Binding AverageTransaction, StringFormat='₹{0:N2}'}" 
+                               FontSize="24" FontWeight="Bold" Foreground="#FF9800"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+        
+        <!-- Report Content -->
+        <Border Grid.Row="2" Classes="card">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <TextBlock Grid.Row="0" Text="{Binding SelectedReportType}" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                
+                <!-- Sales Summary Report -->
+                <DataGrid Grid.Row="1" 
+                          ItemsSource="{Binding SalesData}"
+                          AutoGenerateColumns="False"
+                          CanUserReorderColumns="False"
+                          CanUserResizeColumns="True"
+                          GridLinesVisibility="Horizontal"
+                          IsVisible="{Binding SelectedReportType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter='Sales Summary'}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat='dd/MM/yyyy'}" Width="120"/>
+                        <DataGridTextColumn Header="Transactions" Binding="{Binding TransactionCount}" Width="120"/>
+                        <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat='₹{0:N2}'}" Width="150"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                
+                <!-- Expiring Products Report -->
+                <DataGrid Grid.Row="1" 
+                          ItemsSource="{Binding ExpiringProducts}"
+                          AutoGenerateColumns="False"
+                          CanUserReorderColumns="False"
+                          CanUserResizeColumns="True"
+                          GridLinesVisibility="Horizontal"
+                          IsVisible="{Binding SelectedReportType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter='Expiring Products'}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Product Name" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="Batch Number" Binding="{Binding BatchNumber}" Width="120"/>
+                        <DataGridTextColumn Header="Expiry Date" Binding="{Binding ExpiryDate, StringFormat='dd/MM/yyyy'}" Width="120"/>
+                        <DataGridTextColumn Header="Stock Quantity" Binding="{Binding StockQuantity}" Width="120"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                
+                <!-- Low Stock Report -->
+                <DataGrid Grid.Row="1" 
+                          ItemsSource="{Binding LowStockItems}"
+                          AutoGenerateColumns="False"
+                          CanUserReorderColumns="False"
+                          CanUserResizeColumns="True"
+                          GridLinesVisibility="Horizontal"
+                          IsVisible="{Binding SelectedReportType, Converter={x:Static ObjectConverters.Equal}, ConverterParameter='Low Stock Alert'}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Product Name" Binding="{Binding ProductName}" Width="*"/>
+                        <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="150"/>
+                        <DataGridTextColumn Header="Current Stock" Binding="{Binding CurrentStock}" Width="120"/>
+                        <DataGridTextColumn Header="Minimum Stock" Binding="{Binding MinimumStock}" Width="120"/>
+                        <DataGridTextColumn Header="Deficit" Binding="{Binding StockDeficit}" Width="100"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                
+                <!-- Generic message for other report types -->
+                <StackPanel Grid.Row="1" 
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding SelectedReportType, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter='Sales Summary'}">
+                    <TextBlock Text="{Binding SelectedReportType, StringFormat='Report: {0}'}" 
+                               FontSize="16" 
+                               FontWeight="Bold"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Click 'Generate Report' to view data" 
+                               FontSize="14" 
+                               Opacity="0.7"
+                               HorizontalAlignment="Center"
+                               Margin="0,10,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- Error Message -->
+        <TextBlock Grid.Row="2" 
+                   Text="{Binding ErrorMessage}" 
+                   Foreground="Red" 
+                   IsVisible="{Binding HasError}"
+                   TextWrapping="Wrap"
+                   Margin="0,10,0,0"/>
+    </Grid>
+</UserControl>

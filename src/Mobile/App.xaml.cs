@@ -1,17 +1,36 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Shared.Core.Services;
 
-namespace Mobile
+namespace Mobile;
+
+public partial class App : Application
 {
-    public partial class App : Application
+    public App()
     {
-        public App()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
 
-        protected override Window CreateWindow(IActivationState? activationState)
+        MainPage = new AppShell();
+        
+        // Initialize database
+        Task.Run(async () =>
         {
-            return new Window(new AppShell());
-        }
+            try
+            {
+                var serviceProvider = Handler?.MauiContext?.Services;
+                if (serviceProvider != null)
+                {
+                    using var scope = serviceProvider.CreateScope();
+                    var migrationService = scope.ServiceProvider.GetRequiredService<IDatabaseMigrationService>();
+                    await migrationService.InitializeDatabaseAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                var serviceProvider = Handler?.MauiContext?.Services;
+                var logger = serviceProvider?.GetService<ILogger<App>>();
+                logger?.LogError(ex, "Failed to initialize database");
+            }
+        });
     }
 }
