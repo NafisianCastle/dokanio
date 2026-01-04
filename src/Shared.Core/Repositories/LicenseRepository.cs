@@ -34,7 +34,7 @@ public class LicenseRepository : Repository<License>, ILicenseRepository
     public async Task<License?> GetCurrentLicenseAsync(Guid deviceId)
     {
         return await _context.Set<License>()
-            .Where(l => l.DeviceId == deviceId && l.Status == LicenseStatus.Active)
+            .Where(l => l.DeviceId == deviceId)
             .OrderByDescending(l => l.ActivationDate)
             .FirstOrDefaultAsync();
     }

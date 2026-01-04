@@ -158,6 +158,75 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
         services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
         
+        // Register sync services for testing
+        services.AddScoped<ISyncEngine, SyncEngine>();
+        services.AddScoped<IConnectivityService, ConnectivityService>();
+        services.AddScoped<ISyncApiClient, SyncApiClient>();
+        services.AddHttpClient<ISyncApiClient, SyncApiClient>();
+        
+        // Register hardware integration services for testing
+        services.AddScoped<IReceiptService, ReceiptService>();
+        services.AddScoped<IPrinterService, PrinterService>();
+        services.AddScoped<IBarcodeScanner, BarcodeScanner>();
+        services.AddScoped<ICashDrawerService, CashDrawerService>();
+        
+        // Register additional repositories and services
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+        services.AddScoped<IUserSessionRepository, UserSessionRepository>();
+        services.AddScoped<ITransactionLogService, TransactionLogService>();
+        services.AddScoped<IEncryptionService, EncryptionService>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IAuditService, AuditService>();
+        services.AddScoped<ISessionService, SessionService>();
+        services.AddScoped<IAuthorizationService, AuthorizationService>();
+        services.AddSingleton<ICrossPlatformConfigurationService, CrossPlatformConfigurationService>();
+        
+        // Add test configurations
+        services.AddSingleton(provider => new SyncConfiguration
+        {
+            DeviceId = Guid.NewGuid(),
+            ServerUrl = "https://test.example.com",
+            ServerBaseUrl = "https://test.example.com",
+            ApiKey = "test-api-key",
+            SyncInterval = TimeSpan.FromMinutes(5),
+            ConnectivityCheckInterval = TimeSpan.FromMinutes(1),
+            MaxRetryAttempts = 3,
+            RetryDelay = TimeSpan.FromSeconds(30),
+            InitialRetryDelay = TimeSpan.FromSeconds(5),
+            RetryBackoffMultiplier = 2.0,
+            BatchSize = 100
+        });
+        
+        services.AddSingleton(provider => new ReceiptConfiguration
+        {
+            ShopName = "Test POS Shop",
+            ShopAddress = "123 Test Street",
+            ShopPhone = "555-0123",
+            PaperWidth = 48,
+            PrintLogo = false,
+            PrintBarcode = true,
+            FooterMessage = "Thank you for testing!"
+        });
+        
+        services.AddSingleton(provider => new ScannerConfiguration
+        {
+            EnableContinuousMode = false,
+            ScanTimeout = TimeSpan.FromSeconds(30),
+            EnableBeep = true,
+            EnableVibration = true,
+            SupportedFormats = new List<string> { "EAN13", "EAN8", "Code128", "Code39" }
+        });
+        
+        services.AddSingleton(provider => new CashDrawerConfiguration
+        {
+            Port = "COM1",
+            BaudRate = 9600,
+            OpenTimeout = TimeSpan.FromSeconds(5),
+            AutoClose = false,
+            AutoCloseDelay = TimeSpan.FromSeconds(30)
+        });
+        
         // Add mock current user service for testing
         services.AddSingleton<ICurrentUserService>(provider => 
         {
