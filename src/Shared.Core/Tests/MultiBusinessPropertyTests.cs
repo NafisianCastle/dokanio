@@ -38,6 +38,10 @@ public class MultiBusinessPropertyTests : IDisposable
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IBusinessRepository, BusinessRepository>();
         services.AddScoped<IShopRepository, ShopRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<IDiscountRepository, DiscountRepository>();
+        services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
+        services.AddScoped<ILicenseRepository, LicenseRepository>();
         
         // Add services
         services.AddScoped<IBusinessManagementService, BusinessManagementService>();
@@ -49,6 +53,17 @@ public class MultiBusinessPropertyTests : IDisposable
         services.AddScoped<IEncryptionService, EncryptionService>();
         services.AddScoped<IUserSessionRepository, UserSessionRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+        services.AddScoped<ISaleService, SaleService>();
+        services.AddScoped<IEnhancedSalesService, EnhancedSalesService>();
+        services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
+        services.AddScoped<IMembershipService, MembershipService>();
+        services.AddScoped<IDiscountService, DiscountService>();
+        services.AddScoped<IConfigurationService, ConfigurationService>();
+        services.AddScoped<ILicenseService, LicenseService>();
+        services.AddScoped<ISaleItemRepository, SaleItemRepository>();
+        services.AddSingleton<ICurrentUserService, CurrentUserService>();
         
         _serviceProvider = services.BuildServiceProvider();
         _context = _serviceProvider.GetRequiredService<PosDbContext>();
@@ -494,6 +509,111 @@ public class MultiBusinessPropertyTests : IDisposable
     }
 
     /// <summary>
+    /// Property 6: Sales Calculation Accuracy
+    /// For any sale with multiple items, discounts, and taxes, the final total should equal the sum of line totals minus discounts plus taxes.
+    /// Validates: Requirements 5.2
+    /// Feature: multi-business-pos, Property 6: Sales Calculation Accuracy
+    /// </summary>
+    [Fact]
+    public async Task SalesCalculationAccuracy_FinalTotalShouldEqualSumOfLineItemsMinusDiscountsPlusTaxes()
+    {
+        var enhancedSalesService = _serviceProvider.GetRequiredService<IEnhancedSalesService>();
+        var productService = _serviceProvider.GetRequiredService<IProductService>();
+        var saleItemRepository = _serviceProvider.GetRequiredService<ISaleItemRepository>();
+        
+        // Test with multiple random sale scenarios
+        for (int iteration = 0; iteration < 20; iteration++)
+        {
+            try
+            {
+                // Setup: Create a business with shop and products
+                var saleTestData = GenerateRandomSaleTestData();
+                await SetupSaleTestDataAsync(saleTestData);
+
+                // Create sale with validation
+                var sale = await enhancedSalesService.CreateSaleWithValidationAsync(
+                    saleTestData.ShopId, saleTestData.UserId, $"INV{iteration:D4}");
+
+                // Add random items to the sale
+                var expectedLineTotal = 0m;
+                foreach (var itemData in saleTestData.SaleItems)
+                {
+                    if (itemData.IsWeightBased)
+                    {
+                        await enhancedSalesService.AddWeightBasedItemToSaleAsync(
+                            sale.Id, itemData.ProductId, itemData.Weight!.Value, itemData.BatchNumber);
+                        
+                        // Calculate expected line total for weight-based items
+                        var product = await productService.GetProductByIdAsync(itemData.ProductId);
+                        expectedLineTotal += itemData.Weight!.Value * product!.RatePerKilogram!.Value;
+                    }
+                    else
+                    {
+                        await enhancedSalesService.AddItemToSaleAsync(
+                            sale.Id, itemData.ProductId, itemData.Quantity, itemData.UnitPrice, itemData.BatchNumber);
+                        
+                        expectedLineTotal += itemData.Quantity * itemData.UnitPrice;
+                    }
+                }
+
+                // Calculate with business rules
+                var calculationResult = await enhancedSalesService.CalculateWithBusinessRulesAsync(sale);
+
+                // Verify calculation accuracy
+                var actualLineTotal = calculationResult.BaseTotal;
+                var finalTotal = calculationResult.FinalTotal;
+                var discountAmount = calculationResult.DiscountAmount + calculationResult.MembershipDiscountAmount;
+                var taxAmount = calculationResult.TaxAmount;
+
+                // Property: Final total should equal base total minus discounts plus taxes
+                var expectedFinalTotal = actualLineTotal - discountAmount + taxAmount;
+                
+                // Allow for small rounding differences (within 0.01)
+                var tolerance = 0.01m;
+                var totalDifference = Math.Abs(finalTotal - expectedFinalTotal);
+                
+                Assert.True(totalDifference <= tolerance,
+                    $"Final total calculation incorrect in iteration {iteration}. " +
+                    $"Expected: {expectedFinalTotal:C}, Actual: {finalTotal:C}, " +
+                    $"Base: {actualLineTotal:C}, Discounts: {discountAmount:C}, Tax: {taxAmount:C}, " +
+                    $"Difference: {totalDifference:C}");
+
+                // Verify base total matches sum of line items
+                var saleItems = await saleItemRepository.FindAsync(si => si.SaleId == sale.Id);
+                var actualSumOfLineItems = saleItems.Sum(si => si.TotalPrice);
+                
+                var baseTotalDifference = Math.Abs(actualLineTotal - actualSumOfLineItems);
+                Assert.True(baseTotalDifference <= tolerance,
+                    $"Base total should match sum of line items in iteration {iteration}. " +
+                    $"Base Total: {actualLineTotal:C}, Sum of Line Items: {actualSumOfLineItems:C}, " +
+                    $"Difference: {baseTotalDifference:C}");
+
+                // Verify all amounts are non-negative
+                Assert.True(actualLineTotal >= 0, $"Base total should be non-negative in iteration {iteration}");
+                Assert.True(discountAmount >= 0, $"Discount amount should be non-negative in iteration {iteration}");
+                Assert.True(taxAmount >= 0, $"Tax amount should be non-negative in iteration {iteration}");
+                Assert.True(finalTotal >= 0, $"Final total should be non-negative in iteration {iteration}");
+
+                // Verify discounts don't exceed base total
+                Assert.True(discountAmount <= actualLineTotal,
+                    $"Discount amount should not exceed base total in iteration {iteration}. " +
+                    $"Discount: {discountAmount:C}, Base: {actualLineTotal:C}");
+
+                // Verify calculation is deterministic - same input should give same result
+                var secondCalculationResult = await enhancedSalesService.CalculateWithBusinessRulesAsync(sale);
+                Assert.Equal(calculationResult.FinalTotal, secondCalculationResult.FinalTotal);
+                Assert.Equal(calculationResult.BaseTotal, secondCalculationResult.BaseTotal);
+                Assert.Equal(calculationResult.DiscountAmount, secondCalculationResult.DiscountAmount);
+                Assert.Equal(calculationResult.TaxAmount, secondCalculationResult.TaxAmount);
+            }
+            finally
+            {
+                CleanupTestData();
+            }
+        }
+    }
+
+    /// <summary>
     /// Generates test data for a business including shops, products, sales, and stock
     /// </summary>
     private static BusinessTestData GenerateBusinessData()
@@ -927,10 +1047,145 @@ public class MultiBusinessPropertyTests : IDisposable
         return Convert.ToBase64String(bytes);
     }
 
+    /// <summary>
+    /// Generates random sale test data
+    /// </summary>
+    private static SaleTestData GenerateRandomSaleTestData()
+    {
+        var random = new Random();
+        var itemCount = random.Next(1, 6); // 1-5 items per sale
+        
+        var saleItems = new List<SaleItemTestData>();
+        for (int i = 0; i < itemCount; i++)
+        {
+            var isWeightBased = random.Next(0, 4) == 0; // 25% chance of weight-based
+            saleItems.Add(new SaleItemTestData
+            {
+                ProductId = Guid.NewGuid(),
+                Quantity = isWeightBased ? 1 : random.Next(1, 10),
+                UnitPrice = (decimal)(random.NextDouble() * 100 + 1), // $1-$100
+                Weight = isWeightBased ? Math.Round((decimal)(random.NextDouble() * 4.9 + 0.001), 3) : null, // 0.001-4.901 kg with 3 decimal places
+                IsWeightBased = isWeightBased,
+                BatchNumber = random.Next(0, 3) == 0 ? $"BATCH{random.Next(1000, 9999)}" : null
+            });
+        }
+
+        return new SaleTestData
+        {
+            BusinessId = Guid.NewGuid(),
+            ShopId = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            BusinessType = (BusinessType)random.Next(0, Enum.GetValues<BusinessType>().Length),
+            SaleItems = saleItems
+        };
+    }
+
+    /// <summary>
+    /// Sets up test data for a sale scenario
+    /// </summary>
+    private async Task SetupSaleTestDataAsync(SaleTestData saleTestData)
+    {
+        // Create business owner
+        var owner = new User
+        {
+            Id = saleTestData.UserId,
+            BusinessId = saleTestData.BusinessId,
+            Username = $"user_{saleTestData.UserId:N}",
+            FullName = $"User {saleTestData.UserId:N}",
+            Email = $"user_{saleTestData.UserId:N}@test.com",
+            PasswordHash = "hash",
+            Salt = "salt",
+            Role = UserRole.Cashier,
+            DeviceId = Guid.NewGuid()
+        };
+
+        // Create business
+        var business = new Business
+        {
+            Id = saleTestData.BusinessId,
+            Name = $"Business {saleTestData.BusinessId:N}",
+            Type = saleTestData.BusinessType,
+            OwnerId = saleTestData.UserId,
+            DeviceId = Guid.NewGuid()
+        };
+
+        // Create shop
+        var shop = new Shop
+        {
+            Id = saleTestData.ShopId,
+            BusinessId = saleTestData.BusinessId,
+            Name = $"Shop {saleTestData.ShopId:N}",
+            Configuration = GenerateRandomShopConfigurationJson(),
+            DeviceId = Guid.NewGuid()
+        };
+
+        _context.Users.Add(owner);
+        _context.Businesses.Add(business);
+        _context.Shops.Add(shop);
+
+        // Create products for the sale items
+        foreach (var itemData in saleTestData.SaleItems)
+        {
+            var product = new Product
+            {
+                Id = itemData.ProductId,
+                ShopId = saleTestData.ShopId,
+                Name = $"Product {itemData.ProductId:N}",
+                Barcode = $"BC{itemData.ProductId:N}",
+                UnitPrice = itemData.UnitPrice,
+                IsWeightBased = itemData.IsWeightBased,
+                RatePerKilogram = itemData.IsWeightBased ? itemData.UnitPrice : null,
+                WeightPrecision = itemData.IsWeightBased ? 3 : 0,
+                DeviceId = Guid.NewGuid()
+            };
+
+            _context.Products.Add(product);
+
+            // Create stock for the product
+            var stock = new Stock
+            {
+                Id = Guid.NewGuid(),
+                ShopId = saleTestData.ShopId,
+                ProductId = itemData.ProductId,
+                Quantity = itemData.IsWeightBased ? 1000 : itemData.Quantity * 2, // Ensure sufficient stock
+                DeviceId = Guid.NewGuid()
+            };
+
+            _context.Stock.Add(stock);
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
     public void Dispose()
     {
         _context?.Dispose();
         _serviceProvider?.Dispose();
+    }
+
+    /// <summary>
+    /// Test data structure for sale testing
+    /// </summary>
+    private class SaleTestData
+    {
+        public Guid BusinessId { get; set; }
+        public Guid ShopId { get; set; }
+        public Guid UserId { get; set; }
+        public BusinessType BusinessType { get; set; }
+        public List<SaleItemTestData> SaleItems { get; set; } = new();
+    }
+
+    /// <summary>
+    /// Test data structure for sale item testing
+    /// </summary>
+    private class SaleItemTestData
+    {
+        public Guid ProductId { get; set; }
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal? Weight { get; set; }
+        public bool IsWeightBased { get; set; }
+        public string? BatchNumber { get; set; }
     }
 
     /// <summary>

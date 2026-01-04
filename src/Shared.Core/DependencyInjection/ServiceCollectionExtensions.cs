@@ -28,6 +28,7 @@ public static class ServiceCollectionExtensions
 
         // Register business logic services
         services.AddScoped<ISaleService, SaleService>();
+        services.AddScoped<IEnhancedSalesService, EnhancedSalesService>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
@@ -37,6 +38,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IIntegratedPosService, IntegratedPosService>();
         services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
+        services.AddScoped<IBusinessManagementService, BusinessManagementService>();
         
         // Register repositories
         services.AddScoped<IProductRepository, ProductRepository>();
@@ -50,6 +52,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDiscountRepository, DiscountRepository>();
         services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
         services.AddScoped<ILicenseRepository, LicenseRepository>();
+        services.AddScoped<IBusinessRepository, BusinessRepository>();
+        services.AddScoped<IShopRepository, ShopRepository>();
         
         // Register transaction logging service for offline-first persistence
         services.AddScoped<ITransactionLogService, TransactionLogService>();
@@ -141,6 +145,7 @@ public static class ServiceCollectionExtensions
 
         // Register business logic services
         services.AddScoped<ISaleService, SaleService>();
+        services.AddScoped<IEnhancedSalesService, EnhancedSalesService>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
@@ -156,6 +161,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDiscountRepository, DiscountRepository>();
         services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
         services.AddScoped<ILicenseRepository, LicenseRepository>();
+        services.AddScoped<IBusinessRepository, BusinessRepository>();
+        services.AddScoped<IShopRepository, ShopRepository>();
 
         // Register additional services for testing
         services.AddScoped<IDiscountManagementService, DiscountManagementService>();
@@ -164,6 +171,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IIntegratedPosService, IntegratedPosService>();
         services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
         services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
+        services.AddScoped<IBusinessManagementService, BusinessManagementService>();
         
         // Register sync services for testing
         services.AddScoped<ISyncEngine, SyncEngine>();
