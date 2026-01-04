@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using Shared.Core.Data;
+using Shared.Core.DTOs;
 using Shared.Core.Repositories;
 using Shared.Core.Services;
 using Shared.Core.Tests.TestImplementations;
@@ -30,6 +31,7 @@ public static class ServiceCollectionExtensions
         // Register repositories
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ISaleRepository, SaleRepository>();
+        services.AddScoped<ISaleItemRepository, SaleItemRepository>();
         services.AddScoped<IStockRepository, StockRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
@@ -45,6 +47,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
+        
+        // Register database migration service
+        services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
+        
+        // Register cross-platform configuration service
+        services.AddSingleton<ICrossPlatformConfigurationService, CrossPlatformConfigurationService>();
         
         // Register background services
         services.AddHostedService<SessionCleanupService>();
@@ -85,15 +93,15 @@ public static class ServiceCollectionExtensions
         });
         
         // Register sync configuration (should be configured by the consuming application)
-        // services.AddSingleton(provider => new SyncConfiguration
-        // {
-        //     DeviceId = Guid.NewGuid(), // Should be set by the application
-        //     ServerBaseUrl = "https://api.example.com", // Should be configured
-        //     SyncInterval = TimeSpan.FromMinutes(5),
-        //     MaxRetryAttempts = 3,
-        //     InitialRetryDelay = TimeSpan.FromSeconds(1),
-        //     RetryBackoffMultiplier = 2.0
-        // });
+        services.AddSingleton(provider => new SyncConfiguration
+        {
+            DeviceId = Guid.NewGuid(), // Should be set by the application
+            ServerBaseUrl = "https://api.example.com", // Should be configured
+            SyncInterval = TimeSpan.FromMinutes(5),
+            MaxRetryAttempts = 3,
+            InitialRetryDelay = TimeSpan.FromSeconds(1),
+            RetryBackoffMultiplier = 2.0
+        });
 
         return services;
     }

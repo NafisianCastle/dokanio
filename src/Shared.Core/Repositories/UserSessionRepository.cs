@@ -58,7 +58,6 @@ public class UserSessionRepository : IUserSessionRepository
     public async Task<UserSession?> GetByTokenAsync(string sessionToken)
     {
         return await _context.Set<UserSession>()
-            .Include(s => s.User)
             .FirstOrDefaultAsync(s => s.SessionToken == sessionToken);
     }
 

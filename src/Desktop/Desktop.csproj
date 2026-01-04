@@ -24,8 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Temporarily removed to fix compilation issues -->
-    <!-- <ProjectReference Include="..\Shared.Core\Shared.Core.csproj" /> -->
+    <ProjectReference Include="..\Shared.Core\Shared.Core.csproj" />
   </ItemGroup>
 
 </Project>

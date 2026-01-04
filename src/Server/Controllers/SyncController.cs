@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
+using Shared.Core.DTOs;
 using Shared.Core.Services;
 using System.Security.Claims;
 

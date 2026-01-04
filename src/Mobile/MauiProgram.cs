@@ -3,6 +3,7 @@ using Shared.Core.DependencyInjection;
 using Mobile.ViewModels;
 using Mobile.Views;
 using Mobile.Services;
+using System.IO;
 
 namespace Mobile;
 
@@ -19,8 +20,12 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
+        // Get database path for mobile
+        var dbPath = Path.Combine(FileSystem.AppDataDirectory, "pos.db");
+        var connectionString = $"Data Source={dbPath}";
+
         // Register Shared.Core services
-        builder.Services.AddSharedCore("Data Source=pos.db");
+        builder.Services.AddSharedCore(connectionString);
 
         // Register Mobile-specific services
         builder.Services.AddSingleton<BackgroundSyncService>();
