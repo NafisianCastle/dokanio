@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Mobile.ViewModels"
+             x:Class="Mobile.Views.BarcodeScannerPage"
+             x:DataType="vm:BarcodeScannerViewModel"
+             Title="{Binding Title}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Camera Placeholder -->
+        <Frame Grid.Row="0" BackgroundColor="Black" HasShadow="False">
+            <StackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                <Label Text="📷" FontSize="72" TextColor="White" HorizontalOptions="Center" />
+                <Label Text="Camera View" TextColor="White" FontSize="16" HorizontalOptions="Center" />
+                <Label Text="(Barcode scanning will be implemented)" TextColor="Gray" FontSize="12" HorizontalOptions="Center" />
+            </StackLayout>
+        </Frame>
+
+        <!-- Product Information -->
+        <Grid Grid.Row="1" Padding="15" BackgroundColor="LightGray">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0"
+                   Text="{Binding ScannedBarcode, StringFormat='Barcode: {0}'}"
+                   FontSize="14"
+                   FontAttributes="Bold"
+                   IsVisible="{Binding ScannedBarcode, Converter={StaticResource IsNotNullConverter}}" />
+
+            <Label Grid.Row="1"
+                   Text="{Binding ProductInfo}"
+                   FontSize="12"
+                   TextColor="DarkBlue"
+                   IsVisible="{Binding ProductInfo, Converter={StaticResource IsNotNullConverter}}" />
+        </Grid>
+
+        <!-- Controls -->
+        <Grid Grid.Row="2" Padding="15" BackgroundColor="DarkGray">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0"
+                    Text="Manual Entry"
+                    Command="{Binding ManualEntryCommand}"
+                    BackgroundColor="DodgerBlue"
+                    TextColor="White"
+                    Margin="0,0,5,0" />
+
+            <Button Grid.Column="1"
+                    Text="Back"
+                    Clicked="OnBackClicked"
+                    BackgroundColor="Gray"
+                    TextColor="White"
+                    Margin="5,0,0,0" />
+        </Grid>
+
+        <!-- Error Message -->
+        <Label Grid.Row="0"
+               Text="{Binding ErrorMessage}"
+               TextColor="Red"
+               FontSize="14"
+               BackgroundColor="Black"
+               Padding="10"
+               HorizontalOptions="Center"
+               VerticalOptions="End"
+               IsVisible="{Binding HasError}"
+               Margin="20" />
+    </Grid>
+</ContentPage>

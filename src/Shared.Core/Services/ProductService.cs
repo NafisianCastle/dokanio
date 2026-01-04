@@ -83,4 +83,29 @@ public class ProductService : IProductService
 
         return product;
     }
+
+    public async Task<IEnumerable<Product>> GetAllActiveProductsAsync()
+    {
+        var allProducts = await _productRepository.GetAllAsync();
+        return allProducts.Where(p => p.IsActive);
+    }
+
+    public async Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            return await GetAllActiveProductsAsync();
+        }
+
+        var allProducts = await _productRepository.GetAllAsync();
+        var searchTermLower = searchTerm.ToLowerInvariant();
+
+        return allProducts.Where(p => 
+            p.IsActive && (
+                p.Name.ToLowerInvariant().Contains(searchTermLower) ||
+                (p.Barcode != null && p.Barcode.Contains(searchTerm)) ||
+                (p.Category != null && p.Category.ToLowerInvariant().Contains(searchTermLower))
+            )
+        );
+    }
 }
