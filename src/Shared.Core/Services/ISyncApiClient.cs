@@ -1,3 +1,5 @@
+using Shared.Core.DTOs;
+
 namespace Shared.Core.Services;
 
 /// <summary>

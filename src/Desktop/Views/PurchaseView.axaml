@@ -1,0 +1,206 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Desktop.ViewModels"
+             x:Class="Desktop.Views.PurchaseView"
+             x:DataType="vm:PurchaseViewModel">
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- Left Panel - Product Search and Purchase Items -->
+        <Grid Grid.Column="0" Margin="0,0,10,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Search Section -->
+            <Border Grid.Row="0" Classes="card" Margin="0,0,0,10">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Add Products" FontWeight="Bold" FontSize="16"/>
+                    
+                    <TextBox Text="{Binding SearchText}" 
+                             Watermark="Search products to add to purchase..."/>
+                    
+                    <!-- Search Results -->
+                    <ListBox ItemsSource="{Binding SearchResults}" 
+                             MaxHeight="150"
+                             IsVisible="{Binding SearchResults.Count}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Classes="listitem" Cursor="Hand" 
+                                        Tapped="OnProductTapped">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding Category}" FontSize="12" Opacity="0.7"/>
+                                        </StackPanel>
+                                        
+                                        <TextBlock Grid.Column="1" 
+                                                   Text="{Binding UnitPrice, StringFormat='₹{0:N2}'}" 
+                                                   FontWeight="Bold"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+            
+            <!-- Purchase Info -->
+            <Border Grid.Row="1" Classes="card" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                        <TextBlock Text="Purchase Number" FontWeight="Bold" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding PurchaseNumber}" IsReadOnly="True"/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="1" Margin="5,0">
+                        <TextBlock Text="Purchase Date" FontWeight="Bold" Margin="0,0,0,5"/>
+                        <DatePicker SelectedDate="{Binding PurchaseDate}"/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="2" Margin="10,0,0,0">
+                        <TextBlock Text="Supplier" FontWeight="Bold" Margin="0,0,0,5"/>
+                        <ComboBox ItemsSource="{Binding Suppliers}"
+                                  SelectedItem="{Binding SelectedSupplier}"
+                                  DisplayMemberBinding="{Binding Name}"
+                                  HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            
+            <!-- Purchase Items -->
+            <Border Grid.Row="2" Classes="card">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Grid.Row="0" Text="Purchase Items" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                    
+                    <DataGrid Grid.Row="1" 
+                              ItemsSource="{Binding PurchaseItems}"
+                              AutoGenerateColumns="False"
+                              CanUserReorderColumns="False"
+                              CanUserResizeColumns="True"
+                              GridLinesVisibility="Horizontal">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*"/>
+                            <DataGridTemplateColumn Header="Qty" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <NumericUpDown Value="{Binding Quantity}" 
+                                                       Minimum="1" 
+                                                       Maximum="9999"
+                                                       Increment="1"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Unit Cost" Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <NumericUpDown Value="{Binding UnitCost}" 
+                                                       Minimum="0.01" 
+                                                       Maximum="99999"
+                                                       Increment="0.01"
+                                                       FormatString="₹{0:N2}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Batch" Binding="{Binding BatchNumber}" Width="120"/>
+                            <DataGridTemplateColumn Header="Expiry" Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <DatePicker SelectedDate="{Binding ExpiryDate}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat='₹{0:N2}'}" Width="100"/>
+                            <DataGridTemplateColumn Header="Action" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="Remove" 
+                                                Command="{Binding $parent[UserControl].((vm:PurchaseViewModel)DataContext).RemoveItemCommand}"
+                                                CommandParameter="{Binding}"
+                                                Classes="danger"
+                                                FontSize="12"
+                                                Padding="8,4"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+        
+        <!-- Right Panel - Purchase Summary and Actions -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Purchase Summary -->
+            <Border Grid.Row="0" Classes="card" Margin="0,0,0,10">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Purchase Summary" FontWeight="Bold" FontSize="16"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Text="Total Amount:" FontWeight="Bold" FontSize="18"/>
+                        <TextBlock Grid.Column="1" Text="{Binding TotalAmount, StringFormat='₹{0:N2}'}" 
+                                   FontWeight="Bold" FontSize="18" Foreground="#4CAF50"/>
+                    </Grid>
+                    
+                    <TextBlock Text="{Binding PurchaseItems.Count, StringFormat=\{0\} items}" 
+                               FontSize="14" Opacity="0.7"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Actions -->
+            <Border Grid.Row="1" Classes="card">
+                <StackPanel Spacing="10" VerticalAlignment="Top">
+                    <Button Content="Complete Purchase" 
+                            Command="{Binding CompletePurchaseCommand}"
+                            IsEnabled="{Binding !IsBusy}"
+                            Classes="accent"
+                            HorizontalAlignment="Stretch"
+                            Height="50"
+                            FontSize="16"
+                            FontWeight="Bold"/>
+                    
+                    <Button Content="Reset Purchase" 
+                            Command="{Binding ResetPurchaseCommand}"
+                            HorizontalAlignment="Stretch"/>
+                    
+                    <TextBlock Text="{Binding ErrorMessage}" 
+                               Foreground="Red" 
+                               IsVisible="{Binding HasError}"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

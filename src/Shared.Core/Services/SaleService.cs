@@ -133,4 +133,75 @@ public class SaleService : ISaleService
 
         return true;
     }
+
+    public async Task<Sale> CompleteSaleAsync(Sale sale)
+    {
+        // Ensure total is calculated
+        sale.TotalAmount = await CalculateSaleTotalAsync(sale.Id);
+        
+        await _saleRepository.UpdateAsync(sale);
+        await _saleRepository.SaveChangesAsync();
+
+        // Update inventory for all items in the sale
+        await _inventoryService.ProcessSaleInventoryUpdateAsync(sale);
+
+        return sale;
+    }
+
+    public async Task<Sale?> GetSaleByInvoiceNumberAsync(string invoiceNumber)
+    {
+        var sales = await _saleRepository.FindAsync(s => s.InvoiceNumber == invoiceNumber);
+        return sales.FirstOrDefault();
+    }
+
+    public async Task<decimal> GetDailySalesAsync(DateTime date)
+    {
+        var startOfDay = date.Date;
+        var endOfDay = startOfDay.AddDays(1);
+        
+        var sales = await _saleRepository.FindAsync(s => 
+            s.CreatedAt >= startOfDay && s.CreatedAt < endOfDay);
+        
+        return sales.Sum(s => s.TotalAmount);
+    }
+
+    public async Task<int> GetDailyTransactionCountAsync(DateTime date)
+    {
+        var startOfDay = date.Date;
+        var endOfDay = startOfDay.AddDays(1);
+        
+        var sales = await _saleRepository.FindAsync(s => 
+            s.CreatedAt >= startOfDay && s.CreatedAt < endOfDay);
+        
+        return sales.Count();
+    }
+
+    public async Task<IEnumerable<Sale>> GetSalesByDateRangeAsync(DateTime fromDate, DateTime toDate)
+    {
+        var startDate = fromDate.Date;
+        var endDate = toDate.Date.AddDays(1);
+        
+        return await _saleRepository.FindAsync(s => 
+            s.CreatedAt >= startDate && s.CreatedAt < endDate);
+    }
+
+    public async Task<RefundRecord?> GetRefundBySaleIdAsync(Guid saleId)
+    {
+        // This would typically query a RefundRepository
+        // For now, return null as a placeholder
+        await Task.CompletedTask;
+        return null;
+    }
+
+    public async Task ProcessRefundAsync(RefundRecord refund)
+    {
+        // This would typically:
+        // 1. Validate the refund request
+        // 2. Update inventory (add back refunded items)
+        // 3. Create refund record in database
+        // 4. Update original sale status
+        
+        // For now, just a placeholder
+        await Task.CompletedTask;
+    }
 }

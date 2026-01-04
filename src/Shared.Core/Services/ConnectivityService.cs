@@ -28,6 +28,11 @@ public class ConnectivityService : IConnectivityService, IDisposable
         _isConnected = CheckNetworkConnectivity();
     }
 
+    public Task<bool> IsConnectedAsync()
+    {
+        return Task.FromResult(_isConnected);
+    }
+
     public async Task<bool> IsServerReachableAsync(string serverUrl, TimeSpan timeout = default)
     {
         if (string.IsNullOrEmpty(serverUrl))
