@@ -246,15 +246,32 @@ public class ReceiptService : IReceiptService
         foreach (var item in sale.Items)
         {
             var productName = item.Product?.Name ?? "Unknown Product";
-            var itemLine = FormatItemLine(productName, item.Quantity, item.UnitPrice);
             
-            lines.Add(new ReceiptLine
+            // Check if this is a weight-based item
+            if (item.Weight.HasValue && item.RatePerKilogram.HasValue)
             {
-                Text = itemLine,
-                Type = ReceiptLineType.Item,
-                Alignment = ReceiptAlignment.Left
-            });
-            plainText.AppendLine(itemLine);
+                var itemLine = FormatWeightBasedItemLine(productName, item.Weight.Value, item.RatePerKilogram.Value, item.TotalPrice);
+                
+                lines.Add(new ReceiptLine
+                {
+                    Text = itemLine,
+                    Type = ReceiptLineType.Item,
+                    Alignment = ReceiptAlignment.Left
+                });
+                plainText.AppendLine(itemLine);
+            }
+            else
+            {
+                var itemLine = FormatItemLine(productName, item.Quantity, item.UnitPrice);
+                
+                lines.Add(new ReceiptLine
+                {
+                    Text = itemLine,
+                    Type = ReceiptLineType.Item,
+                    Alignment = ReceiptAlignment.Left
+                });
+                plainText.AppendLine(itemLine);
+            }
 
             // Add batch number if available (for medicines)
             if (!string.IsNullOrWhiteSpace(item.BatchNumber))
@@ -353,5 +370,16 @@ public class ReceiptService : IReceiptService
         var name = productName.Length > 20 ? productName.Substring(0, 17) + "..." : productName;
         
         return $"{name,-20} {quantity,3} {unitPrice,7:F2} {total,7:F2}";
+    }
+
+    private string FormatWeightBasedItemLine(string productName, decimal weight, decimal ratePerKg, decimal totalPrice)
+    {
+        // Truncate product name if too long
+        var name = productName.Length > 20 ? productName.Substring(0, 17) + "..." : productName;
+        
+        // Format weight with appropriate precision (show up to 3 decimal places, remove trailing zeros)
+        var weightStr = weight.ToString("0.###");
+        
+        return $"{name,-20} {weightStr}kg @{ratePerKg:F2} {totalPrice,7:F2}";
     }
 }

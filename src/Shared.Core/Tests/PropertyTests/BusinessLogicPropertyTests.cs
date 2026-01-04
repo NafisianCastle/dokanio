@@ -6,6 +6,7 @@ using Shared.Core.Data;
 using Shared.Core.DependencyInjection;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
+using Shared.Core.Services;
 using Xunit;
 
 namespace Shared.Core.Tests.PropertyTests;
@@ -447,6 +448,81 @@ public class BusinessLogicPropertyTests : IDisposable
         {
             // Log the exception for debugging
             System.Diagnostics.Debug.WriteLine($"Test failed with exception: {ex.Message}");
+            return false;
+        }
+    }
+
+    [Property]
+    public bool WeightBasedPriceCalculation(PositiveInt weightGrams, PositiveInt ratePerKgCents, Gen<int> precisionGen)
+    {
+        // Feature: offline-first-pos, Property 22: For any weight-based product and valid weight input, the calculated price should equal weight × rate per kilogram, rounded to the configured currency precision
+        // **Validates: Requirements 13.2, 13.3**
+        
+        // Clear the database for each test
+        ClearDatabase();
+        
+        var deviceId = Guid.NewGuid();
+        var productId = Guid.NewGuid();
+        
+        // Convert inputs to reasonable values
+        var weightInKg = Math.Max(0.001m, (decimal)weightGrams.Get / 1000m); // Convert grams to kg, minimum 1 gram
+        var ratePerKg = Math.Max(0.01m, (decimal)ratePerKgCents.Get / 100m); // Convert cents to dollars, minimum 1 cent
+        var precision = Math.Max(0, Math.Min(6, Math.Abs(precisionGen.Sample(0, 1).First()))); // Precision between 0-6
+        
+        // Ensure weight doesn't exceed maximum allowed
+        weightInKg = Math.Min(weightInKg, 999.999m);
+        
+        try
+        {
+            // Create a weight-based product
+            var product = new Product
+            {
+                Id = productId,
+                Name = "Weight-based Product",
+                Barcode = $"WEIGHT{DateTime.Now.Ticks}",
+                UnitPrice = 0, // Not used for weight-based products
+                IsWeightBased = true,
+                RatePerKilogram = ratePerKg,
+                WeightPrecision = precision,
+                IsActive = true,
+                DeviceId = deviceId,
+                CreatedAt = DateTime.UtcNow,
+                SyncStatus = SyncStatus.NotSynced
+            };
+            
+            _context.Products.Add(product);
+            _context.SaveChanges();
+            
+            // Create weight-based pricing service
+            var services = new ServiceCollection();
+            services.AddSharedCoreInMemory();
+            var serviceProvider = services.BuildServiceProvider();
+            var weightBasedPricingService = serviceProvider.GetRequiredService<IWeightBasedPricingService>();
+            
+            // Calculate expected price manually
+            var roundedWeight = Math.Round(weightInKg, precision, MidpointRounding.AwayFromZero);
+            var expectedPrice = Math.Round(roundedWeight * ratePerKg, 2, MidpointRounding.AwayFromZero);
+            
+            // Calculate actual price using the service
+            var actualPrice = weightBasedPricingService.CalculatePriceAsync(product, weightInKg).Result;
+            
+            // The calculated price should match the expected price
+            var difference = Math.Abs(actualPrice - expectedPrice);
+            var isValid = difference < 0.001m; // Allow for small decimal precision differences
+            
+            // Debug output for failing cases
+            if (!isValid)
+            {
+                System.Diagnostics.Debug.WriteLine($"Weight: {weightInKg}kg, Rate: {ratePerKg:C}, Precision: {precision}");
+                System.Diagnostics.Debug.WriteLine($"Expected: {expectedPrice:C}, Actual: {actualPrice:C}, Difference: {difference:C}");
+            }
+            
+            return isValid;
+        }
+        catch (Exception ex)
+        {
+            // Log the exception for debugging
+            System.Diagnostics.Debug.WriteLine($"Weight-based pricing test failed with exception: {ex.Message}");
             return false;
         }
     }

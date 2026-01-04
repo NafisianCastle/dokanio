@@ -82,6 +82,7 @@ public class PosDbContext : DbContext
             entity.HasIndex(e => e.ExpiryDate);
             entity.HasIndex(e => e.SyncStatus);
             entity.HasIndex(e => e.DeviceId);
+            entity.HasIndex(e => e.IsWeightBased);
             
             entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
             entity.Property(e => e.Barcode).HasMaxLength(50);
@@ -90,6 +91,7 @@ public class PosDbContext : DbContext
             entity.Property(e => e.UnitPrice).HasPrecision(10, 2);
             entity.Property(e => e.PurchasePrice).HasPrecision(10, 2);
             entity.Property(e => e.SellingPrice).HasPrecision(10, 2);
+            entity.Property(e => e.RatePerKilogram).HasPrecision(10, 2);
             
             // Convert enums to integers for SQLite
             entity.Property(e => e.SyncStatus).HasConversion<int>();
@@ -120,6 +122,9 @@ public class PosDbContext : DbContext
             entity.HasIndex(e => e.ProductId);
             
             entity.Property(e => e.UnitPrice).HasPrecision(10, 2);
+            entity.Property(e => e.TotalPrice).HasPrecision(10, 2);
+            entity.Property(e => e.Weight).HasPrecision(10, 3);
+            entity.Property(e => e.RatePerKilogram).HasPrecision(10, 2);
             entity.Property(e => e.BatchNumber).HasMaxLength(50);
             
             // Foreign key relationships with proper constraints
