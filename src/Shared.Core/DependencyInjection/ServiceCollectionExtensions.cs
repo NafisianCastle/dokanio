@@ -30,6 +30,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
         services.AddScoped<IDiscountService, DiscountService>();
         services.AddScoped<IMembershipService, MembershipService>();
+        services.AddScoped<IConfigurationService, ConfigurationService>();
         
         // Register repositories
         services.AddScoped<IProductRepository, ProductRepository>();
@@ -41,6 +42,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserSessionRepository, UserSessionRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IDiscountRepository, DiscountRepository>();
+        services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
         
         // Register transaction logging service for offline-first persistence
         services.AddScoped<ITransactionLogService, TransactionLogService>();
@@ -135,9 +137,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStockRepository, StockRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IDiscountRepository, DiscountRepository>();
+        services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
 
         // Register additional services for testing
         services.AddScoped<IDiscountManagementService, DiscountManagementService>();
+        services.AddScoped<IConfigurationService, ConfigurationService>();
 
         return services;
     }

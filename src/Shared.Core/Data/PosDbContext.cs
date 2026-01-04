@@ -24,6 +24,7 @@ public class PosDbContext : DbContext
     public DbSet<AuditLog> AuditLogs { get; set; } = null!;
     public DbSet<UserSession> UserSessions { get; set; } = null!;
     public DbSet<SystemLogEntry> SystemLogs { get; set; } = null!;
+    public DbSet<Configuration> Configurations { get; set; } = null!;
 
     public PosDbContext(DbContextOptions<PosDbContext> options) : base(options)
     {
@@ -62,6 +63,7 @@ public class PosDbContext : DbContext
         ConfigureSoftDelete<Customer>(modelBuilder);
         ConfigureSoftDelete<Discount>(modelBuilder);
         ConfigureSoftDelete<User>(modelBuilder);
+        ConfigureSoftDelete<Configuration>(modelBuilder);
 
         // TransactionLogEntry configuration (not soft deletable)
         modelBuilder.Entity<TransactionLogEntry>(entity =>
@@ -344,6 +346,26 @@ public class PosDbContext : DbContext
             // Convert enums to integers for SQLite
             entity.Property(e => e.Level).HasConversion<int>();
             entity.Property(e => e.Category).HasConversion<int>();
+        });
+
+        // Configuration configuration
+        modelBuilder.Entity<Configuration>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Key).IsUnique();
+            entity.HasIndex(e => e.Type);
+            entity.HasIndex(e => e.IsSystemLevel);
+            entity.HasIndex(e => e.UpdatedAt);
+            entity.HasIndex(e => e.SyncStatus);
+            entity.HasIndex(e => e.DeviceId);
+            
+            entity.Property(e => e.Key).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Value).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(500);
+            
+            // Convert enums to integers for SQLite
+            entity.Property(e => e.Type).HasConversion<int>();
+            entity.Property(e => e.SyncStatus).HasConversion<int>();
         });
     }
 
