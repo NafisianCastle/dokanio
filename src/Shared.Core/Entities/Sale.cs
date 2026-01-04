@@ -43,4 +43,5 @@ public class Sale : ISoftDeletable
     
     // Navigation properties
     public virtual ICollection<SaleItem> Items { get; set; } = new List<SaleItem>();
+    public virtual ICollection<SaleDiscount> AppliedDiscounts { get; set; } = new List<SaleDiscount>();
 }

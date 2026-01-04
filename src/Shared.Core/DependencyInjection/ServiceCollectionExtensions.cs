@@ -28,6 +28,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
+        services.AddScoped<IDiscountService, DiscountService>();
+        services.AddScoped<IMembershipService, MembershipService>();
         
         // Register repositories
         services.AddScoped<IProductRepository, ProductRepository>();
@@ -37,6 +39,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IUserSessionRepository, UserSessionRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<IDiscountRepository, DiscountRepository>();
         
         // Register transaction logging service for offline-first persistence
         services.AddScoped<ITransactionLogService, TransactionLogService>();
@@ -116,14 +120,24 @@ public static class ServiceCollectionExtensions
             options.EnableSensitiveDataLogging(true);
         });
 
-        // Register test repository implementations
-        services.AddScoped<IProductRepository, InMemoryProductRepository>();
-
         // Register business logic services
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
+        services.AddScoped<IDiscountService, DiscountService>();
+        services.AddScoped<IMembershipService, MembershipService>();
+        
+        // Register repositories
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<ISaleRepository, SaleRepository>();
+        services.AddScoped<ISaleItemRepository, SaleItemRepository>();
+        services.AddScoped<IStockRepository, StockRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<IDiscountRepository, DiscountRepository>();
+
+        // Register additional services for testing
+        services.AddScoped<IDiscountManagementService, DiscountManagementService>();
 
         return services;
     }
