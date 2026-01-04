@@ -19,6 +19,17 @@ public class SaleItem : ISoftDeletable
     [MaxLength(50)]
     public string? BatchNumber { get; set; }
     
+    // Weight-based pricing properties
+    [Range(0, double.MaxValue)]
+    public decimal? Weight { get; set; }
+    
+    [Range(0, double.MaxValue)]
+    public decimal? RatePerKilogram { get; set; }
+    
+    // Calculated total price (quantity * unitPrice for regular items, weight * ratePerKg for weight-based)
+    [Range(0, double.MaxValue)]
+    public decimal TotalPrice { get; set; }
+    
     // Soft delete properties
     public bool IsDeleted { get; set; } = false;
     public DateTime? DeletedAt { get; set; }
