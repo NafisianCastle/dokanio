@@ -38,6 +38,13 @@ public interface ISyncApiClient
     /// <param name="apiKey">The API key for authentication</param>
     /// <returns>Result of the authentication operation</returns>
     Task<SyncApiResult<AuthenticationResponse>> AuthenticateAsync(Guid deviceId, string apiKey);
+    
+    /// <summary>
+    /// Uploads business metadata to the server
+    /// </summary>
+    /// <param name="request">The business metadata sync request</param>
+    /// <returns>Result of the metadata upload operation</returns>
+    Task<SyncApiResult> UploadBusinessMetadataAsync(BusinessMetadataSyncRequest request);
 }
 
 /// <summary>
