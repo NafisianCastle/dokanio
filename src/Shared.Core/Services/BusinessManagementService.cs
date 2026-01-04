@@ -330,7 +330,10 @@ public class BusinessManagementService : IBusinessManagementService
 
         try
         {
-            var config = JsonSerializer.Deserialize<BusinessConfiguration>(business.Configuration);
+            var config = JsonSerializer.Deserialize<BusinessConfiguration>(
+                business.Configuration,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
             return config ?? await GetDefaultBusinessConfigurationAsync(business.Type);
         }
         catch (JsonException)
