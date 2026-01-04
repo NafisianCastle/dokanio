@@ -25,6 +25,7 @@ public class PosDbContext : DbContext
     public DbSet<UserSession> UserSessions { get; set; } = null!;
     public DbSet<SystemLogEntry> SystemLogs { get; set; } = null!;
     public DbSet<Configuration> Configurations { get; set; } = null!;
+    public DbSet<License> Licenses { get; set; } = null!;
 
     public PosDbContext(DbContextOptions<PosDbContext> options) : base(options)
     {
@@ -64,6 +65,7 @@ public class PosDbContext : DbContext
         ConfigureSoftDelete<Discount>(modelBuilder);
         ConfigureSoftDelete<User>(modelBuilder);
         ConfigureSoftDelete<Configuration>(modelBuilder);
+        ConfigureSoftDelete<License>(modelBuilder);
 
         // TransactionLogEntry configuration (not soft deletable)
         modelBuilder.Entity<TransactionLogEntry>(entity =>
@@ -366,6 +368,32 @@ public class PosDbContext : DbContext
             // Convert enums to integers for SQLite
             entity.Property(e => e.Type).HasConversion<int>();
             entity.Property(e => e.SyncStatus).HasConversion<int>();
+        });
+
+        // License configuration (not soft deletable)
+        modelBuilder.Entity<License>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.LicenseKey).IsUnique();
+            entity.HasIndex(e => e.DeviceId);
+            entity.HasIndex(e => e.CustomerEmail);
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.ExpiryDate);
+            entity.HasIndex(e => e.Type);
+            
+            entity.Property(e => e.LicenseKey).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.CustomerName).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.CustomerEmail).IsRequired().HasMaxLength(255);
+            
+            // Convert enums to integers for SQLite
+            entity.Property(e => e.Type).HasConversion<int>();
+            entity.Property(e => e.Status).HasConversion<int>();
+            
+            // Convert Features list to JSON string for SQLite
+            entity.Property(e => e.Features)
+                  .HasConversion(
+                      v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                      v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>());
         });
     }
 
