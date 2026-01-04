@@ -77,7 +77,7 @@ public class SaleService : ISaleService
             throw new ArgumentException("Sale not found", nameof(saleId));
         }
 
-        var totalPrice = quantity * unitPrice;
+        var totalPrice = Math.Round(quantity * unitPrice, 2, MidpointRounding.AwayFromZero);
 
         var saleItem = new SaleItem
         {
