@@ -21,6 +21,13 @@ public interface ISaleRepository : IRepository<Sale>
     Task<decimal> GetDailySalesAsync(DateTime date);
     
     /// <summary>
+    /// Gets the count of sales for a specific date
+    /// </summary>
+    /// <param name="date">Date to count sales for</param>
+    /// <returns>Number of sales for the date</returns>
+    Task<int> GetDailySalesCountAsync(DateTime date);
+    
+    /// <summary>
     /// Gets all sales within a date range
     /// </summary>
     /// <param name="from">Start date (inclusive)</param>
