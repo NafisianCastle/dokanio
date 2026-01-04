@@ -117,6 +117,41 @@ public class AdvancedFeaturesIntegrationTests : IDisposable
 
         // Ensure database is created
         _dbContext.Database.EnsureCreated();
+        
+        // Set up a valid license for all tests
+        SetupValidLicenseAsync().Wait();
+    }
+
+    private async Task SetupValidLicenseAsync()
+    {
+        var currentUserService = _serviceProvider.GetRequiredService<ICurrentUserService>();
+        var deviceId = currentUserService.GetDeviceId();
+        
+        // Create a valid active license
+        var license = new License
+        {
+            Id = Guid.NewGuid(),
+            LicenseKey = "TEST-LICENSE-KEY-12345",
+            Type = LicenseType.Professional,
+            IssueDate = DateTime.UtcNow.AddDays(-30),
+            ExpiryDate = DateTime.UtcNow.AddYears(1),
+            Status = LicenseStatus.Active,
+            CustomerName = "Test Customer",
+            CustomerEmail = "test@example.com",
+            MaxDevices = 5,
+            Features = new List<string> 
+            { 
+                "WeightBasedPricing", 
+                "MembershipSystem", 
+                "DiscountSystem", 
+                "AdvancedReporting" 
+            },
+            ActivationDate = DateTime.UtcNow.AddDays(-30),
+            DeviceId = deviceId
+        };
+
+        await _licenseRepository.AddAsync(license);
+        await _licenseRepository.SaveChangesAsync();
     }
 
     [Fact]

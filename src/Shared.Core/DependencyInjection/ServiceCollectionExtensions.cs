@@ -34,6 +34,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDiscountService, DiscountService>();
         services.AddScoped<IMembershipService, MembershipService>();
         services.AddScoped<IConfigurationService, ConfigurationService>();
+        services.AddScoped<ILicenseService, LicenseService>();
+        services.AddScoped<IIntegratedPosService, IntegratedPosService>();
+        services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
         
         // Register repositories
         services.AddScoped<IProductRepository, ProductRepository>();
@@ -46,6 +49,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IDiscountRepository, DiscountRepository>();
         services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
+        services.AddScoped<ILicenseRepository, LicenseRepository>();
         
         // Register transaction logging service for offline-first persistence
         services.AddScoped<ITransactionLogService, TransactionLogService>();
@@ -150,6 +154,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDiscountManagementService, DiscountManagementService>();
         services.AddScoped<IConfigurationService, ConfigurationService>();
         services.AddScoped<ILicenseService, LicenseService>();
+        services.AddScoped<IIntegratedPosService, IntegratedPosService>();
+        services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
+        services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
         
         // Add mock current user service for testing
         services.AddSingleton<ICurrentUserService>(provider => 
