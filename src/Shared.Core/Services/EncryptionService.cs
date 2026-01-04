@@ -71,8 +71,7 @@ public class EncryptionService : IEncryptionService
         if (string.IsNullOrEmpty(password) || string.IsNullOrEmpty(salt))
             throw new ArgumentException("Password and salt cannot be null or empty");
 
-        using var pbkdf2 = new Rfc2898DeriveBytes(password, Convert.FromBase64String(salt), 10000, HashAlgorithmName.SHA256);
-        var hash = pbkdf2.GetBytes(32);
+        var hash = Rfc2898DeriveBytes.Pbkdf2(password, Convert.FromBase64String(salt), 10000, HashAlgorithmName.SHA256, 32);
         return Convert.ToBase64String(hash);
     }
 
