@@ -135,21 +135,33 @@ public class MembershipService : IMembershipService
             return;
         }
 
-        customer.TotalSpent += sale.TotalAmount;
-        customer.VisitCount++;
-        customer.LastVisit = DateTime.UtcNow;
-
-        // Check if tier should be upgraded
-        var newTier = await CalculateMembershipTierAsync(customer);
-        if (newTier != customer.Tier)
+        // Get the customer from the database to ensure we have the latest data
+        var existingCustomer = await _customerRepository.GetByIdAsync(customer.Id);
+        if (existingCustomer == null)
         {
-            _logger.LogInformation("Customer {MembershipNumber} tier upgraded from {OldTier} to {NewTier}",
-                customer.MembershipNumber, customer.Tier, newTier);
-            customer.Tier = newTier;
+            _logger.LogWarning("Customer not found: {CustomerId}", customer.Id);
+            return;
         }
 
-        await _customerRepository.UpdateAsync(customer);
-        await _customerRepository.SaveChangesAsync();
+        // Update the customer properties
+        existingCustomer.TotalSpent += sale.TotalAmount;
+        existingCustomer.VisitCount++;
+        existingCustomer.LastVisit = DateTime.UtcNow;
+
+        // Check if tier should be upgraded
+        var newTier = await CalculateMembershipTierAsync(existingCustomer);
+        if (newTier != existingCustomer.Tier)
+        {
+            _logger.LogInformation("Customer {MembershipNumber} tier upgraded from {OldTier} to {NewTier}",
+                existingCustomer.MembershipNumber, existingCustomer.Tier, newTier);
+            existingCustomer.Tier = newTier;
+        }
+
+        // Force the repository to treat this as an update
+        await _customerRepository.UpdateAsync(existingCustomer);
+        var result = await _customerRepository.SaveChangesAsync();
+        
+        _logger.LogDebug("Customer update saved {AffectedRows} rows for customer {CustomerId}", result, customer.Id);
     }
 
     public async Task<MembershipTier> CalculateMembershipTierAsync(Customer customer)

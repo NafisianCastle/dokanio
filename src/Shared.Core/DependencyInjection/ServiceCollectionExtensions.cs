@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
+using Moq;
 using Shared.Core.Data;
 using Shared.Core.DTOs;
+using Shared.Core.Entities;
+using Shared.Core.Enums;
 using Shared.Core.Repositories;
 using Shared.Core.Services;
 using Shared.Core.Tests.TestImplementations;
@@ -115,6 +118,9 @@ public static class ServiceCollectionExtensions
     
     public static IServiceCollection AddSharedCoreInMemory(this IServiceCollection services)
     {
+        // Add logging
+        services.AddLogging();
+        
         // Add Entity Framework Core with In-Memory database for testing
         services.AddDbContext<PosDbContext>(options =>
         {
@@ -138,10 +144,31 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IDiscountRepository, DiscountRepository>();
         services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
+        services.AddScoped<ILicenseRepository, LicenseRepository>();
 
         // Register additional services for testing
         services.AddScoped<IDiscountManagementService, DiscountManagementService>();
         services.AddScoped<IConfigurationService, ConfigurationService>();
+        services.AddScoped<ILicenseService, LicenseService>();
+        
+        // Add mock current user service for testing
+        services.AddSingleton<ICurrentUserService>(provider => 
+        {
+            var mockService = new Mock<ICurrentUserService>();
+            var deviceId = Guid.NewGuid();
+            var user = new User 
+            { 
+                Id = Guid.NewGuid(), 
+                DeviceId = deviceId,
+                Username = "TestUser",
+                Role = UserRole.Administrator
+            };
+            mockService.Setup(x => x.CurrentUser).Returns(user);
+            mockService.Setup(x => x.GetDeviceId()).Returns(deviceId);
+            mockService.Setup(x => x.GetUserId()).Returns(user.Id);
+            mockService.Setup(x => x.GetUsername()).Returns(user.Username);
+            return mockService.Object;
+        });
 
         return services;
     }
