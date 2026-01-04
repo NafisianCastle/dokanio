@@ -67,10 +67,10 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    protected override void OnExit(ControlledApplicationLifetimeExitEventArgs e)
+    public override void OnExit()
     {
         _serviceProvider?.Dispose();
-        base.OnExit(e);
+        base.OnExit();
     }
 }
 
