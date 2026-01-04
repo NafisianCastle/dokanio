@@ -13,7 +13,7 @@ namespace Server.Data;
 public class ServerDbContext : PosDbContext
 {
     public DbSet<Device> Devices { get; set; } = null!;
-    public DbSet<AuditLog> AuditLogs { get; set; } = null!;
+    public new DbSet<Server.Models.AuditLog> AuditLogs { get; set; } = null!;
 
     public ServerDbContext(DbContextOptions<ServerDbContext> options) : base(ConvertOptions(options))
     {
@@ -59,7 +59,7 @@ public class ServerDbContext : PosDbContext
         });
 
         // AuditLog configuration
-        modelBuilder.Entity<AuditLog>(entity =>
+        modelBuilder.Entity<Server.Models.AuditLog>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.Operation);
@@ -119,10 +119,10 @@ public class ServerDbContext : PosDbContext
             .Where(e => e.State == EntityState.Added || 
                        e.State == EntityState.Modified || 
                        e.State == EntityState.Deleted)
-            .Where(e => e.Entity is not AuditLog) // Don't audit the audit logs themselves
+            .Where(e => e.Entity is not Server.Models.AuditLog) // Don't audit the audit logs themselves
             .ToList();
 
-        var auditLogs = new List<AuditLog>();
+        var auditLogs = new List<Server.Models.AuditLog>();
 
         foreach (var entry in entries)
         {
@@ -138,7 +138,7 @@ public class ServerDbContext : PosDbContext
             var entityId = GetEntityId(entry.Entity);
             var deviceId = GetDeviceId(entry.Entity);
 
-            var auditLog = new AuditLog
+            var auditLog = new Server.Models.AuditLog
             {
                 Operation = operation,
                 EntityType = entityType,

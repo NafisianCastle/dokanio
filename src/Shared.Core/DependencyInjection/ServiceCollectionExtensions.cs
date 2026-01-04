@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
+using Moq;
 using Shared.Core.Data;
 using Shared.Core.DTOs;
+using Shared.Core.Entities;
+using Shared.Core.Enums;
 using Shared.Core.Repositories;
 using Shared.Core.Services;
 using Shared.Core.Tests.TestImplementations;
@@ -28,6 +31,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
+        services.AddScoped<IDiscountService, DiscountService>();
+        services.AddScoped<IMembershipService, MembershipService>();
+        services.AddScoped<IConfigurationService, ConfigurationService>();
+        services.AddScoped<ILicenseService, LicenseService>();
+        services.AddScoped<IIntegratedPosService, IntegratedPosService>();
+        services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
         
         // Register repositories
         services.AddScoped<IProductRepository, ProductRepository>();
@@ -37,6 +46,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IUserSessionRepository, UserSessionRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<IDiscountRepository, DiscountRepository>();
+        services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
+        services.AddScoped<ILicenseRepository, LicenseRepository>();
         
         // Register transaction logging service for offline-first persistence
         services.AddScoped<ITransactionLogService, TransactionLogService>();
@@ -109,6 +122,9 @@ public static class ServiceCollectionExtensions
     
     public static IServiceCollection AddSharedCoreInMemory(this IServiceCollection services)
     {
+        // Add logging
+        services.AddLogging();
+        
         // Add Entity Framework Core with In-Memory database for testing
         services.AddDbContext<PosDbContext>(options =>
         {
@@ -116,14 +132,50 @@ public static class ServiceCollectionExtensions
             options.EnableSensitiveDataLogging(true);
         });
 
-        // Register test repository implementations
-        services.AddScoped<IProductRepository, InMemoryProductRepository>();
-
         // Register business logic services
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
+        services.AddScoped<IDiscountService, DiscountService>();
+        services.AddScoped<IMembershipService, MembershipService>();
+        
+        // Register repositories
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<ISaleRepository, SaleRepository>();
+        services.AddScoped<ISaleItemRepository, SaleItemRepository>();
+        services.AddScoped<IStockRepository, StockRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<IDiscountRepository, DiscountRepository>();
+        services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
+        services.AddScoped<ILicenseRepository, LicenseRepository>();
+
+        // Register additional services for testing
+        services.AddScoped<IDiscountManagementService, DiscountManagementService>();
+        services.AddScoped<IConfigurationService, ConfigurationService>();
+        services.AddScoped<ILicenseService, LicenseService>();
+        services.AddScoped<IIntegratedPosService, IntegratedPosService>();
+        services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
+        services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
+        
+        // Add mock current user service for testing
+        services.AddSingleton<ICurrentUserService>(provider => 
+        {
+            var mockService = new Mock<ICurrentUserService>();
+            var deviceId = Guid.NewGuid();
+            var user = new User 
+            { 
+                Id = Guid.NewGuid(), 
+                DeviceId = deviceId,
+                Username = "TestUser",
+                Role = UserRole.Administrator
+            };
+            mockService.Setup(x => x.CurrentUser).Returns(user);
+            mockService.Setup(x => x.GetDeviceId()).Returns(deviceId);
+            mockService.Setup(x => x.GetUserId()).Returns(user.Id);
+            mockService.Setup(x => x.GetUsername()).Returns(user.Username);
+            return mockService.Object;
+        });
 
         return services;
     }

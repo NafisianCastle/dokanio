@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Desktop.ViewModels;
 
-public partial class BaseViewModel : ObservableObject
+public partial class BaseViewModel : ObservableValidator
 {
     [ObservableProperty]
     private bool isBusy;

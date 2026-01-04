@@ -62,6 +62,7 @@ public class StockDto
     public Guid ProductId { get; set; }
     public int Quantity { get; set; }
     public DateTime LastUpdatedAt { get; set; }
+    public Guid DeviceId { get; set; }
 }
 
 public class StockUpdateDto

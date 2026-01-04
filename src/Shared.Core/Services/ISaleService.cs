@@ -1,17 +1,22 @@
 using Shared.Core.Entities;
 using Shared.Core.Enums;
+using Shared.Core.DTOs;
 
 namespace Shared.Core.Services;
 
 public interface ISaleService
 {
     Task<Sale> CreateSaleAsync(string invoiceNumber, Guid deviceId);
+    Task<Sale> CreateSaleWithCustomerAsync(string invoiceNumber, Guid deviceId, string? membershipNumber = null);
     Task<Sale> AddItemToSaleAsync(Guid saleId, Guid productId, int quantity, decimal unitPrice, string? batchNumber = null);
     Task<Sale> AddWeightBasedItemToSaleAsync(Guid saleId, Guid productId, decimal weight, string? batchNumber = null);
     Task<Sale> CompleteSaleAsync(Guid saleId, PaymentMethod paymentMethod);
     Task<Sale> CompleteSaleAsync(Sale sale);
+    Task<Sale> CompleteSaleAsync(Sale sale, PaymentMethod paymentMethod);
     Task<decimal> CalculateSaleTotalAsync(Guid saleId);
     Task<decimal> CalculateSaleTotalAsync(IEnumerable<SaleItem> saleItems);
+    Task<SaleCalculationResult> CalculateFullSaleTotalAsync(Guid saleId);
+    Task<SaleCalculationResult> CalculateFullSaleTotalAsync(Sale sale);
     Task<bool> ValidateProductForSaleAsync(Guid productId);
     
     // Additional methods for desktop application

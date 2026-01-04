@@ -262,7 +262,7 @@ public class ReceiptService : IReceiptService
             }
             else
             {
-                var itemLine = FormatItemLine(productName, item.Quantity, item.UnitPrice, item.TotalPrice);
+                var itemLine = FormatItemLine(productName, item.Quantity, item.UnitPrice);
     
                 lines.Add(new ReceiptLine
                 {

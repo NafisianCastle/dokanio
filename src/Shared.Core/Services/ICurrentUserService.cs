@@ -1,4 +1,5 @@
 using Shared.Core.Entities;
+using Shared.Core.Enums;
 
 namespace Shared.Core.Services;
 
@@ -50,6 +51,30 @@ public interface ICurrentUserService
     /// Event fired when user authentication state changes
     /// </summary>
     event EventHandler<AuthenticationStateChangedEventArgs>? AuthenticationStateChanged;
+    
+    /// <summary>
+    /// Gets the current device ID
+    /// </summary>
+    /// <returns>Device ID</returns>
+    Guid GetDeviceId();
+    
+    /// <summary>
+    /// Gets the current user ID
+    /// </summary>
+    /// <returns>User ID or null if not authenticated</returns>
+    Guid? GetUserId();
+    
+    /// <summary>
+    /// Gets the current username
+    /// </summary>
+    /// <returns>Username or null if not authenticated</returns>
+    string? GetUsername();
+    
+    /// <summary>
+    /// Gets the current user role
+    /// </summary>
+    /// <returns>User role</returns>
+    UserRole GetUserRole();
 }
 
 /// <summary>

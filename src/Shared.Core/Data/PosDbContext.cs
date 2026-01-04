@@ -17,11 +17,15 @@ public class PosDbContext : DbContext
     public DbSet<SaleItem> SaleItems { get; set; } = null!;
     public DbSet<Stock> Stock { get; set; } = null!;
     public DbSet<Customer> Customers { get; set; } = null!;
+    public DbSet<Discount> Discounts { get; set; } = null!;
+    public DbSet<SaleDiscount> SaleDiscounts { get; set; } = null!;
     public DbSet<TransactionLogEntry> TransactionLogs { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<AuditLog> AuditLogs { get; set; } = null!;
     public DbSet<UserSession> UserSessions { get; set; } = null!;
     public DbSet<SystemLogEntry> SystemLogs { get; set; } = null!;
+    public DbSet<Configuration> Configurations { get; set; } = null!;
+    public DbSet<License> Licenses { get; set; } = null!;
 
     public PosDbContext(DbContextOptions<PosDbContext> options) : base(options)
     {
@@ -58,7 +62,10 @@ public class PosDbContext : DbContext
         ConfigureSoftDelete<SaleItem>(modelBuilder);
         ConfigureSoftDelete<Stock>(modelBuilder);
         ConfigureSoftDelete<Customer>(modelBuilder);
+        ConfigureSoftDelete<Discount>(modelBuilder);
         ConfigureSoftDelete<User>(modelBuilder);
+        ConfigureSoftDelete<Configuration>(modelBuilder);
+        ConfigureSoftDelete<License>(modelBuilder);
 
         // TransactionLogEntry configuration (not soft deletable)
         modelBuilder.Entity<TransactionLogEntry>(entity =>
@@ -214,6 +221,64 @@ public class PosDbContext : DbContext
             entity.Property(e => e.SyncStatus).HasConversion<int>();
         });
 
+        // Discount configuration
+        modelBuilder.Entity<Discount>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Name);
+            entity.HasIndex(e => e.Type);
+            entity.HasIndex(e => e.Scope);
+            entity.HasIndex(e => e.ProductId);
+            entity.HasIndex(e => e.Category);
+            entity.HasIndex(e => e.RequiredMembershipTier);
+            entity.HasIndex(e => e.StartDate);
+            entity.HasIndex(e => e.EndDate);
+            entity.HasIndex(e => e.IsActive);
+            entity.HasIndex(e => e.SyncStatus);
+            entity.HasIndex(e => e.DeviceId);
+            
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Value).HasPrecision(10, 2);
+            entity.Property(e => e.Category).HasMaxLength(100);
+            entity.Property(e => e.MinimumAmount).HasPrecision(10, 2);
+            
+            // Convert enums to integers for SQLite
+            entity.Property(e => e.Type).HasConversion<int>();
+            entity.Property(e => e.Scope).HasConversion<int>();
+            entity.Property(e => e.RequiredMembershipTier).HasConversion<int>();
+            entity.Property(e => e.SyncStatus).HasConversion<int>();
+            
+            // Foreign key relationship with Product
+            entity.HasOne(e => e.Product)
+                  .WithMany()
+                  .HasForeignKey(e => e.ProductId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // SaleDiscount configuration
+        modelBuilder.Entity<SaleDiscount>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.SaleId);
+            entity.HasIndex(e => e.DiscountId);
+            entity.HasIndex(e => e.AppliedAt);
+            
+            entity.Property(e => e.DiscountAmount).HasPrecision(10, 2);
+            entity.Property(e => e.DiscountReason).IsRequired().HasMaxLength(200);
+            
+            // Foreign key relationships
+            entity.HasOne(e => e.Sale)
+                  .WithMany(s => s.AppliedDiscounts)
+                  .HasForeignKey(e => e.SaleId)
+                  .OnDelete(DeleteBehavior.Cascade);
+                  
+            entity.HasOne(e => e.Discount)
+                  .WithMany(d => d.SaleDiscounts)
+                  .HasForeignKey(e => e.DiscountId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
         // AuditLog configuration
         modelBuilder.Entity<AuditLog>(entity =>
         {
@@ -283,6 +348,52 @@ public class PosDbContext : DbContext
             // Convert enums to integers for SQLite
             entity.Property(e => e.Level).HasConversion<int>();
             entity.Property(e => e.Category).HasConversion<int>();
+        });
+
+        // Configuration configuration
+        modelBuilder.Entity<Configuration>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Key).IsUnique();
+            entity.HasIndex(e => e.Type);
+            entity.HasIndex(e => e.IsSystemLevel);
+            entity.HasIndex(e => e.UpdatedAt);
+            entity.HasIndex(e => e.SyncStatus);
+            entity.HasIndex(e => e.DeviceId);
+            
+            entity.Property(e => e.Key).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Value).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(500);
+            
+            // Convert enums to integers for SQLite
+            entity.Property(e => e.Type).HasConversion<int>();
+            entity.Property(e => e.SyncStatus).HasConversion<int>();
+        });
+
+        // License configuration (not soft deletable)
+        modelBuilder.Entity<License>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.LicenseKey).IsUnique();
+            entity.HasIndex(e => e.DeviceId);
+            entity.HasIndex(e => e.CustomerEmail);
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.ExpiryDate);
+            entity.HasIndex(e => e.Type);
+            
+            entity.Property(e => e.LicenseKey).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.CustomerName).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.CustomerEmail).IsRequired().HasMaxLength(255);
+            
+            // Convert enums to integers for SQLite
+            entity.Property(e => e.Type).HasConversion<int>();
+            entity.Property(e => e.Status).HasConversion<int>();
+            
+            // Convert Features list to JSON string for SQLite
+            entity.Property(e => e.Features)
+                  .HasConversion(
+                      v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                      v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>());
         });
     }
 
