@@ -12,6 +12,8 @@ public class PosDbContext : DbContext
 {
     private readonly ILogger<PosDbContext>? _logger;
 
+    public DbSet<Business> Businesses { get; set; } = null!;
+    public DbSet<Shop> Shops { get; set; } = null!;
     public DbSet<Product> Products { get; set; } = null!;
     public DbSet<Sale> Sales { get; set; } = null!;
     public DbSet<SaleItem> SaleItems { get; set; } = null!;
@@ -57,6 +59,8 @@ public class PosDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         // Configure soft delete for all entities
+        ConfigureSoftDelete<Business>(modelBuilder);
+        ConfigureSoftDelete<Shop>(modelBuilder);
         ConfigureSoftDelete<Product>(modelBuilder);
         ConfigureSoftDelete<Sale>(modelBuilder);
         ConfigureSoftDelete<SaleItem>(modelBuilder);
@@ -82,10 +86,65 @@ public class PosDbContext : DbContext
             entity.Property(e => e.EntityData).IsRequired();
         });
 
+        // Business configuration
+        modelBuilder.Entity<Business>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Name);
+            entity.HasIndex(e => e.Type);
+            entity.HasIndex(e => e.OwnerId);
+            entity.HasIndex(e => e.IsActive);
+            entity.HasIndex(e => e.SyncStatus);
+            entity.HasIndex(e => e.DeviceId);
+            
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Address).HasMaxLength(200);
+            entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.Email).HasMaxLength(255);
+            entity.Property(e => e.TaxId).HasMaxLength(50);
+            
+            // Convert enums to integers for SQLite
+            entity.Property(e => e.Type).HasConversion<int>();
+            entity.Property(e => e.SyncStatus).HasConversion<int>();
+            
+            // Foreign key relationship with Owner
+            entity.HasOne(e => e.Owner)
+                  .WithMany(u => u.OwnedBusinesses)
+                  .HasForeignKey(e => e.OwnerId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Shop configuration
+        modelBuilder.Entity<Shop>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.BusinessId);
+            entity.HasIndex(e => e.Name);
+            entity.HasIndex(e => e.IsActive);
+            entity.HasIndex(e => e.SyncStatus);
+            entity.HasIndex(e => e.DeviceId);
+            
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Address).HasMaxLength(500);
+            entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.Email).HasMaxLength(255);
+            
+            // Convert enums to integers for SQLite
+            entity.Property(e => e.SyncStatus).HasConversion<int>();
+            
+            // Foreign key relationship with Business
+            entity.HasOne(e => e.Business)
+                  .WithMany(b => b.Shops)
+                  .HasForeignKey(e => e.BusinessId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
         // Product configuration
         modelBuilder.Entity<Product>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.ShopId);
             entity.HasIndex(e => e.Barcode).IsUnique();
             entity.HasIndex(e => e.Category);
             entity.HasIndex(e => e.ExpiryDate);
@@ -104,12 +163,20 @@ public class PosDbContext : DbContext
             
             // Convert enums to integers for SQLite
             entity.Property(e => e.SyncStatus).HasConversion<int>();
+            
+            // Foreign key relationship with Shop
+            entity.HasOne(e => e.Shop)
+                  .WithMany(s => s.Products)
+                  .HasForeignKey(e => e.ShopId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Sale configuration
         modelBuilder.Entity<Sale>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.ShopId);
+            entity.HasIndex(e => e.UserId);
             entity.HasIndex(e => e.InvoiceNumber).IsUnique();
             entity.HasIndex(e => e.CreatedAt);
             entity.HasIndex(e => e.SyncStatus);
@@ -125,6 +192,18 @@ public class PosDbContext : DbContext
             // Convert enums to integers for SQLite
             entity.Property(e => e.PaymentMethod).HasConversion<int>();
             entity.Property(e => e.SyncStatus).HasConversion<int>();
+            
+            // Foreign key relationship with Shop
+            entity.HasOne(e => e.Shop)
+                  .WithMany(s => s.Sales)
+                  .HasForeignKey(e => e.ShopId)
+                  .OnDelete(DeleteBehavior.Cascade);
+                  
+            // Foreign key relationship with User
+            entity.HasOne(e => e.User)
+                  .WithMany(u => u.Sales)
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.Restrict);
             
             // Foreign key relationship with Customer
             entity.HasOne(e => e.Customer)
@@ -162,6 +241,7 @@ public class PosDbContext : DbContext
         modelBuilder.Entity<Stock>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.ShopId);
             entity.HasIndex(e => e.ProductId);
             entity.HasIndex(e => e.SyncStatus);
             entity.HasIndex(e => e.DeviceId);
@@ -169,7 +249,13 @@ public class PosDbContext : DbContext
             // Convert enums to integers for SQLite
             entity.Property(e => e.SyncStatus).HasConversion<int>();
             
-            // Foreign key relationship
+            // Foreign key relationship with Shop
+            entity.HasOne(e => e.Shop)
+                  .WithMany(s => s.Inventory)
+                  .HasForeignKey(e => e.ShopId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            
+            // Foreign key relationship with Product
             entity.HasOne(e => e.Product)
                   .WithMany(p => p.StockEntries)
                   .HasForeignKey(e => e.ProductId)
@@ -180,6 +266,8 @@ public class PosDbContext : DbContext
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.BusinessId);
+            entity.HasIndex(e => e.ShopId);
             entity.HasIndex(e => e.Username).IsUnique();
             entity.HasIndex(e => e.Email).IsUnique();
             entity.HasIndex(e => e.Role);
@@ -196,6 +284,18 @@ public class PosDbContext : DbContext
             // Convert enums to integers for SQLite
             entity.Property(e => e.Role).HasConversion<int>();
             entity.Property(e => e.SyncStatus).HasConversion<int>();
+            
+            // Foreign key relationship with Business
+            entity.HasOne(e => e.Business)
+                  .WithMany(b => b.Users)
+                  .HasForeignKey(e => e.BusinessId)
+                  .OnDelete(DeleteBehavior.Cascade);
+                  
+            // Foreign key relationship with Shop (nullable)
+            entity.HasOne(e => e.Shop)
+                  .WithMany(s => s.Users)
+                  .HasForeignKey(e => e.ShopId)
+                  .OnDelete(DeleteBehavior.SetNull);
         });
 
         // Customer configuration
