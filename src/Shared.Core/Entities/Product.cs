@@ -44,6 +44,15 @@ public class Product : ISoftDeletable
     [Range(0, double.MaxValue)]
     public decimal? SellingPrice { get; set; }
     
+    // Weight-based pricing properties
+    public bool IsWeightBased { get; set; } = false;
+    
+    [Range(0, double.MaxValue)]
+    public decimal? RatePerKilogram { get; set; }
+    
+    [Range(0, 6)]
+    public int WeightPrecision { get; set; } = 3; // Decimal places for weight (default 3 for grams precision)
+    
     // Soft delete properties
     public bool IsDeleted { get; set; } = false;
     public DateTime? DeletedAt { get; set; }

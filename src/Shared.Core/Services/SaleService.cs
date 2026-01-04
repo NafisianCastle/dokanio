@@ -10,17 +10,20 @@ public class SaleService : ISaleService
     private readonly ISaleItemRepository _saleItemRepository;
     private readonly IProductService _productService;
     private readonly IInventoryService _inventoryService;
+    private readonly IWeightBasedPricingService _weightBasedPricingService;
 
     public SaleService(
         ISaleRepository saleRepository,
         ISaleItemRepository saleItemRepository,
         IProductService productService,
-        IInventoryService inventoryService)
+        IInventoryService inventoryService,
+        IWeightBasedPricingService weightBasedPricingService)
     {
         _saleRepository = saleRepository;
         _saleItemRepository = saleItemRepository;
         _productService = productService;
         _inventoryService = inventoryService;
+        _weightBasedPricingService = weightBasedPricingService;
     }
 
     public async Task<Sale> CreateSaleAsync(string invoiceNumber, Guid deviceId)
@@ -50,6 +53,18 @@ public class SaleService : ISaleService
             throw new InvalidOperationException("Product is not valid for sale (may be expired or inactive)");
         }
 
+        var product = await _productService.GetProductByIdAsync(productId);
+        if (product == null)
+        {
+            throw new ArgumentException("Product not found", nameof(productId));
+        }
+
+        // Check if this is a weight-based product - should use AddWeightBasedItemToSaleAsync instead
+        if (product.IsWeightBased)
+        {
+            throw new InvalidOperationException("Weight-based products must be added using AddWeightBasedItemToSaleAsync");
+        }
+
         // Check if we have sufficient stock
         if (!await _inventoryService.HasSufficientStockAsync(productId, quantity))
         {
@@ -62,6 +77,8 @@ public class SaleService : ISaleService
             throw new ArgumentException("Sale not found", nameof(saleId));
         }
 
+        var totalPrice = Math.Round(quantity * unitPrice, 2, MidpointRounding.AwayFromZero);
+
         var saleItem = new SaleItem
         {
             Id = Guid.NewGuid(),
@@ -69,6 +86,72 @@ public class SaleService : ISaleService
             ProductId = productId,
             Quantity = quantity,
             UnitPrice = unitPrice,
+            TotalPrice = totalPrice,
+            BatchNumber = batchNumber
+        };
+
+        await _saleItemRepository.AddAsync(saleItem);
+        await _saleItemRepository.SaveChangesAsync();
+
+        // Recalculate sale total
+        sale.TotalAmount = await CalculateSaleTotalAsync(saleId);
+        await _saleRepository.UpdateAsync(sale);
+        await _saleRepository.SaveChangesAsync();
+
+        return sale;
+    }
+
+    public async Task<Sale> AddWeightBasedItemToSaleAsync(Guid saleId, Guid productId, decimal weight, string? batchNumber = null)
+    {
+        // Validate product before adding to sale
+        if (!await ValidateProductForSaleAsync(productId))
+        {
+            throw new InvalidOperationException("Product is not valid for sale (may be expired or inactive)");
+        }
+
+        var product = await _productService.GetProductByIdAsync(productId);
+        if (product == null)
+        {
+            throw new ArgumentException("Product not found", nameof(productId));
+        }
+
+        // Validate this is a weight-based product
+        if (!product.IsWeightBased)
+        {
+            throw new InvalidOperationException("Product is not weight-based. Use AddItemToSaleAsync for regular products");
+        }
+
+        if (!product.RatePerKilogram.HasValue)
+        {
+            throw new InvalidOperationException("Weight-based product must have a rate per kilogram defined");
+        }
+
+        // Validate weight
+        if (!await _weightBasedPricingService.ValidateWeightAsync(weight, product))
+        {
+            throw new ArgumentException("Invalid weight value", nameof(weight));
+        }
+
+        var sale = await _saleRepository.GetByIdAsync(saleId);
+        if (sale == null)
+        {
+            throw new ArgumentException("Sale not found", nameof(saleId));
+        }
+
+        // Calculate pricing
+        var roundedWeight = _weightBasedPricingService.RoundWeight(weight, product.WeightPrecision);
+        var totalPrice = await _weightBasedPricingService.CalculatePriceAsync(product, weight);
+
+        var saleItem = new SaleItem
+        {
+            Id = Guid.NewGuid(),
+            SaleId = saleId,
+            ProductId = productId,
+            Quantity = 1, // Always 1 for weight-based items
+            UnitPrice = product.RatePerKilogram.Value, // Store the rate for reference
+            Weight = roundedWeight,
+            RatePerKilogram = product.RatePerKilogram.Value,
+            TotalPrice = totalPrice,
             BatchNumber = batchNumber
         };
 
@@ -114,7 +197,15 @@ public class SaleService : ISaleService
 
     public async Task<decimal> CalculateSaleTotalAsync(IEnumerable<SaleItem> saleItems)
     {
-        return await Task.FromResult(saleItems.Sum(item => item.Quantity * item.UnitPrice));
+        decimal total = 0;
+        
+        foreach (var item in saleItems)
+        {
+            // Use the pre-calculated TotalPrice which handles both regular and weight-based items
+            total += item.TotalPrice;
+        }
+        
+        return await Task.FromResult(total);
     }
 
     public async Task<bool> ValidateProductForSaleAsync(Guid productId)

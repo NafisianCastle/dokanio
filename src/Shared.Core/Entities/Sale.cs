@@ -14,7 +14,20 @@ public class Sale : ISoftDeletable
     [Range(0, double.MaxValue)]
     public decimal TotalAmount { get; set; }
     
+    [Range(0, double.MaxValue)]
+    public decimal DiscountAmount { get; set; } = 0;
+    
+    [Range(0, double.MaxValue)]
+    public decimal TaxAmount { get; set; } = 0;
+    
+    [Range(0, double.MaxValue)]
+    public decimal MembershipDiscountAmount { get; set; } = 0;
+    
     public PaymentMethod PaymentMethod { get; set; }
+    
+    // Customer and membership
+    public Guid? CustomerId { get; set; }
+    public virtual Customer? Customer { get; set; }
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
