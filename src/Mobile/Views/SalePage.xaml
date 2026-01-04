@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Mobile.ViewModels"
+             x:Class="Mobile.Views.SalePage"
+             x:DataType="vm:SaleViewModel"
+             Title="{Binding Title}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header with Invoice Number -->
+        <Grid Grid.Row="0" BackgroundColor="LightGray" Padding="15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+            <Label Grid.Column="0"
+                   Text="{Binding InvoiceNumber, StringFormat='Invoice: {0}'}"
+                   FontSize="16"
+                   FontAttributes="Bold"
+                   VerticalOptions="Center" />
+            
+            <Button Grid.Column="1"
+                    Text="Scan"
+                    Command="{Binding ScanBarcodeCommand}"
+                    BackgroundColor="DodgerBlue"
+                    TextColor="White"
+                    WidthRequest="80" />
+        </Grid>
+
+        <!-- Sale Items List -->
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding SaleItems}"
+                        Margin="10">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="10" BackgroundColor="White" Margin="0,2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Label Grid.Row="0" Grid.Column="0"
+                               Text="{Binding ProductName}"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               VerticalOptions="Center" />
+
+                        <Stepper Grid.Row="0" Grid.Column="1"
+                                 Value="{Binding Quantity}"
+                                 Minimum="0"
+                                 Maximum="999"
+                                 Increment="1"
+                                 VerticalOptions="Center" />
+
+                        <Label Grid.Row="0" Grid.Column="2"
+                               Text="{Binding Quantity}"
+                               FontSize="14"
+                               VerticalOptions="Center"
+                               Margin="5,0" />
+
+                        <Button Grid.Row="0" Grid.Column="3"
+                                Text="×"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SaleViewModel}}, Path=RemoveItemCommand}"
+                                CommandParameter="{Binding .}"
+                                BackgroundColor="Red"
+                                TextColor="White"
+                                WidthRequest="40"
+                                HeightRequest="40" />
+
+                        <Label Grid.Row="1" Grid.Column="0"
+                               Text="{Binding UnitPrice, StringFormat='${0:F2} each'}"
+                               FontSize="12"
+                               TextColor="Gray" />
+
+                        <Label Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2"
+                               Text="{Binding Total, StringFormat='${0:F2}'}"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="Green"
+                               HorizontalOptions="End" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Empty State -->
+        <StackLayout Grid.Row="1"
+                     IsVisible="{Binding SaleItems.Count, Converter={StaticResource IntToBoolConverter}, ConverterParameter=0}"
+                     VerticalOptions="Center"
+                     HorizontalOptions="Center">
+            <Label Text="No items in sale"
+                   FontSize="16"
+                   TextColor="Gray"
+                   HorizontalOptions="Center" />
+            <Button Text="Add Products"
+                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ScanBarcodeCommand}"
+                    BackgroundColor="DodgerBlue"
+                    TextColor="White"
+                    Margin="0,10" />
+        </StackLayout>
+
+        <!-- Payment Method Selection -->
+        <Grid Grid.Row="2" Padding="15" BackgroundColor="LightGray">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            
+            <Label Grid.Column="0"
+                   Text="Payment:"
+                   FontSize="14"
+                   VerticalOptions="Center"
+                   Margin="0,0,10,0" />
+            
+            <Picker Grid.Column="1"
+                    ItemsSource="{Binding PaymentMethods}"
+                    SelectedItem="{Binding SelectedPaymentMethod}"
+                    FontSize="14" />
+        </Grid>
+
+        <!-- Total and Actions -->
+        <Grid Grid.Row="3" Padding="15" BackgroundColor="DarkGray">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                   Text="{Binding TotalAmount, StringFormat='Total: ${0:F2}'}"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   HorizontalOptions="Center"
+                   Margin="0,0,0,10" />
+
+            <Button Grid.Row="1" Grid.Column="0"
+                    Text="Clear Sale"
+                    Command="{Binding ClearSaleCommand}"
+                    BackgroundColor="Orange"
+                    TextColor="White"
+                    Margin="0,0,5,0" />
+
+            <Button Grid.Row="1" Grid.Column="1"
+                    Text="Complete Sale"
+                    Command="{Binding CompleteSaleCommand}"
+                    IsEnabled="{Binding CanCompleteSale}"
+                    BackgroundColor="Green"
+                    TextColor="White"
+                    Margin="5,0,0,0" />
+        </Grid>
+
+        <!-- Loading Indicator -->
+        <ActivityIndicator Grid.Row="1"
+                          IsVisible="{Binding IsBusy}"
+                          IsRunning="{Binding IsBusy}"
+                          Color="DodgerBlue"
+                          VerticalOptions="Center"
+                          HorizontalOptions="Center" />
+
+        <!-- Error Message -->
+        <Label Grid.Row="1"
+               Text="{Binding ErrorMessage}"
+               TextColor="Red"
+               FontSize="14"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               IsVisible="{Binding HasError}"
+               Margin="20" />
+    </Grid>
+</ContentPage>

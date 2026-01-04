@@ -1,17 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿namespace Mobile;
 
-namespace Mobile
+public partial class App : Application
 {
-    public partial class App : Application
+    public App()
     {
-        public App()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
 
-        protected override Window CreateWindow(IActivationState? activationState)
-        {
-            return new Window(new AppShell());
-        }
+        MainPage = new AppShell();
     }
 }

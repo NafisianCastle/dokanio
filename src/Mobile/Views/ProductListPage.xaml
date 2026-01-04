@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Mobile.ViewModels"
+             x:Class="Mobile.Views.ProductListPage"
+             x:DataType="vm:ProductListViewModel"
+             Title="{Binding Title}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Search Bar -->
+        <SearchBar Grid.Row="0"
+                   Text="{Binding SearchText}"
+                   Placeholder="Search products..."
+                   SearchCommand="{Binding SearchProductsCommand}"
+                   Margin="10" />
+
+        <!-- Action Buttons -->
+        <Grid Grid.Row="1" Margin="10,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            
+            <Button Grid.Column="0"
+                    Text="Scan Barcode"
+                    Command="{Binding ScanBarcodeCommand}"
+                    BackgroundColor="DodgerBlue"
+                    TextColor="White"
+                    Margin="0,0,5,0" />
+            
+            <Button Grid.Column="1"
+                    Text="Refresh"
+                    Command="{Binding LoadProductsCommand}"
+                    BackgroundColor="Green"
+                    TextColor="White"
+                    Margin="5,0,0,0" />
+        </Grid>
+
+        <!-- Products List -->
+        <CollectionView Grid.Row="2"
+                        ItemsSource="{Binding Products}"
+                        SelectionMode="Single"
+                        SelectionChangedCommand="{Binding SelectProductCommand}"
+                        SelectionChangedCommandParameter="{Binding SelectedItem, Source={RelativeSource Self}}"
+                        Margin="10">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="15" BackgroundColor="White" Margin="0,2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Label Grid.Row="0" Grid.Column="0"
+                               Text="{Binding Name}"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="Black" />
+
+                        <Label Grid.Row="0" Grid.Column="1"
+                               Text="{Binding UnitPrice, StringFormat='${0:F2}'}"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="Green"
+                               HorizontalOptions="End" />
+
+                        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                               Text="{Binding Barcode}"
+                               FontSize="12"
+                               TextColor="Gray" />
+
+                        <Label Grid.Row="2" Grid.Column="0"
+                               Text="{Binding Category}"
+                               FontSize="12"
+                               TextColor="DarkBlue" />
+
+                        <Label Grid.Row="2" Grid.Column="1"
+                               Text="{Binding ExpiryDate, StringFormat='Exp: {0:MM/dd/yyyy}'}"
+                               FontSize="10"
+                               TextColor="Red"
+                               HorizontalOptions="End"
+                               IsVisible="{Binding ExpiryDate, Converter={StaticResource IsNotNullConverter}}" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Loading Indicator -->
+        <ActivityIndicator Grid.Row="2"
+                          IsVisible="{Binding IsBusy}"
+                          IsRunning="{Binding IsBusy}"
+                          Color="DodgerBlue"
+                          VerticalOptions="Center"
+                          HorizontalOptions="Center" />
+
+        <!-- Error Message -->
+        <Label Grid.Row="2"
+               Text="{Binding ErrorMessage}"
+               TextColor="Red"
+               FontSize="14"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               IsVisible="{Binding HasError}"
+               Margin="20" />
+    </Grid>
+</ContentPage>

@@ -367,6 +367,90 @@ public class BusinessLogicPropertyTests : IDisposable
         }
     }
 
+    [Property]
+    public bool DailySalesSummaryAccuracy(NonEmptyArray<PositiveInt> saleAmounts)
+    {
+        // Feature: offline-first-pos, Property 19: For any date, the daily sales summary should equal the sum of all completed sales for that date
+        // **Validates: Requirements 4.4**
+        
+        // Clear the database for each test
+        ClearDatabase();
+        
+        var deviceId = Guid.NewGuid();
+        var testDate = DateTime.UtcNow.Date; // Use today's date for testing
+        
+        // Limit the number of sales to avoid performance issues
+        var salesCount = Math.Min(saleAmounts.Get.Length, 20);
+        var expectedTotal = 0m;
+        var salesCreated = new List<Sale>();
+        
+        try
+        {
+            // Create multiple sales for the test date
+            for (int i = 0; i < salesCount; i++)
+            {
+                // Convert PositiveInt to a reasonable decimal amount (divide by 100 to get cents)
+                var saleAmount = Math.Max(0.01m, (decimal)saleAmounts.Get[i].Get / 100m);
+                expectedTotal += saleAmount;
+                
+                var sale = new Sale
+                {
+                    Id = Guid.NewGuid(),
+                    InvoiceNumber = $"INV-{testDate:yyyyMMdd}-{i:D4}",
+                    TotalAmount = saleAmount,
+                    PaymentMethod = PaymentMethod.Cash,
+                    DeviceId = deviceId,
+                    CreatedAt = testDate.AddHours(i % 24), // Spread sales throughout the day, cycling hours if needed
+                    SyncStatus = SyncStatus.NotSynced
+                };
+                
+                salesCreated.Add(sale);
+                _context.Sales.Add(sale);
+            }
+            
+            // Also create a sale for a different date to ensure date filtering works
+            var differentDateSale = new Sale
+            {
+                Id = Guid.NewGuid(),
+                InvoiceNumber = $"INV-{testDate.AddDays(1):yyyyMMdd}-0001",
+                TotalAmount = 999.99m, // This should not be included in today's summary
+                PaymentMethod = PaymentMethod.Card,
+                DeviceId = deviceId,
+                CreatedAt = testDate.AddDays(1),
+                SyncStatus = SyncStatus.NotSynced
+            };
+            
+            _context.Sales.Add(differentDateSale);
+            _context.SaveChanges();
+            
+            // Calculate the daily sales summary using the same logic that would be used in the mobile app
+            var startOfDay = testDate.Date;
+            var endOfDay = startOfDay.AddDays(1);
+            
+            // Use ToList() to bring data to client side before Sum to avoid SQLite decimal Sum issue
+            var salesForDate = _context.Sales
+                .Where(s => s.CreatedAt >= startOfDay && s.CreatedAt < endOfDay)
+                .ToList();
+            
+            var actualTotal = salesForDate.Sum(s => s.TotalAmount);
+            
+            // Debug output
+            System.Diagnostics.Debug.WriteLine($"Expected: {expectedTotal}, Actual: {actualTotal}, Difference: {Math.Abs(actualTotal - expectedTotal)}");
+            System.Diagnostics.Debug.WriteLine($"Sales count: {salesCount}, Test date: {testDate}");
+            
+            // The daily sales summary should equal the sum of all sales for that date
+            // Use a small tolerance for decimal precision issues
+            var difference = Math.Abs(actualTotal - expectedTotal);
+            return difference < 0.001m;
+        }
+        catch (Exception ex)
+        {
+            // Log the exception for debugging
+            System.Diagnostics.Debug.WriteLine($"Test failed with exception: {ex.Message}");
+            return false;
+        }
+    }
+
     private void ClearDatabase()
     {
         // Use IgnoreQueryFilters to remove all entities including soft-deleted ones
