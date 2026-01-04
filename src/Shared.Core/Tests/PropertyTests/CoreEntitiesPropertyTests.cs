@@ -40,8 +40,8 @@ public class CoreEntitiesPropertyTests : IDisposable
         _context.Database.ExecuteSqlRaw("PRAGMA foreign_keys=ON");
     }
 
-    [Property]
-    public bool ForeignKeyConstraintEnforcement(NonEmptyString invoiceNumber)
+    [Fact]
+    public void ForeignKeyConstraintEnforcement_ShouldRejectInvalidProductId()
     {
         // Feature: offline-first-pos, Property 12: For any attempt to create a relationship with a non-existent entity (e.g., sale item with invalid product ID), the operation should be rejected
         // **Validates: Requirements 8.3**
@@ -52,7 +52,7 @@ public class CoreEntitiesPropertyTests : IDisposable
         var sale = new Sale
         {
             Id = Guid.NewGuid(),
-            InvoiceNumber = $"INV-{invoiceNumber.Get}-{DateTime.Now.Ticks}",
+            InvoiceNumber = $"INV-TEST-{DateTime.Now.Ticks}",
             TotalAmount = 100.00m,
             PaymentMethod = PaymentMethod.Cash,
             DeviceId = Guid.NewGuid(),
@@ -68,6 +68,7 @@ public class CoreEntitiesPropertyTests : IDisposable
         var invalidProductId = Guid.NewGuid(); // This won't exist in the database
         var saleItem = new SaleItem
         {
+            Id = Guid.NewGuid(),
             SaleId = sale.Id,
             ProductId = invalidProductId, // This should be invalid
             Quantity = 1,
@@ -77,19 +78,10 @@ public class CoreEntitiesPropertyTests : IDisposable
         _context.SaleItems.Add(saleItem);
         
         // This should throw an exception due to foreign key constraint violation
-        try
-        {
-            _context.SaveChanges();
-            return false; // If no exception is thrown, the test fails
-        }
-        catch (DbUpdateException)
-        {
-            return true; // Foreign key constraint was enforced
-        }
-        catch (InvalidOperationException)
-        {
-            return true; // Foreign key constraint was enforced
-        }
+        var exception = Assert.Throws<DbUpdateException>(() => _context.SaveChanges());
+        
+        // Verify that the exception is related to foreign key constraint
+        Assert.Contains("FOREIGN KEY constraint failed", exception.InnerException?.Message ?? exception.Message);
     }
 
     [Property]

@@ -4,11 +4,38 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:Mobile"
+    xmlns:views="clr-namespace:Mobile.Views"
     Title="Mobile">
 
+    <TabBar>
+        <ShellContent
+            Title="Home"
+            ContentTemplate="{DataTemplate local:MainPage}"
+            Route="main"
+            Icon="home.png" />
+
+        <ShellContent
+            Title="Sale"
+            ContentTemplate="{DataTemplate views:SalePage}"
+            Route="sale"
+            Icon="cart.png" />
+
+        <ShellContent
+            Title="Products"
+            ContentTemplate="{DataTemplate views:ProductListPage}"
+            Route="products"
+            Icon="list.png" />
+
+        <ShellContent
+            Title="Reports"
+            ContentTemplate="{DataTemplate views:DailySalesPage}"
+            Route="dailysales"
+            Icon="chart.png" />
+    </TabBar>
+
+    <!-- Additional pages that can be navigated to -->
     <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+        ContentTemplate="{DataTemplate views:BarcodeScannerPage}"
+        Route="scanner" />
 
 </Shell>

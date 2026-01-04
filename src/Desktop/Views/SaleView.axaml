@@ -1,0 +1,243 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Desktop.ViewModels"
+             x:Class="Desktop.Views.SaleView"
+             x:DataType="vm:SaleViewModel">
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- Left Panel - Product Search and Sale Items -->
+        <Grid Grid.Column="0" Margin="0,0,10,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Search Section -->
+            <Border Grid.Row="0" Classes="card" Margin="0,0,0,10">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Add Products" FontWeight="Bold" FontSize="16"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBox Grid.Column="0" 
+                                 Text="{Binding SearchText}" 
+                                 Watermark="Search products or scan barcode..."
+                                 Margin="0,0,10,0"/>
+                        
+                        <Button Grid.Column="1" 
+                                Content="Scan Barcode" 
+                                Command="{Binding StartBarcodeScanCommand}"
+                                IsEnabled="{Binding !IsScanning}"/>
+                    </Grid>
+                    
+                    <!-- Search Results -->
+                    <ListBox ItemsSource="{Binding SearchResults}" 
+                             MaxHeight="150"
+                             IsVisible="{Binding SearchResults.Count}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Classes="listitem" Cursor="Hand" 
+                                        Tapped="OnProductTapped">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding Barcode}" FontSize="12" Opacity="0.7"/>
+                                        </StackPanel>
+                                        
+                                        <TextBlock Grid.Column="1" 
+                                                   Text="{Binding UnitPrice, StringFormat='₹{0:N2}'}" 
+                                                   FontWeight="Bold"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+            
+            <!-- Customer Info -->
+            <Border Grid.Row="1" Classes="card" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                        <TextBlock Text="Customer Name" FontWeight="Bold" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding CustomerName}" Watermark="Optional"/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Phone Number" FontWeight="Bold" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding CustomerPhone}" Watermark="Optional"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            
+            <!-- Sale Items -->
+            <Border Grid.Row="2" Classes="card">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Grid.Row="0" Text="Sale Items" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                    
+                    <DataGrid Grid.Row="1" 
+                              ItemsSource="{Binding SaleItems}"
+                              AutoGenerateColumns="False"
+                              CanUserReorderColumns="False"
+                              CanUserResizeColumns="True"
+                              GridLinesVisibility="Horizontal">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*"/>
+                            <DataGridTextColumn Header="Price" Binding="{Binding UnitPrice, StringFormat='₹{0:N2}'}" Width="80"/>
+                            <DataGridTemplateColumn Header="Qty" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <NumericUpDown Value="{Binding Quantity}" 
+                                                       Minimum="1" 
+                                                       Maximum="999"
+                                                       Increment="1"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat='₹{0:N2}'}" Width="100"/>
+                            <DataGridTemplateColumn Header="Action" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="Remove" 
+                                                Command="{Binding $parent[UserControl].((vm:SaleViewModel)DataContext).RemoveItemCommand}"
+                                                CommandParameter="{Binding}"
+                                                Classes="danger"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+        
+        <!-- Right Panel - Payment and Totals -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Totals -->
+            <Border Grid.Row="0" Classes="card" Margin="0,0,0,10">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Order Summary" FontWeight="Bold" FontSize="16"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Subtotal:"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Subtotal, StringFormat='₹{0:N2}'}"/>
+                        
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Tax (10%):"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Tax, StringFormat='₹{0:N2}'}"/>
+                        
+                        <Separator Grid.Row="2" Grid.ColumnSpan="2" Margin="0,5"/>
+                    </Grid>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Text="Total:" FontWeight="Bold" FontSize="18"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Total, StringFormat='₹{0:N2}'}" 
+                                   FontWeight="Bold" FontSize="18" Foreground="#4CAF50"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            
+            <!-- Payment -->
+            <Border Grid.Row="1" Classes="card" Margin="0,0,0,10">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Payment" FontWeight="Bold" FontSize="16"/>
+                    
+                    <StackPanel>
+                        <TextBlock Text="Payment Method" FontWeight="Bold" Margin="0,0,0,5"/>
+                        <ComboBox ItemsSource="{Binding PaymentMethods}" 
+                                  SelectedItem="{Binding SelectedPaymentMethod}"
+                                  HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                    
+                    <StackPanel>
+                        <TextBlock Text="Amount Received" FontWeight="Bold" Margin="0,0,0,5"/>
+                        <NumericUpDown Value="{Binding AmountReceived}" 
+                                       Minimum="0" 
+                                       Maximum="999999"
+                                       Increment="1"
+                                       FormatString="₹{0:N2}"/>
+                        
+                        <Grid Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Change:" FontWeight="Bold"/>
+                            <TextBlock Grid.Column="1" Text="{Binding ChangeAmount, StringFormat='₹{0:N2}'}" 
+                                       FontWeight="Bold" Foreground="#FF9800"/>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            
+            <!-- Actions -->
+            <Border Grid.Row="2" Classes="card">
+                <StackPanel Spacing="10">
+                    <Button Content="Complete Sale" 
+                            Command="{Binding CompleteSaleCommand}"
+                            IsEnabled="{Binding !IsBusy}"
+                            Classes="accent"
+                            HorizontalAlignment="Stretch"
+                            Height="50"
+                            FontSize="16"
+                            FontWeight="Bold"/>
+                    
+                    <Button Content="Reset Sale" 
+                            Command="{Binding ResetSaleCommand}"
+                            HorizontalAlignment="Stretch"/>
+                    
+                    <TextBlock Text="{Binding ErrorMessage}" 
+                               Foreground="Red" 
+                               IsVisible="{Binding HasError}"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
