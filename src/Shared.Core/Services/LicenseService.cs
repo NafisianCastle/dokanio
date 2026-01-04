@@ -258,7 +258,7 @@ public class LicenseService : ILicenseService
             await _licenseRepository.AddAsync(license);
             await _licenseRepository.SaveChangesAsync();
 
-            _logger.LogInformation("Trial license created: {LicenseKey} for {CustomerEmail}", licenseKey, request.CustomerEmail);
+            _logger.LogInformation("Trial license created: {LicenseKey} for device {DeviceId}", licenseKey, request.DeviceId);
 
             return new LicenseActivationResult
             {
@@ -268,7 +268,7 @@ public class LicenseService : ILicenseService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating trial license for {CustomerEmail}", request.CustomerEmail);
+            _logger.LogError(ex, "Error creating trial license for device {DeviceId}", request.DeviceId);
             return new LicenseActivationResult
             {
                 Success = false,
