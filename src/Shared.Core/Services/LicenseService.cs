@@ -4,6 +4,7 @@ using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Repositories;
 using System.Text.Json;
+using System.Security.Cryptography;
 
 namespace Shared.Core.Services;
 
@@ -13,6 +14,25 @@ namespace Shared.Core.Services;
 public class LicenseService : ILicenseService
 {
     private readonly ILicenseRepository _licenseRepository;
+
+    /// <summary>
+    /// Computes a SHA-256 hash of the license key for safe logging and correlation.
+    /// This avoids storing or exposing the raw license key in logs.
+    /// </summary>
+    /// <param name="licenseKey">The raw license key.</param>
+    /// <returns>Hex-encoded SHA-256 hash of the license key.</returns>
+    private static string HashLicenseKey(string licenseKey)
+    {
+        if (string.IsNullOrEmpty(licenseKey))
+        {
+            return string.Empty;
+        }
+
+        using var sha256 = SHA256.Create();
+        var bytes = System.Text.Encoding.UTF8.GetBytes(licenseKey);
+        var hashBytes = sha256.ComputeHash(bytes);
+        return Convert.ToHexString(hashBytes);
+    }
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<LicenseService> _logger;
 
@@ -258,7 +278,8 @@ public class LicenseService : ILicenseService
             await _licenseRepository.AddAsync(license);
             await _licenseRepository.SaveChangesAsync();
 
-            _logger.LogInformation("Trial license created: {LicenseKey} for device {DeviceId}", licenseKey, request.DeviceId);
+            var licenseKeyHash = HashLicenseKey(licenseKey);
+            _logger.LogInformation("Trial license created: {LicenseKeyHash} for device {DeviceId}", licenseKeyHash, request.DeviceId);
 
             return new LicenseActivationResult
             {
