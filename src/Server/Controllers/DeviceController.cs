@@ -75,7 +75,10 @@ public class DeviceController : ControllerBase
                     await _context.SaveChangesAsync();
                     
                     _logger.LogInformation("Reactivated device {DeviceId} with name {DeviceName}", 
-                        existingDevice.Id, existingDevice.Name);
+                        existingDevice.Id, existingDevice.Name?
+                            .Replace(Environment.NewLine, string.Empty)
+                            .Replace("\n", string.Empty)
+                            .Replace("\r", string.Empty));
 
                     return Ok(new SyncApiResult<DeviceRegistrationResponse>
                     {
@@ -106,7 +109,10 @@ public class DeviceController : ControllerBase
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Registered new device {DeviceId} with name {DeviceName}", 
-                device.Id, device.Name);
+                device.Id, device.Name?
+                    .Replace(Environment.NewLine, string.Empty)
+                    .Replace("\n", string.Empty)
+                    .Replace("\r", string.Empty));
 
             return Ok(new SyncApiResult<DeviceRegistrationResponse>
             {
