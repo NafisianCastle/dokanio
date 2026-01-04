@@ -41,6 +41,35 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISyncApiClient, SyncApiClient>();
         services.AddHttpClient<ISyncApiClient, SyncApiClient>();
         
+        // Register hardware integration services
+        services.AddScoped<IReceiptService, ReceiptService>();
+        services.AddScoped<IPrinterService, PrinterService>();
+        services.AddScoped<IBarcodeScanner, BarcodeScanner>();
+        services.AddScoped<ICashDrawerService, CashDrawerService>();
+        
+        // Register hardware configurations (should be configured by the consuming application)
+        services.AddSingleton(provider => new ReceiptConfiguration
+        {
+            ShopName = "POS Shop",
+            PaperWidth = 48,
+            PrintBarcode = true,
+            FooterMessage = "Thank you for your business!"
+        });
+        
+        services.AddSingleton(provider => new ScannerConfiguration
+        {
+            ScanTimeout = TimeSpan.FromSeconds(30),
+            EnableBeep = true,
+            EnableVibration = true
+        });
+        
+        services.AddSingleton(provider => new CashDrawerConfiguration
+        {
+            Port = "COM1",
+            BaudRate = 9600,
+            OpenTimeout = TimeSpan.FromSeconds(5)
+        });
+        
         // Register sync configuration (should be configured by the consuming application)
         services.AddSingleton(provider => new SyncConfiguration
         {
