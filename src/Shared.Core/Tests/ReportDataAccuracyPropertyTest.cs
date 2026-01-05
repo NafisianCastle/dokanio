@@ -664,14 +664,14 @@ public class ReportDataAccuracyPropertyTest : IDisposable
         try
         {
             // Remove all test data in correct order (respecting foreign keys)
-            _context.SaleItems.RemoveRange(_context.SaleItems);
-            _context.Sales.RemoveRange(_context.Sales);
-            _context.Stock.RemoveRange(_context.Stock);
-            _context.Products.RemoveRange(_context.Products);
-            _context.Shops.RemoveRange(_context.Shops);
-            _context.Businesses.RemoveRange(_context.Businesses);
-            _context.Users.RemoveRange(_context.Users);
-            _context.SaveChanges();
+            _context.SaleItems.ExecuteDelete();
+            _context.Sales.ExecuteDelete();
+            _context.Stock.ExecuteDelete();
+            _context.Products.ExecuteDelete();
+            _context.Shops.ExecuteDelete();
+            _context.Businesses.ExecuteDelete();
+            _context.Users.ExecuteDelete();
+            // SaveChanges is not needed with ExecuteDelete
         }
         catch (Exception)
         {
