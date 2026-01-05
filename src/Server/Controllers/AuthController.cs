@@ -52,12 +52,18 @@ public class AuthController : ControllerBase
                 .Replace("\n", string.Empty)
                 .Replace("\r", string.Empty);
 
+            // Sanitize username before logging to prevent log forging
+            var sanitizedUsername = (request.Username ?? string.Empty)
+                .Replace(Environment.NewLine, string.Empty)
+                .Replace("\n", string.Empty)
+                .Replace("\r", string.Empty);
+
             var result = await _authService.AuthenticateAsync(request);
 
             if (!result.IsSuccess)
             {
                 _logger.LogWarning("Authentication failed for user {Username} from IP {IpAddress}",
-                    request.Username, sanitizedIpAddress);
+                    sanitizedUsername, sanitizedIpAddress);
 
                 return Unauthorized(new SyncApiResult<AuthenticationResponse>
                 {
