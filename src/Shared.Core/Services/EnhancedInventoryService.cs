@@ -415,10 +415,10 @@ public class EnhancedInventoryService : InventoryService, IEnhancedInventoryServ
         var salesData = await _saleRepository.GetSalesByShopAndDateRangeAsync(
             shopId, DateTime.UtcNow.AddMonths(-6), DateTime.UtcNow);
 
-        var productSales = salesData.SelectMany(s => s.Items)
-            .Where(i => i.ProductId == productId)
-            .GroupBy(i => i.Sale.CreatedAt.Date)
-            .Select(g => g.Sum(i => i.Quantity))
+        var productSales = salesData
+            .GroupBy(s => s.CreatedAt.Date)
+            .Select(g => g.Sum(s => s.Items.Where(i => i.ProductId == productId).Sum(i => i.Quantity)))
+            .Where(qty => qty > 0)
             .ToList();
 
         if (!productSales.Any())
