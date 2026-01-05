@@ -204,6 +204,23 @@ public class AuthController : ControllerBase
     {
         try
         {
+            var callerUserId = GetUserIdFromToken();
+            if (callerUserId == null)
+            {
+                return Unauthorized(new SyncApiResult<UserPermissions>
+                {
+                    Success = false,
+                    Message = "Invalid user token",
+                    StatusCode = 401
+                });
+            }
+
+            // Prevent IDOR: only allow users to access their own permissions
+            if (callerUserId.Value != userId)
+            {
+                return Forbid();
+            }
+
             var permissions = await _authService.GetUserPermissionsAsync(userId);
 
             return Ok(new SyncApiResult<UserPermissions>
