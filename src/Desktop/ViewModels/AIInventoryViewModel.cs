@@ -364,7 +364,7 @@ public partial class AIInventoryViewModel : BaseViewModel
                 ExpiryRiskAlerts.Add(alert);
             }
 
-            SuccessMessage = $"Found {alerts.Length} products at risk of expiry within {daysAhead} days";
+            SuccessMessage = $"Found {alerts.Count()} products at risk of expiry within {daysAhead} days";
         }
         catch (Exception ex)
         {
