@@ -69,6 +69,14 @@ public class UserSessionRepository : IUserSessionRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<UserSession>> GetAllActiveSessionsAsync()
+    {
+        return await _context.Set<UserSession>()
+            .Where(s => s.IsActive && s.EndedAt == null)
+            .OrderByDescending(s => s.LastActivityAt)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<UserSession>> GetExpiredSessionsAsync(int inactivityTimeoutMinutes)
     {
         var cutoffTime = DateTime.UtcNow.AddMinutes(-inactivityTimeoutMinutes);

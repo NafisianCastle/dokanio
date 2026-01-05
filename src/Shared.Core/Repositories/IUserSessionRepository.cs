@@ -22,6 +22,12 @@ public interface IUserSessionRepository : IRepository<UserSession>
     Task<IEnumerable<UserSession>> GetActiveSessionsByUserIdAsync(Guid userId);
     
     /// <summary>
+    /// Gets all active sessions
+    /// </summary>
+    /// <returns>List of all active sessions</returns>
+    Task<IEnumerable<UserSession>> GetAllActiveSessionsAsync();
+    
+    /// <summary>
     /// Gets expired sessions
     /// </summary>
     /// <param name="inactivityTimeoutMinutes">Inactivity timeout in minutes</param>

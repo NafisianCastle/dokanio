@@ -1490,15 +1490,15 @@ public class AIAnalyticsEngine : IAIAnalyticsEngine
             { new[] { "baby" }, new[] { "diaper", "formula", "care" } }
         };
 
-        var triggerProducts = products.Where(p =>
-            p.Name != null && pattern.Key.Any(keyword => p.Name.Contains(keyword, StringComparison.OrdinalIgnoreCase)))
-            .ToList();
+        foreach (var pattern in crossSellPatterns)
+        {
+            var triggerProducts = products.Where(p =>
+                p.Name != null && pattern.Key.Any(keyword => p.Name.Contains(keyword, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
 
-        var recommendedProducts = products.Where(p =>
-            p.Name != null && pattern.Value.Any(keyword => p.Name.Contains(keyword, StringComparison.OrdinalIgnoreCase)))
-            .ToList();
-            var recommendedProducts = products.Where(p => 
-                pattern.Value.Any(keyword => p.Name.ToLower().Contains(keyword))).ToList();
+            var recommendedProducts = products.Where(p =>
+                p.Name != null && pattern.Value.Any(keyword => p.Name.Contains(keyword, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
 
             foreach (var triggerProduct in triggerProducts.Take(2))
             {
