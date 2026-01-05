@@ -706,8 +706,8 @@ public class DashboardService : IDashboardService
             var todaySales = await _saleRepository.GetSalesByShopAndDateRangeAsync(shop.Id, analysisDate.StartDate, analysisDate.EndDate);
             var yesterdaySales = await _saleRepository.GetSalesByShopAndDateRangeAsync(shop.Id, analysisDate.StartDate.AddDays(-1), analysisDate.StartDate.AddTicks(-1));
 
-            var todayRevenue = todaySales.Sum(s => s.TotalAmount);
-            var yesterdayRevenue = yesterdaySales.Sum(s => s.TotalAmount);
+            var todayRevenue = todaySales.Sum(s => (decimal)s.TotalAmount);
+            var yesterdayRevenue = yesterdaySales.Sum(s => (decimal)s.TotalAmount);
             var todayTransactions = todaySales.Count;
             var averageOrderValue = todayTransactions > 0 ? todayRevenue / (decimal)todayTransactions : 0;
 
@@ -754,11 +754,11 @@ public class DashboardService : IDashboardService
             var products = await _productRepository.GetProductsByShopAsync(shop.Id);
             var stocks = await _stockRepository.GetStockByShopAsync(shop.Id);
 
-            var revenue = sales.Sum(s => s.TotalAmount);
+            var revenue = sales.Sum(s => (decimal)s.TotalAmount);
             var transactionCount = sales.Count;
             var averageOrderValue = transactionCount > 0 ? revenue / (decimal)transactionCount : 0;
             var profitEstimate = revenue * 0.3m; // Estimate
-            var inventoryValue = stocks.Sum(s => s.Quantity * (s.Product?.UnitPrice ?? 0));
+            var inventoryValue = stocks.Sum(s => (decimal)(s.Quantity * (s.Product?.UnitPrice ?? 0)));
 
             comparisons.Add(new ShopComparisonData
             {
@@ -768,7 +768,7 @@ public class DashboardService : IDashboardService
                 TransactionCount = transactionCount,
                 AverageOrderValue = averageOrderValue,
                 ProfitEstimate = profitEstimate,
-                ProductCount = (decimal)products.Count(),
+                ProductCount = ((IEnumerable<Product>)products).Count(),
                 InventoryValue = inventoryValue,
                 Performance = new PerformanceMetrics
                 {

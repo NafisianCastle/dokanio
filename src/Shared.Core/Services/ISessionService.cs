@@ -1,4 +1,5 @@
 using Shared.Core.Entities;
+using Shared.Core.Enums;
 
 namespace Shared.Core.Services;
 
@@ -38,12 +39,18 @@ public interface ISessionService
     Task<UserSession?> GetActiveSessionAsync(string sessionToken);
     
     /// <summary>
-    /// Checks if session is expired based on inactivity timeout
+    /// Checks if session is expired based on role-specific inactivity timeout
     /// </summary>
     /// <param name="sessionToken">Session token</param>
-    /// <param name="inactivityTimeoutMinutes">Inactivity timeout in minutes</param>
+    /// <param name="userRole">User role for timeout calculation</param>
     /// <returns>True if session is expired</returns>
-    Task<bool> IsSessionExpiredAsync(string sessionToken, int inactivityTimeoutMinutes = 30);
+    Task<bool> IsSessionExpiredAsync(string sessionToken, UserRole? userRole = null);
+
+    /// <summary>
+    /// Ends all expired sessions with role-based timeouts
+    /// </summary>
+    /// <returns>Number of sessions ended</returns>
+    Task<int> EndExpiredSessionsWithRoleBasedTimeoutsAsync();
     
     /// <summary>
     /// Ends all expired sessions
