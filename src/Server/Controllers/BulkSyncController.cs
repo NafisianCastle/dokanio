@@ -55,7 +55,7 @@ public class BulkSyncController : ControllerBase
             _logger.LogInformation("Starting bulk sync for business {BusinessId} by user {UserId}", 
                 businessId, userId);
 
-            var result = await _syncService.SyncBusinessDataAsync(request);
+            var result = await _syncService.SyncBusinessDataAsync(businessId);
 
             _logger.LogInformation("Bulk sync completed for business {BusinessId}: {SyncedRecords} records synced, {ConflictsResolved} conflicts resolved",
                 businessId, result.ItemsSynced, result.ConflictsResolved);
@@ -119,7 +119,7 @@ public class BulkSyncController : ControllerBase
             _logger.LogInformation("Starting shop sync for shop {ShopId} by user {UserId}", 
                 shopId, userId);
 
-            var result = await _syncService.SyncShopDataAsync(request);
+            var result = await _syncService.SyncShopDataAsync(shopId);
 
             _logger.LogInformation("Shop sync completed for shop {ShopId}: {SyncedRecords} records synced, {ConflictsResolved} conflicts resolved",
                 shopId, result.ItemsSynced, result.ConflictsResolved);
@@ -189,9 +189,9 @@ public class BulkSyncController : ControllerBase
                 LocalData = c.LocalData,
                 ServerData = c.ServerData,
                 LocalTimestamp = c.ConflictTimestamp,
-                ServerTimestamp = c.ConflictTimestamp, // This might also need adjustment depending on service logic
-                Type = Shared.Core.Services.ConflictType.UpdateConflict, // Default type
-                ConflictReason = c.ConflictType,
+                ServerTimestamp = c.ConflictTimestamp, // Using same timestamp as simpler DTO doesn't distinguish
+                Type = Shared.Core.Services.ConflictType.UpdateConflict, // Defaulting as DTO has string
+                ConflictReason = c.ConflictType, // DTO has string ConflictType, mapping to Reason
                 Resolution = c.Resolution
             }).ToArray());
 
@@ -345,38 +345,47 @@ public class BulkSyncController : ControllerBase
             foreach (var deviceData in request.DeviceData)
             {
                 try
-            {
-                // Process sales
-                foreach (var sale in deviceData.Sales)
                 {
-                    try
+                    // Process sales
+                    foreach (var sale in deviceData.Sales)
                     {
-                        // Process individual sale (implementation would go here)
-                        result.ProcessedRecords++;
+                        try
+                        {
+                            // Process individual sale (implementation would go here)
+                            result.ProcessedRecords++;
+                        }
+                        catch (Exception ex)
+                        {
+                            result.FailedRecords++;
+                            result.Errors.Add($"Device {deviceData.DeviceId} sale: {ex.Message}");
+                            _logger.LogWarning(ex, "Error processing sale from device {DeviceId}", deviceData.DeviceId);
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        result.FailedRecords++;
-                        result.Errors.Add($"Device {deviceData.DeviceId} sale: {ex.Message}");
-                        _logger.LogWarning(ex, "Error processing sale from device {DeviceId}", deviceData.DeviceId);
-                    }
-                }
 
-                // Process stock updates
-                foreach (var stockUpdate in deviceData.StockUpdates)
-                {
-                    try
+                    // Process stock updates
+                    foreach (var stockUpdate in deviceData.StockUpdates)
                     {
-                        // Process individual stock update (implementation would go here)
-                        result.ProcessedRecords++;
-                    }
-                    catch (Exception ex)
-                    {
-                        result.FailedRecords++;
-                        result.Errors.Add($"Device {deviceData.DeviceId} stock update: {ex.Message}");
-                        _logger.LogWarning(ex, "Error processing stock update from device {DeviceId}", deviceData.DeviceId);
+                        try
+                        {
+                            // Process individual stock update (implementation would go here)
+                            result.ProcessedRecords++;
+                        }
+                        catch (Exception ex)
+                        {
+                            result.FailedRecords++;
+                            result.Errors.Add($"Device {deviceData.DeviceId} stock update: {ex.Message}");
+                            _logger.LogWarning(ex, "Error processing stock update from device {DeviceId}", deviceData.DeviceId);
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    result.Errors.Add($"Error processing device {deviceData.DeviceId}: {ex.Message}");
+                    _logger.LogError(ex, "Error processing sync data for device {DeviceId}", deviceData.DeviceId);
+                    result.FailedRecords += (deviceData.Sales?.Count ?? 0) + (deviceData.StockUpdates?.Count ?? 0);
+                }
+            }
+
             result.IsSuccess = result.FailedRecords == 0;
 
             _logger.LogInformation("Bulk upload completed: {ProcessedRecords} processed, {FailedRecords} failed",
@@ -539,13 +548,13 @@ public class ShopSyncResult
 /// </summary>
 public class ConflictResolutionRequest
 {
-    public List<DataConflict> Conflicts { get; set; } = new();
+    public List<DataConflictDto> Conflicts { get; set; } = new();
 }
 
 /// <summary>
-/// Data conflict model
+/// Data conflict DTO model
 /// </summary>
-public class DataConflict
+public class DataConflictDto
 {
     public Guid Id { get; set; }
     public string EntityType { get; set; } = string.Empty;
@@ -556,6 +565,8 @@ public class DataConflict
     public DateTime ConflictTimestamp { get; set; }
     public string Resolution { get; set; } = string.Empty; // "UseLocal", "UseServer", "Merge"
 }
+
+// DataConflict class is removed as it uses Shared.Core.Services.DataConflict
 
 /// <summary>
 /// Tenant isolation validation request model

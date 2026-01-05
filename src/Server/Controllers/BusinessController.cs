@@ -284,7 +284,7 @@ public class BusinessController : ControllerBase
 
             // It's assumed the service layer performs the authorization check.
             // Pass the userId to the service method for validation.
-            var shop = await _businessService.CreateShopAsync(request, userId.Value);
+            var shop = await _businessService.CreateShopAsync(request);
 
             _logger.LogInformation("Shop {ShopId} created for business {BusinessId} by user {UserId}", shop.Id, request.BusinessId, userId);
 
