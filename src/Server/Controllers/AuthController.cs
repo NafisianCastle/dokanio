@@ -136,11 +136,15 @@ public class AuthController : ControllerBase
                 });
             }
 
+            var sanitizedUsername = request.Username?
+                .Replace("\r", string.Empty)
+                .Replace("\n", string.Empty);
+
             var result = await _authService.AuthenticateOfflineAsync(request.Username, request.CachedToken);
 
             if (!result.IsSuccess)
             {
-                _logger.LogWarning("Offline authentication failed for user {Username}", request.Username);
+                _logger.LogWarning("Offline authentication failed for user {Username}", sanitizedUsername);
 
                 return Unauthorized(new SyncApiResult<AuthenticationResponse>
                 {
@@ -174,7 +178,11 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during offline authentication for user {Username}", request.Username);
+            var sanitizedUsername = request.Username?
+                .Replace("\r", string.Empty)
+                .Replace("\n", string.Empty);
+
+            _logger.LogError(ex, "Error during offline authentication for user {Username}", sanitizedUsername);
             return StatusCode(500, new SyncApiResult<AuthenticationResponse>
             {
                 Success = false,
