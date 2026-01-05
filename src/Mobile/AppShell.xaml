@@ -7,6 +7,13 @@
     xmlns:views="clr-namespace:Mobile.Views"
     Title="Mobile">
 
+    <!-- Login Shell Content (shown when not authenticated) -->
+    <ShellContent
+        Title="Login"
+        ContentTemplate="{DataTemplate views:LoginPage}"
+        Route="login" />
+
+    <!-- Main App Shell Content (shown when authenticated) -->
     <TabBar>
         <ShellContent
             Title="Home"

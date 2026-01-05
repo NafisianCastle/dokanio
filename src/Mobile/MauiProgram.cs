@@ -29,9 +29,11 @@ public static class MauiProgram
 
         // Register Mobile-specific services
         builder.Services.AddSingleton<BackgroundSyncService>();
+        builder.Services.AddSingleton<IUserContextService, UserContextService>();
 
         // Register ViewModels
         builder.Services.AddTransient<MainViewModel>();
+        builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<ProductListViewModel>();
         builder.Services.AddTransient<SaleViewModel>();
         builder.Services.AddTransient<DailySalesViewModel>();
@@ -39,6 +41,7 @@ public static class MauiProgram
 
         // Register Views
         builder.Services.AddTransient<MainPage>();
+        builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<ProductListPage>();
         builder.Services.AddTransient<SalePage>();
         builder.Services.AddTransient<DailySalesPage>();

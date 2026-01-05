@@ -4,9 +4,9 @@
         xmlns:views="using:Desktop.Views"
         x:Class="Desktop.MainWindow"
         x:DataType="vm:MainViewModel"
-        Title="POS Desktop Application"
-        Width="1200"
-        Height="800"
+        Title="Multi-Business POS Desktop Application"
+        Width="1400"
+        Height="900"
         WindowStartupLocation="CenterScreen">
     
     <Design.DataContext>
@@ -15,6 +15,7 @@
     
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -26,10 +27,11 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <TextBlock Text="POS Desktop Application" 
+                    <TextBlock Text="Multi-Business POS Desktop" 
                                FontSize="20" 
                                FontWeight="Bold" 
                                Foreground="White" 
@@ -39,9 +41,37 @@
                                Foreground="White" 
                                VerticalAlignment="Center" 
                                Margin="20,0,0,0"/>
+                    <TextBlock Text="{Binding CurrentUserRole, StringFormat='({0})'}" 
+                               FontSize="12" 
+                               Foreground="LightGray" 
+                               VerticalAlignment="Center" 
+                               Margin="5,0,0,0"/>
                 </StackPanel>
                 
-                <Button Grid.Column="1" 
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,20,0">
+                    <TextBlock Text="Business:" 
+                               FontSize="12" 
+                               Foreground="White" 
+                               VerticalAlignment="Center" 
+                               Margin="0,0,5,0"/>
+                    <TextBlock Text="{Binding CurrentBusinessName}" 
+                               FontSize="12" 
+                               FontWeight="Bold"
+                               Foreground="White" 
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="Shop:" 
+                               FontSize="12" 
+                               Foreground="White" 
+                               VerticalAlignment="Center" 
+                               Margin="15,0,5,0"/>
+                    <TextBlock Text="{Binding CurrentShopName}" 
+                               FontSize="12" 
+                               FontWeight="Bold"
+                               Foreground="White" 
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <Button Grid.Column="2" 
                         Content="Sync Data" 
                         Command="{Binding SyncDataCommand}"
                         IsEnabled="{Binding !IsBusy}"
@@ -49,8 +79,50 @@
             </Grid>
         </Border>
         
+        <!-- Business/Shop Selection Bar (for Business Owners) -->
+        <Border Grid.Row="1" Background="#F5F5F5" Padding="20,10" 
+                IsVisible="{Binding IsBusinessOwner}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0" 
+                           Text="Business:" 
+                           VerticalAlignment="Center" 
+                           Margin="0,0,10,0"/>
+                
+                <ComboBox Grid.Column="1" 
+                          ItemsSource="{Binding Businesses}"
+                          SelectedItem="{Binding SelectedBusiness}"
+                          DisplayMemberBinding="{Binding Name}"
+                          PlaceholderText="Select Business"/>
+                
+                <TextBlock Grid.Column="2" 
+                           Text="Shop:" 
+                           VerticalAlignment="Center" 
+                           Margin="20,0,10,0"/>
+                
+                <ComboBox Grid.Column="3" 
+                          ItemsSource="{Binding Shops}"
+                          SelectedItem="{Binding SelectedShop}"
+                          DisplayMemberBinding="{Binding Name}"
+                          PlaceholderText="Select Shop"/>
+                
+                <Button Grid.Column="4" 
+                        Content="Refresh" 
+                        Command="{Binding RefreshDashboardCommand}"
+                        HorizontalAlignment="Right"
+                        Margin="20,0,0,0"/>
+            </Grid>
+        </Border>
+        
         <!-- Main Content -->
-        <TabControl Grid.Row="1" Margin="10">
+        <TabControl Grid.Row="2" Margin="10">
             <!-- Dashboard Tab -->
             <TabItem Header="Dashboard">
                 <ScrollViewer>
@@ -58,6 +130,7 @@
                         <!-- Summary Cards -->
                         <Grid>
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
@@ -88,7 +161,15 @@
                                 </StackPanel>
                             </Border>
                             
-                            <Border Grid.Column="3" Classes="card" Margin="10,0,0,0">
+                            <Border Grid.Column="3" Classes="card" Margin="5,0">
+                                <StackPanel>
+                                    <TextBlock Text="Expiry Alerts" FontWeight="Bold" FontSize="14"/>
+                                    <TextBlock Text="{Binding ExpiryAlerts}" 
+                                               FontSize="24" FontWeight="Bold" Foreground="#F44336"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <Border Grid.Column="4" Classes="card" Margin="10,0,0,0">
                                 <StackPanel>
                                     <TextBlock Text="Sync Status" FontWeight="Bold" FontSize="14"/>
                                     <TextBlock Text="{Binding SyncStatus}" 
@@ -96,6 +177,32 @@
                                 </StackPanel>
                             </Border>
                         </Grid>
+                        
+                        <!-- Multi-Business Summary (for Business Owners) -->
+                        <Border Classes="card" IsVisible="{Binding IsBusinessOwner}">
+                            <StackPanel>
+                                <TextBlock Text="Multi-Business Overview" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding TotalBusinesses, StringFormat='Total Businesses: {0}'}" 
+                                                   FontSize="14" Margin="0,0,0,5"/>
+                                        <TextBlock Text="{Binding TotalShops, StringFormat='Total Shops: {0}'}" 
+                                                   FontSize="14"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Column="1">
+                                        <Button Content="Manage Businesses" 
+                                                Command="{Binding LoadBusinessesCommand}"
+                                                HorizontalAlignment="Right"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
                         
                         <!-- Recent Activities -->
                         <Border Classes="card">
@@ -108,6 +215,25 @@
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Dashboard Alerts -->
+                        <Border Classes="card" IsVisible="{Binding DashboardAlerts.Count}">
+                            <StackPanel>
+                                <TextBlock Text="Active Alerts" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                                <ItemsControl ItemsSource="{Binding DashboardAlerts}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#FFF3E0" Padding="10" Margin="0,0,0,5" CornerRadius="4">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="14"/>
+                                                    <TextBlock Text="{Binding Message}" FontSize="12" TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -134,25 +260,50 @@
                 <views:SupplierView DataContext="{Binding SupplierViewModel}"/>
             </TabItem>
             
-            <!-- Refunds Tab -->
-            <TabItem Header="Refunds">
-                <TextBlock Text="Refund processing functionality will be implemented here" 
+            <!-- Business Management Tab (Business Owners only) -->
+            <TabItem Header="Business Management" IsVisible="{Binding IsBusinessOwner}">
+                <TextBlock Text="Business Management functionality will be implemented here" 
                            HorizontalAlignment="Center" 
                            VerticalAlignment="Center"
                            FontSize="16"/>
             </TabItem>
             
-            <!-- Reports Tab -->
+            <!-- User Management Tab (Business Owners and Shop Managers) -->
+            <TabItem Header="User Management" IsVisible="{Binding CanManageUsers}">
+                <TextBlock Text="User Management functionality will be implemented here" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center"
+                           FontSize="16"/>
+            </TabItem>
+            
+            <!-- AI Inventory Tab -->
+            <TabItem Header="AI Inventory" IsVisible="{Binding CanManageInventory}">
+                <TextBlock Text="AI Inventory Management functionality will be implemented here" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center"
+                           FontSize="16"/>
+            </TabItem>
+            
+            <!-- Advanced Reports Tab -->
+            <TabItem Header="Advanced Reports" IsVisible="{Binding CanViewReports}">
+                <TextBlock Text="Advanced Reports and Analytics functionality will be implemented here" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center"
+                           FontSize="16"/>
+            </TabItem>
+            
+            <!-- Basic Reports Tab -->
             <TabItem Header="Reports">
                 <views:ReportsView DataContext="{Binding ReportsViewModel}"/>
             </TabItem>
         </TabControl>
         
         <!-- Status Bar -->
-        <Border Grid.Row="2" Background="#F5F5F5" Padding="10,5">
+        <Border Grid.Row="3" Background="#F5F5F5" Padding="10,5">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 
@@ -163,6 +314,11 @@
                 
                 <TextBlock Grid.Column="1" 
                            Text="{Binding LastSyncTime, StringFormat='Last Sync: {0:HH:mm}'}" 
+                           FontSize="12"
+                           Margin="0,0,20,0"/>
+                
+                <TextBlock Grid.Column="2" 
+                           Text="{Binding IsOnline, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Online|Offline'}" 
                            FontSize="12"/>
             </Grid>
         </Border>

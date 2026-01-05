@@ -1,0 +1,481 @@
+@page "/users"
+@inject IUserApiService UserService
+@inject IBusinessApiService BusinessService
+@inject IAuthenticationService AuthService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>User Management - Multi-Business POS</PageTitle>
+
+<div class="user-management-container">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">User Management</h2>
+                    <p class="text-muted mb-0">Manage users and their roles across your businesses</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-filter me-2"></i>
+                            @(SelectedBusiness?.Name ?? "All Businesses")
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" @onclick="() => FilterByBusiness(null)">All Businesses</a></li>
+                            @foreach (var business in Businesses)
+                            {
+                                <li><a class="dropdown-item" href="#" @onclick="() => FilterByBusiness(business)">@business.Name</a></li>
+                            }
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary" @onclick="ShowCreateUserModal">
+                        <i class="fas fa-plus me-2"></i>Add New User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Users Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Users</h5>
+            </div>
+            <div class="card-body">
+                @if (FilteredUsers.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Business</th>
+                                    <th>Shop</th>
+                                    <th>Role</th>
+                                    <th>Last Login</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in FilteredUsers)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="user-avatar me-3">
+                                                    <i class="fas fa-user-circle fa-2x text-muted"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold">@user.Username</div>
+                                                    <div class="small text-muted">@user.Email</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="fw-semibold">@GetBusinessName(user.BusinessId ?? Guid.Empty)</span>
+                                        </td>
+                                        <td>
+                                            @if (user.ShopIds.Any())
+                                            {
+                                                <span>@GetShopName(user.ShopIds.First())</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">All Shops</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-@GetRoleColor(user.Role)">
+                                                @user.Role
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if (user.LastLoginAt.HasValue)
+                                            {
+                                                <span>@user.LastLoginAt.Value.ToString("MMM dd, yyyy HH:mm")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Never</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-@(user.IsActive ? "success" : "secondary")">
+                                                @(user.IsActive ? "Active" : "Inactive")
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#" @onclick="() => EditUser(user)"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                                                    <li><a class="dropdown-item" href="#" @onclick="() => ChangeUserRole(user)"><i class="fas fa-user-shield me-2"></i>Change Role</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="#" @onclick="() => DeleteUser(user)"><i class="fas fa-trash me-2"></i>Delete</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h4>No Users Found</h4>
+                        <p class="text-muted">
+                            @if (SelectedBusiness != null)
+                            {
+                                <text>No users found for @SelectedBusiness.Name.</text>
+                            }
+                            else
+                            {
+                                <text>Get started by creating your first user.</text>
+                            }
+                        </p>
+                        <button class="btn btn-primary" @onclick="ShowCreateUserModal">
+                            <i class="fas fa-plus me-2"></i>Create User
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Create/Edit User Modal -->
+<div class="modal fade" id="userModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@(IsEditMode ? "Edit User" : "Create New User")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="UserForm" OnValidSubmit="SaveUser">
+                    <DataAnnotationsValidator />
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Username *</label>
+                            <InputText @bind-Value="UserForm.Username" class="form-control" placeholder="Enter username" />
+                            <ValidationMessage For="() => UserForm.Username" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email *</label>
+                            <InputText @bind-Value="UserForm.Email" class="form-control" type="email" placeholder="Enter email" />
+                            <ValidationMessage For="() => UserForm.Email" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Business *</label>
+                            <InputSelect @bind-Value="UserForm.BusinessId" class="form-select" @onchange="OnBusinessChanged">
+                                <option value="">Select business</option>
+                                @foreach (var business in Businesses)
+                                {
+                                    <option value="@business.Id">@business.Name</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="() => UserForm.BusinessId" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Shop</label>
+                            <InputSelect @bind-Value="UserForm.ShopId" class="form-select">
+                                <option value="">All Shops</option>
+                                @foreach (var shop in AvailableShops)
+                                {
+                                    <option value="@shop.Id">@shop.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Role *</label>
+                            <InputSelect @bind-Value="UserForm.Role" class="form-select">
+                                <option value="">Select role</option>
+                                @foreach (var role in Enum.GetValues<UserRole>())
+                                {
+                                    <option value="@role">@role</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="() => UserForm.Role" />
+                        </div>
+                        @if (!IsEditMode)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Password *</label>
+                                <InputText @bind-Value="UserForm.Password" class="form-control" type="password" placeholder="Enter password" />
+                                <ValidationMessage For="() => UserForm.Password" />
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check mt-4">
+                                    <InputCheckbox @bind-Value="UserForm.IsActive" class="form-check-input" id="userIsActive" />
+                                    <label class="form-check-label" for="userIsActive">Active</label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" disabled="@IsSaving">
+                            @if (IsSaving)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            }
+                            @(IsEditMode ? "Update User" : "Create User")
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<BusinessResponse> Businesses = new();
+    private List<UserDto> AllUsers = new();
+    private List<UserDto> FilteredUsers = new();
+    private List<ShopResponse> AllShops = new();
+    private List<ShopResponse> AvailableShops = new();
+    private BusinessResponse? SelectedBusiness;
+    private bool IsLoading = true;
+    private bool IsSaving = false;
+    private bool IsEditMode = false;
+    private UserFormModel UserForm = new();
+    private UserDto? CurrentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            IsLoading = true;
+            CurrentUser = await AuthService.GetCurrentUserAsync();
+            
+            if (CurrentUser?.Id != null)
+            {
+                Businesses = (await BusinessService.GetBusinessesByOwnerAsync(CurrentUser.Id)).ToList();
+                
+                // Load users and shops for all businesses
+                AllUsers.Clear();
+                AllShops.Clear();
+                foreach (var business in Businesses)
+                {
+                    var users = await UserService.GetUsersByBusinessAsync(business.Id);
+                    AllUsers.AddRange(users);
+                    
+                    var shops = await BusinessService.GetShopsByBusinessAsync(business.Id);
+                    AllShops.AddRange(shops);
+                }
+                
+                FilteredUsers = AllUsers.ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading data: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void FilterByBusiness(BusinessResponse? business)
+    {
+        SelectedBusiness = business;
+        FilteredUsers = business == null 
+            ? AllUsers.ToList() 
+            : AllUsers.Where(u => u.BusinessId == business.Id).ToList();
+        StateHasChanged();
+    }
+
+    private async Task ShowCreateUserModal()
+    {
+        IsEditMode = false;
+        UserForm = new UserFormModel();
+        AvailableShops.Clear();
+        if (SelectedBusiness != null)
+        {
+            UserForm.BusinessId = SelectedBusiness.Id;
+            await LoadShopsForBusiness(SelectedBusiness.Id);
+        }
+        await JSRuntime.InvokeVoidAsync("showModal", "userModal");
+    }
+
+    private async Task EditUser(UserDto user)
+    {
+        IsEditMode = true;
+        UserForm = new UserFormModel
+        {
+            Id = user.Id,
+            BusinessId = user.BusinessId ?? Guid.Empty,
+            ShopId = user.ShopIds.FirstOrDefault(),
+            Username = user.Username,
+            Email = user.Email,
+            Role = user.Role,
+            IsActive = user.IsActive
+        };
+        await LoadShopsForBusiness(user.BusinessId ?? Guid.Empty);
+        await JSRuntime.InvokeVoidAsync("showModal", "userModal");
+    }
+
+    private async Task OnBusinessChanged(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out var businessId))
+        {
+            await LoadShopsForBusiness(businessId);
+            UserForm.ShopId = null; // Reset shop selection
+        }
+        else
+        {
+            AvailableShops.Clear();
+        }
+        StateHasChanged();
+    }
+
+    private async Task LoadShopsForBusiness(Guid businessId)
+    {
+        try
+        {
+            var shops = await BusinessService.GetShopsByBusinessAsync(businessId);
+            AvailableShops = shops.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading shops: {ex.Message}");
+            AvailableShops.Clear();
+        }
+    }
+
+    private async Task SaveUser()
+    {
+        try
+        {
+            IsSaving = true;
+            
+            if (IsEditMode)
+            {
+                var updateRequest = new UpdateUserRequest
+                {
+                    Id = UserForm.Id,
+                    Email = UserForm.Email,
+                    FirstName = UserForm.Username, // Using username as first name for demo
+                    LastName = "User", // Default last name for demo
+                    IsActive = UserForm.IsActive
+                };
+                
+                await UserService.UpdateUserAsync(updateRequest);
+            }
+            else
+            {
+                var createRequest = new CreateUserRequest
+                {
+                    BusinessId = UserForm.BusinessId,
+                    ShopIds = UserForm.ShopId.HasValue ? new List<Guid> { UserForm.ShopId.Value } : new List<Guid>(),
+                    Username = UserForm.Username,
+                    Email = UserForm.Email,
+                    FirstName = UserForm.Username, // Using username as first name for demo
+                    LastName = "User", // Default last name for demo
+                    Password = UserForm.Password,
+                    Role = UserForm.Role
+                };
+                
+                await UserService.CreateUserAsync(createRequest);
+            }
+
+            await JSRuntime.InvokeVoidAsync("hideModal", "userModal");
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving user: {ex.Message}");
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private async Task ChangeUserRole(UserDto user)
+    {
+        // Implement role change functionality
+    }
+
+    private async Task DeleteUser(UserDto user)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete user '{user.Username}'?"))
+        {
+            try
+            {
+                await UserService.DeleteUserAsync(user.Id);
+                await LoadData();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting user: {ex.Message}");
+            }
+        }
+    }
+
+    private string GetBusinessName(Guid businessId)
+    {
+        return Businesses.FirstOrDefault(b => b.Id == businessId)?.Name ?? "Unknown";
+    }
+
+    private string GetShopName(Guid shopId)
+    {
+        return AllShops.FirstOrDefault(s => s.Id == shopId)?.Name ?? "Unknown";
+    }
+
+    private string GetRoleColor(UserRole role) => role switch
+    {
+        UserRole.BusinessOwner => "primary",
+        UserRole.ShopManager => "success",
+        UserRole.Cashier => "info",
+        UserRole.InventoryStaff => "warning",
+        _ => "secondary"
+    };
+
+    public class UserFormModel
+    {
+        public Guid Id { get; set; }
+        public Guid BusinessId { get; set; }
+        public Guid? ShopId { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public UserRole Role { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
+}

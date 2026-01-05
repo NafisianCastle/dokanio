@@ -1,0 +1,535 @@
+@page "/sales-analytics"
+@inject IDashboardApiService DashboardService
+@inject IAuthenticationService AuthService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Sales Analytics - Multi-Business POS</PageTitle>
+
+<div class="sales-analytics-container">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">Sales Analytics</h2>
+                    <p class="text-muted mb-0">Comprehensive sales performance analysis and insights</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-calendar me-2"></i>@CurrentPeriod
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" @onclick="() => SetPeriod(AnalyticsPeriod.Today)">Today</a></li>
+                            <li><a class="dropdown-item" href="#" @onclick="() => SetPeriod(AnalyticsPeriod.Week)">This Week</a></li>
+                            <li><a class="dropdown-item" href="#" @onclick="() => SetPeriod(AnalyticsPeriod.Month)">This Month</a></li>
+                            <li><a class="dropdown-item" href="#" @onclick="() => SetPeriod(AnalyticsPeriod.Quarter)">This Quarter</a></li>
+                            <li><a class="dropdown-item" href="#" @onclick="() => SetPeriod(AnalyticsPeriod.Year)">This Year</a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-outline-primary" @onclick="RefreshData">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh
+                    </button>
+                    <button class="btn btn-primary" @onclick="ExportReport">
+                        <i class="fas fa-download me-2"></i>Export
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (AnalyticsData != null)
+    {
+        <!-- Key Metrics -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card metric-card bg-gradient-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div class="metric-value">@AnalyticsData.TotalRevenue.ToString("C")</div>
+                                <div class="metric-label">Total Revenue</div>
+                                <div class="metric-change">
+                                    <i class="fas @(AnalyticsData.RevenueGrowth >= 0 ? "fa-arrow-up" : "fa-arrow-down")"></i>
+                                    @Math.Abs(AnalyticsData.RevenueGrowth).ToString("F1")%
+                                </div>
+                            </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-dollar-sign fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card metric-card bg-gradient-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div class="metric-value">@AnalyticsData.TotalTransactions.ToString("N0")</div>
+                                <div class="metric-label">Total Transactions</div>
+                                <div class="metric-change">
+                                    <i class="fas @(AnalyticsData.TransactionGrowth >= 0 ? "fa-arrow-up" : "fa-arrow-down")"></i>
+                                    @Math.Abs(AnalyticsData.TransactionGrowth).ToString("F1")%
+                                </div>
+                            </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-shopping-cart fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card metric-card bg-gradient-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div class="metric-value">@AnalyticsData.AverageOrderValue.ToString("C")</div>
+                                <div class="metric-label">Average Order Value</div>
+                                <div class="metric-change">
+                                    <i class="fas @(AnalyticsData.AOVGrowth >= 0 ? "fa-arrow-up" : "fa-arrow-down")"></i>
+                                    @Math.Abs(AnalyticsData.AOVGrowth).ToString("F1")%
+                                </div>
+                            </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-receipt fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card metric-card bg-gradient-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div class="metric-value">@AnalyticsData.ItemsSold.ToString("N0")</div>
+                                <div class="metric-label">Items Sold</div>
+                                <div class="metric-change">
+                                    <i class="fas @(AnalyticsData.ItemsGrowth >= 0 ? "fa-arrow-up" : "fa-arrow-down")"></i>
+                                    @Math.Abs(AnalyticsData.ItemsGrowth).ToString("F1")%
+                                </div>
+                            </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-boxes fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <!-- Revenue Trend Chart -->
+            <div class="col-xl-8 mb-3">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Revenue Trend</h5>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <input type="radio" class="btn-check" name="chartType" id="revenue" checked @onchange="() => SetChartType(ChartType.Revenue)">
+                            <label class="btn btn-outline-primary" for="revenue">Revenue</label>
+                            
+                            <input type="radio" class="btn-check" name="chartType" id="transactions" @onchange="() => SetChartType(ChartType.Transactions)">
+                            <label class="btn btn-outline-primary" for="transactions">Transactions</label>
+                            
+                            <input type="radio" class="btn-check" name="chartType" id="items" @onchange="() => SetChartType(ChartType.Items)">
+                            <label class="btn btn-outline-primary" for="items">Items</label>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="trendChart" style="height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Categories -->
+            <div class="col-xl-4 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Top Categories</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (AnalyticsData.TopCategories.Any())
+                        {
+                            @foreach (var category in AnalyticsData.TopCategories.Take(8))
+                            {
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold">@category.CategoryName</div>
+                                        <div class="progress mt-1" style="height: 4px;">
+                                            <div class="progress-bar" role="progressbar" style="width: @(category.Percentage)%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end ms-3">
+                                        <div class="fw-semibold">@category.Revenue.ToString("C")</div>
+                                        <div class="small text-muted">@category.Percentage.ToString("F1")%</div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-chart-pie fa-2x mb-2"></i>
+                                <p>No category data available</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Analytics -->
+        <div class="row mb-4">
+            <!-- Shop Performance -->
+            <div class="col-xl-6 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Shop Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (AnalyticsData.ShopPerformances.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Shop</th>
+                                            <th>Revenue</th>
+                                            <th>Transactions</th>
+                                            <th>Growth</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var shop in AnalyticsData.ShopPerformances)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="fw-semibold">@shop.ShopName</div>
+                                                </td>
+                                                <td>@shop.Revenue.ToString("C")</td>
+                                                <td>@shop.Transactions</td>
+                                                <td>
+                                                    <span class="badge bg-@(shop.Growth >= 0 ? "success" : "danger")">
+                                                        @shop.Growth.ToString("F1")%
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-store fa-2x mb-2"></i>
+                                <p>No shop performance data</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="col-xl-6 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Payment Methods</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (AnalyticsData.PaymentMethods.Any())
+                        {
+                            @foreach (var payment in AnalyticsData.PaymentMethods)
+                            {
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas @GetPaymentIcon(payment.Method) me-3 text-muted"></i>
+                                        <div>
+                                            <div class="fw-semibold">@payment.Method</div>
+                                            <div class="progress mt-1" style="height: 4px; width: 100px;">
+                                                <div class="progress-bar bg-@GetPaymentColor(payment.Method)" role="progressbar" style="width: @(payment.Percentage)%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-semibold">@payment.Amount.ToString("C")</div>
+                                        <div class="small text-muted">@payment.Percentage.ToString("F1")%</div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-credit-card fa-2x mb-2"></i>
+                                <p>No payment method data</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Products -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Top Selling Products</h5>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <input type="radio" class="btn-check" name="productSort" id="byRevenue" checked @onchange="() => SetProductSort(ProductSort.Revenue)">
+                            <label class="btn btn-outline-primary" for="byRevenue">By Revenue</label>
+                            
+                            <input type="radio" class="btn-check" name="productSort" id="byQuantity" @onchange="() => SetProductSort(ProductSort.Quantity)">
+                            <label class="btn btn-outline-primary" for="byQuantity">By Quantity</label>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if (AnalyticsData.TopProducts.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Category</th>
+                                            <th>Shop</th>
+                                            <th>Quantity Sold</th>
+                                            <th>Revenue</th>
+                                            <th>Avg. Price</th>
+                                            <th>Growth</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var product in GetSortedProducts().Take(10))
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="fw-semibold">@product.ProductName</div>
+                                                    @if (!string.IsNullOrEmpty(product.Barcode))
+                                                    {
+                                                        <div class="small text-muted">@product.Barcode</div>
+                                                    }
+                                                </td>
+                                                <td>@product.Category</td>
+                                                <td>@product.ShopName</td>
+                                                <td>@product.QuantitySold.ToString("N0")</td>
+                                                <td>@product.Revenue.ToString("C")</td>
+                                                <td>@product.AveragePrice.ToString("C")</td>
+                                                <td>
+                                                    <span class="badge bg-@(product.Growth >= 0 ? "success" : "danger")">
+                                                        @product.Growth.ToString("F1")%
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                                <p>No product sales data available</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Unable to load sales analytics data. Please try refreshing the page.
+        </div>
+    }
+</div>
+
+@code {
+    private global::Shared.Core.DTOs.SalesAnalytics? AnalyticsData;
+    private bool IsLoading = true;
+    private UserDto? CurrentUser;
+    private AnalyticsPeriod CurrentAnalyticsPeriod = AnalyticsPeriod.Month;
+    private ChartType CurrentChartType = ChartType.Revenue;
+    private ProductSort CurrentProductSort = ProductSort.Revenue;
+
+    private string CurrentPeriod => CurrentAnalyticsPeriod switch
+    {
+        AnalyticsPeriod.Today => "Today",
+        AnalyticsPeriod.Week => "This Week",
+        AnalyticsPeriod.Month => "This Month",
+        AnalyticsPeriod.Quarter => "This Quarter",
+        AnalyticsPeriod.Year => "This Year",
+        _ => "This Month"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && AnalyticsData != null)
+        {
+            await RenderChart();
+        }
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            IsLoading = true;
+            CurrentUser = await AuthService.GetCurrentUserAsync();
+            
+            if (CurrentUser?.BusinessId != null)
+            {
+                var dateRange = GetDateRange(CurrentAnalyticsPeriod);
+                AnalyticsData = await DashboardService.GetSalesAnalyticsAsync(CurrentUser.BusinessId.Value, dateRange);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading sales analytics: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task RefreshData()
+    {
+        await LoadData();
+        if (AnalyticsData != null)
+        {
+            await RenderChart();
+        }
+    }
+
+    private async Task SetPeriod(AnalyticsPeriod period)
+    {
+        CurrentAnalyticsPeriod = period;
+        await RefreshData();
+    }
+
+    private async Task SetChartType(ChartType chartType)
+    {
+        CurrentChartType = chartType;
+        await RenderChart();
+    }
+
+    private void SetProductSort(ProductSort sort)
+    {
+        CurrentProductSort = sort;
+        StateHasChanged();
+    }
+
+    private async Task RenderChart()
+    {
+        if (AnalyticsData == null) return;
+
+        var chartData = CurrentChartType switch
+        {
+            ChartType.Revenue => AnalyticsData.DailyTrends.Select(d => new { x = d.Date.ToString("MMM dd"), y = d.Revenue }).ToArray(),
+            ChartType.Transactions => AnalyticsData.DailyTrends.Select(d => new { x = d.Date.ToString("MMM dd"), y = d.Transactions }).ToArray(),
+            ChartType.Items => AnalyticsData.DailyTrends.Select(d => new { x = d.Date.ToString("MMM dd"), y = d.ItemsSold }).ToArray(),
+            _ => Array.Empty<object>()
+        };
+
+        await JSRuntime.InvokeVoidAsync("renderTrendChart", chartData, CurrentChartType.ToString());
+    }
+
+    private async Task ExportReport()
+    {
+        // Implement export functionality
+        await JSRuntime.InvokeVoidAsync("alert", "Export functionality will be implemented soon.");
+    }
+
+    private IEnumerable<global::Shared.Core.DTOs.TopProductAnalytics> GetSortedProducts()
+    {
+        if (AnalyticsData?.TopProducts == null) return Enumerable.Empty<global::Shared.Core.DTOs.TopProductAnalytics>();
+
+        return CurrentProductSort switch
+        {
+            ProductSort.Revenue => AnalyticsData.TopProducts.OrderByDescending(p => p.Revenue),
+            ProductSort.Quantity => AnalyticsData.TopProducts.OrderByDescending(p => p.QuantitySold),
+            _ => AnalyticsData.TopProducts.OrderByDescending(p => p.Revenue)
+        };
+    }
+
+    private global::Shared.Core.DTOs.DateRange GetDateRange(AnalyticsPeriod period)
+    {
+        var now = DateTime.UtcNow;
+        return period switch
+        {
+            AnalyticsPeriod.Today => new global::Shared.Core.DTOs.DateRange { StartDate = now.Date, EndDate = now.Date.AddDays(1).AddTicks(-1) },
+            AnalyticsPeriod.Week => new global::Shared.Core.DTOs.DateRange { StartDate = now.Date.AddDays(-(int)now.DayOfWeek), EndDate = now.Date.AddDays(7 - (int)now.DayOfWeek).AddTicks(-1) },
+            AnalyticsPeriod.Month => new global::Shared.Core.DTOs.DateRange { StartDate = new DateTime(now.Year, now.Month, 1), EndDate = new DateTime(now.Year, now.Month, 1).AddMonths(1).AddTicks(-1) },
+            AnalyticsPeriod.Quarter => new global::Shared.Core.DTOs.DateRange { StartDate = new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1), EndDate = new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1).AddMonths(3).AddTicks(-1) },
+            AnalyticsPeriod.Year => new global::Shared.Core.DTOs.DateRange { StartDate = new DateTime(now.Year, 1, 1), EndDate = new DateTime(now.Year, 12, 31, 23, 59, 59) },
+            _ => new global::Shared.Core.DTOs.DateRange { StartDate = new DateTime(now.Year, now.Month, 1), EndDate = new DateTime(now.Year, now.Month, 1).AddMonths(1).AddTicks(-1) }
+        };
+    }
+
+    private string GetPaymentIcon(string method) => method.ToLower() switch
+    {
+        "cash" => "fa-money-bill-wave",
+        "credit card" => "fa-credit-card",
+        "debit card" => "fa-credit-card",
+        "mobile payment" => "fa-mobile-alt",
+        "bank transfer" => "fa-university",
+        _ => "fa-money-bill"
+    };
+
+    private string GetPaymentColor(string method) => method.ToLower() switch
+    {
+        "cash" => "success",
+        "credit card" => "primary",
+        "debit card" => "info",
+        "mobile payment" => "warning",
+        "bank transfer" => "secondary",
+        _ => "secondary"
+    };
+
+    private enum AnalyticsPeriod
+    {
+        Today,
+        Week,
+        Month,
+        Quarter,
+        Year
+    }
+
+    private enum ChartType
+    {
+        Revenue,
+        Transactions,
+        Items
+    }
+
+    private enum ProductSort
+    {
+        Revenue,
+        Quantity
+    }
+}
