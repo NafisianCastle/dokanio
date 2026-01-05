@@ -94,6 +94,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IModelTrainingService, ModelTrainingService>();
         services.AddScoped<IModelPerformanceMonitoringService, ModelPerformanceMonitoringService>();
         
+        // Register performance optimization services
+        services.AddScoped<IPerformanceOptimizationService, PerformanceOptimizationService>();
+        services.AddScoped<ISystemHealthMonitoringService, SystemHealthMonitoringService>();
+        services.AddScoped<IDatabaseQueryOptimizationService, DatabaseQueryOptimizationService>();
+        services.AddScoped<ICachingStrategyService, CachingStrategyService>();
+        
         // Register background services
         services.AddHostedService<SessionCleanupService>();
         
@@ -230,6 +236,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFeatureEngineeringService, FeatureEngineeringService>();
         services.AddScoped<IModelTrainingService, ModelTrainingService>();
         services.AddScoped<IModelPerformanceMonitoringService, ModelPerformanceMonitoringService>();
+        
+        // Register performance optimization services
+        services.AddScoped<IPerformanceOptimizationService, PerformanceOptimizationService>();
+        services.AddScoped<ISystemHealthMonitoringService, SystemHealthMonitoringService>();
+        services.AddScoped<IDatabaseQueryOptimizationService, DatabaseQueryOptimizationService>();
+        services.AddScoped<ICachingStrategyService, CachingStrategyService>();
         
         services.AddScoped<IAuthenticationService>(provider => new AuthenticationService(
             provider.GetRequiredService<IUserRepository>(),

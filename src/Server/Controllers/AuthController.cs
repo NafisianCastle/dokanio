@@ -259,13 +259,10 @@ public class AuthController : ControllerBase
 
             return Ok(new SyncApiResult<bool>
             {
-            // Remove newline characters to mitigate log forging
-            var sanitized = value.Replace("\r", string.Empty)
-                                 .Replace("\n", string.Empty);
-
-            // Bound log size to prevent log flooding
-            return sanitized.Length <= 200 ? sanitized : sanitized.Substring(0, 200);
-        }
+                Success = true,
+                Message = "Permission validation completed",
+                StatusCode = 200,
+                Data = hasPermission
             });
         }
         catch (Exception ex)

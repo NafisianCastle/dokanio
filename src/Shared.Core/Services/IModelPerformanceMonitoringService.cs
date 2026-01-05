@@ -210,19 +210,6 @@ public class ModelHealthSummary
 }
 
 /// <summary>
-/// Health issue
-/// </summary>
-public class HealthIssue
-{
-    public HealthIssueType Type { get; set; }
-    public string Description { get; set; } = string.Empty;
-    public HealthIssueSeverity Severity { get; set; }
-    public DateTime DetectedAt { get; set; } = DateTime.UtcNow;
-    public string RecommendedAction { get; set; } = string.Empty;
-    public Dictionary<string, object> IssueMetadata { get; set; } = new();
-}
-
-/// <summary>
 /// Monitoring schedule configuration
 /// </summary>
 public class MonitoringScheduleConfig
@@ -287,12 +274,4 @@ public enum HealthIssueType
     HighErrorRate,
     InsufficientData,
     ModelStaleness
-}
-
-public enum HealthIssueSeverity
-{
-    Low,
-    Medium,
-    High,
-    Critical
 }

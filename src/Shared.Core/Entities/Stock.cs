@@ -18,6 +18,7 @@ public class Stock : ISoftDeletable
     public int Quantity { get; set; }
     
     public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     
     public Guid DeviceId { get; set; }
     

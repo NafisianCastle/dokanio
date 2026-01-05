@@ -79,11 +79,13 @@ public class SystemHealthResult
 /// </summary>
 public class HealthIssue
 {
+    public string Type { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public HealthSeverity Severity { get; set; }
     public bool IsResolved { get; set; }
     public string? ResolutionAction { get; set; }
+    public string RecommendedAction { get; set; } = string.Empty;
 }
 
 /// <summary>

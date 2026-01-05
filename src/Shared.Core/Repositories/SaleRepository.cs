@@ -291,4 +291,31 @@ public class SaleRepository : Repository<Sale>, ISaleRepository
             throw;
         }
     }
+
+    /// <summary>
+    /// Gets all sales for a specific shop from Local_Storage
+    /// </summary>
+    public async Task<IEnumerable<Sale>> GetSalesByShopAsync(Guid shopId)
+    {
+        try
+        {
+            _logger.LogDebug("Getting all sales for shop {ShopId} from Local_Storage", shopId);
+            
+            // Local-first: Query Local_Storage only
+            var shopSales = await _dbSet
+                .Include(s => s.Items)
+                .Where(s => s.ShopId == shopId)
+                .OrderByDescending(s => s.CreatedAt)
+                .ToListAsync();
+            
+            _logger.LogDebug("Found {Count} sales for shop {ShopId} in Local_Storage", shopSales.Count, shopId);
+            
+            return shopSales;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting sales for shop {ShopId} from Local_Storage", shopId);
+            throw;
+        }
+    }
 }

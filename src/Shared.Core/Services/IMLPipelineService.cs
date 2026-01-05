@@ -197,13 +197,16 @@ public class ModelTrainingResult
 {
     public bool Success { get; set; }
     public string Message { get; set; } = string.Empty;
+    public string ErrorMessage { get; set; } = string.Empty;
     public string ModelId { get; set; } = string.Empty;
+    public object? Model { get; set; }
     public MLModelType ModelType { get; set; }
     public ModelPerformanceMetrics PerformanceMetrics { get; set; } = new();
     public DateTime TrainingStartedAt { get; set; }
     public DateTime TrainingCompletedAt { get; set; }
     public TimeSpan TrainingDuration => TrainingCompletedAt - TrainingStartedAt;
     public Dictionary<string, object> ModelMetadata { get; set; } = new();
+    public Dictionary<string, object> TrainingMetadata { get; set; } = new();
 }
 
 /// <summary>
@@ -213,11 +216,15 @@ public class ModelDeploymentResult
 {
     public bool Success { get; set; }
     public string Message { get; set; } = string.Empty;
+    public string ErrorMessage { get; set; } = string.Empty;
+    public string ModelId { get; set; } = string.Empty;
+    public string EndpointUrl { get; set; } = string.Empty;
     public List<string> DeployedModelIds { get; set; } = new();
     public DeploymentEnvironment Environment { get; set; }
     public DateTime DeployedAt { get; set; } = DateTime.UtcNow;
     public string DeploymentVersion { get; set; } = string.Empty;
     public Dictionary<string, string> EndpointUrls { get; set; } = new();
+    public Dictionary<string, object> DeploymentMetadata { get; set; } = new();
 }
 
 /// <summary>

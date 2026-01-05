@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Shared.Core.DTOs;
 using System.Text.Json;
 
 namespace Shared.Core.Services;

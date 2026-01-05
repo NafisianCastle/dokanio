@@ -63,4 +63,11 @@ public interface ISaleRepository : IRepository<Sale>
     /// <param name="to">End date (inclusive)</param>
     /// <returns>Collection of sales within the date range for the shop</returns>
     Task<IEnumerable<Sale>> GetSalesByShopAndDateRangeAsync(Guid shopId, DateTime from, DateTime to);
+    
+    /// <summary>
+    /// Gets all sales for a specific shop
+    /// </summary>
+    /// <param name="shopId">Shop identifier</param>
+    /// <returns>Collection of sales for the shop</returns>
+    Task<IEnumerable<Sale>> GetSalesByShopAsync(Guid shopId);
 }

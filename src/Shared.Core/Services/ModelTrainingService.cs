@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Shared.Core.DTOs;
 using System.Text.Json;
 
 namespace Shared.Core.Services;
@@ -56,7 +57,7 @@ public class ModelTrainingService : IModelTrainingService
         }
     }
 
-    public async Task<ModelTrainingOperationResult> TrainSalesForecastingModelAsync(string modelId, ForecastingFeatureData trainingData, SalesForecastingTrainingConfig config)
+    public async Task<ModelTrainingResult> TrainSalesForecastingModelAsync(string modelId, ForecastingFeatureData trainingData, SalesForecastingTrainingConfig config)
     {
         _logger.LogInformation("Training sales forecasting model {ModelId} using {Algorithm}", modelId, config.Algorithm);
 
@@ -67,7 +68,7 @@ public class ModelTrainingService : IModelTrainingService
             // Validate training data
             if (!trainingData.TrainingSet.Any())
             {
-                return new ModelTrainingOperationResult
+                return new ModelTrainingResult
                 {
                     Success = false,
                     ErrorMessage = "Training data is empty"
@@ -88,11 +89,14 @@ public class ModelTrainingService : IModelTrainingService
             _logger.LogInformation("Sales forecasting model {ModelId} trained successfully in {Duration}ms. Accuracy: {Accuracy}",
                 modelId, trainingDuration.TotalMilliseconds, performanceMetrics.Accuracy);
 
-            return new ModelTrainingOperationResult
+            return new ModelTrainingResult
             {
                 Success = true,
-                Model = trainedModel,
+                ModelId = modelId,
+                ModelType = MLModelType.SalesForecasting,
                 PerformanceMetrics = performanceMetrics,
+                TrainingStartedAt = startTime,
+                TrainingCompletedAt = DateTime.UtcNow,
                 TrainingMetadata = new Dictionary<string, object>
                 {
                     ["Algorithm"] = config.Algorithm.ToString(),
@@ -106,15 +110,17 @@ public class ModelTrainingService : IModelTrainingService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error training sales forecasting model {ModelId}", modelId);
-            return new ModelTrainingOperationResult
+            return new ModelTrainingResult
             {
                 Success = false,
-                ErrorMessage = $"Training failed: {ex.Message}"
+                ErrorMessage = $"Training failed: {ex.Message}",
+                ModelId = modelId,
+                ModelType = MLModelType.SalesForecasting
             };
         }
     }
 
-    public async Task<ModelTrainingOperationResult> TrainRecommendationModelAsync(string modelId, RecommendationFeatureData trainingData, RecommendationTrainingConfig config)
+    public async Task<ModelTrainingResult> TrainRecommendationModelAsync(string modelId, RecommendationFeatureData trainingData, RecommendationTrainingConfig config)
     {
         _logger.LogInformation("Training recommendation model {ModelId} using {Algorithm}", modelId, config.Algorithm);
 
@@ -125,10 +131,12 @@ public class ModelTrainingService : IModelTrainingService
             // Validate training data
             if (!trainingData.TrainingSet.Any())
             {
-                return new ModelTrainingOperationResult
+                return new ModelTrainingResult
                 {
                     Success = false,
-                    ErrorMessage = "Training data is empty"
+                    ErrorMessage = "Training data is empty",
+                    ModelId = modelId,
+                    ModelType = MLModelType.ProductRecommendation
                 };
             }
 
@@ -146,11 +154,14 @@ public class ModelTrainingService : IModelTrainingService
             _logger.LogInformation("Recommendation model {ModelId} trained successfully in {Duration}ms. Precision@10: {Precision}",
                 modelId, trainingDuration.TotalMilliseconds, performanceMetrics.Precision);
 
-            return new ModelTrainingOperationResult
+            return new ModelTrainingResult
             {
                 Success = true,
-                Model = trainedModel,
+                ModelId = modelId,
+                ModelType = MLModelType.ProductRecommendation,
                 PerformanceMetrics = performanceMetrics,
+                TrainingStartedAt = startTime,
+                TrainingCompletedAt = DateTime.UtcNow,
                 TrainingMetadata = new Dictionary<string, object>
                 {
                     ["Algorithm"] = config.Algorithm.ToString(),
@@ -165,15 +176,17 @@ public class ModelTrainingService : IModelTrainingService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error training recommendation model {ModelId}", modelId);
-            return new ModelTrainingOperationResult
+            return new ModelTrainingResult
             {
                 Success = false,
-                ErrorMessage = $"Training failed: {ex.Message}"
+                ErrorMessage = $"Training failed: {ex.Message}",
+                ModelId = modelId,
+                ModelType = MLModelType.ProductRecommendation
             };
         }
     }
 
-    public async Task<ModelDeploymentOperationResult> DeployModelAsync(string modelId, ModelDeploymentConfig deploymentConfig)
+    public async Task<ModelDeploymentResult> DeployModelAsync(string modelId, ModelDeploymentConfig deploymentConfig)
     {
         _logger.LogInformation("Deploying model {ModelId} to {Environment}", modelId, deploymentConfig.Environment);
 
@@ -182,10 +195,11 @@ public class ModelTrainingService : IModelTrainingService
             // Check if model exists
             if (!_modelArtifacts.ContainsKey(modelId))
             {
-                return new ModelDeploymentOperationResult
+                return new ModelDeploymentResult
                 {
                     Success = false,
-                    ErrorMessage = $"Model {modelId} not found"
+                    ErrorMessage = $"Model {modelId} not found",
+                    ModelId = modelId
                 };
             }
 
@@ -202,10 +216,13 @@ public class ModelTrainingService : IModelTrainingService
 
             _logger.LogInformation("Model {ModelId} deployed successfully to {EndpointUrl}", modelId, endpointUrl);
 
-            return new ModelDeploymentOperationResult
+            return new ModelDeploymentResult
             {
                 Success = true,
+                ModelId = modelId,
                 EndpointUrl = endpointUrl,
+                Environment = deploymentConfig.Environment,
+                DeployedAt = DateTime.UtcNow,
                 DeploymentMetadata = new Dictionary<string, object>
                 {
                     ["Environment"] = deploymentConfig.Environment.ToString(),
@@ -217,10 +234,11 @@ public class ModelTrainingService : IModelTrainingService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deploying model {ModelId}", modelId);
-            return new ModelDeploymentOperationResult
+            return new ModelDeploymentResult
             {
                 Success = false,
-                ErrorMessage = $"Deployment failed: {ex.Message}"
+                ErrorMessage = $"Deployment failed: {ex.Message}",
+                ModelId = modelId
             };
         }
     }
