@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Shared.Core.DTOs;
+using System.Collections.Concurrent;
 using System.Text.Json;
 
 namespace Shared.Core.Services;
