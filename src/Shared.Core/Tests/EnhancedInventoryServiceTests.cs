@@ -32,7 +32,7 @@ public class EnhancedInventoryServiceTests : IDisposable
         _licenseService = _serviceProvider.GetRequiredService<ILicenseService>();
         
         // Create a valid license for testing
-        CreateValidLicenseAsync().Wait();
+        CreateValidLicenseAsync().GetAwaiter().GetResult();
     }
 
     [Fact]

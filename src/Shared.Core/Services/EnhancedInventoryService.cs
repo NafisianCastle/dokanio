@@ -36,6 +36,8 @@ public class EnhancedInventoryService : InventoryService, IEnhancedInventoryServ
 
     public async Task<List<ReorderRecommendation>> PredictLowStockAsync(Guid shopId, int daysAhead = 30)
     {
+        if (daysAhead < 0)
+            throw new ArgumentException("daysAhead must be non-negative", nameof(daysAhead));
         _logger.LogInformation("Predicting low stock for shop {ShopId} for {DaysAhead} days ahead", shopId, daysAhead);
 
         var shop = await _shopRepository.GetShopWithBusinessAsync(shopId);

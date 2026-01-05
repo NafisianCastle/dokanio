@@ -382,14 +382,17 @@ public class AIRecommendationRelevancePropertyTest : IDisposable
             var itemCount = random.Next(1, 4);
             for (int j = 0; j < itemCount && j < shopData.ProductIds.Count; j++)
             {
+                var quantity = random.Next(1, 5);
+                var unitPrice = 10.00m + j;
+
                 var saleItem = new SaleItem
                 {
                     Id = Guid.NewGuid(),
                     SaleId = sale.Id,
                     ProductId = shopData.ProductIds[j],
-                    Quantity = random.Next(1, 5),
-                    UnitPrice = 10.00m + j,
-                    TotalPrice = (10.00m + j) * random.Next(1, 5)
+                    Quantity = quantity,
+                    UnitPrice = unitPrice,
+                    TotalPrice = unitPrice * quantity
                 };
                 
                 _context.SaleItems.Add(saleItem);
