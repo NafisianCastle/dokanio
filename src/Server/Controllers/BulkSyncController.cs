@@ -381,7 +381,8 @@ public class BulkSyncController : ControllerBase
                 catch (Exception ex)
                 {
                     result.Errors.Add($"Error processing device {deviceData.DeviceId}: {ex.Message}");
-                     _logger.LogError(ex, "Error processing sync data for device {DeviceId}", deviceData.DeviceId);
+                    _logger.LogError(ex, "Error processing sync data for device {DeviceId}", deviceData.DeviceId);
+                    result.FailedRecords += deviceData.Sales.Count + deviceData.StockUpdates.Count;
                 }
             }
 
