@@ -1251,7 +1251,7 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
                     IssueType = "Invalid Sales Data",
                     Description = $"{invalidSales} sales records have missing or invalid data",
                     AffectedRecords = invalidSales,
-                    Severity = invalidSales > totalSales * 0.1 ? "High" : "Medium",
+                    Severity = invalidSales > totalSales * 0.1 ? DataQualityIssueSeverity.High : DataQualityIssueSeverity.Medium,
                     AffectedShopIds = new List<Guid> { shopId }
                 });
             }
@@ -1278,7 +1278,7 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
                     IssueType = "Invalid Product Data",
                     Description = $"{invalidProducts} products have missing names or invalid prices",
                     AffectedRecords = invalidProducts,
-                    Severity = invalidProducts > totalProducts * 0.1 ? "High" : "Medium",
+                    Severity = invalidProducts > totalProducts * 0.1 ? DataQualityIssueSeverity.High : DataQualityIssueSeverity.Medium,
                     AffectedShopIds = new List<Guid> { shopId }
                 });
             }
@@ -1290,7 +1290,7 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
         {
             recommendations.Add("Review data entry processes to improve data quality");
         }
-        if (issues.Any(i => i.Severity == "High"))
+        if (issues.Any(i => i.Severity == DataQualityIssueSeverity.High))
         {
             recommendations.Add("Address high-severity data quality issues immediately");
         }

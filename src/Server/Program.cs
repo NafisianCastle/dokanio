@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Server.Data;
 using Server.Services;
+using Shared.Core.DependencyInjection;
+using Shared.Core.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,6 +45,11 @@ builder.Services.AddDbContext<ServerDbContext>(options =>
     options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
     options.EnableDetailedErrors(builder.Environment.IsDevelopment());
 });
+
+// Add shared core services for server
+var sqliteConnectionString = builder.Configuration.GetConnectionString("SqliteConnection") 
+    ?? "Data Source=server_pos.db";
+builder.Services.AddSharedCore(sqliteConnectionString);
 
 // Configure JWT authentication
 var jwtSecret = builder.Configuration["Jwt:Secret"] 
@@ -86,12 +93,6 @@ builder.Services.AddAuthorization();
 // Register application services
 builder.Services.AddScoped<IJwtService, JwtService>();
 
-// Register multi-business services (these would need to be implemented)
-// builder.Services.AddScoped<IBusinessManagementService, BusinessManagementService>();
-// builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-// builder.Services.AddScoped<IDashboardService, DashboardService>();
-// builder.Services.AddScoped<IMultiTenantSyncService, MultiTenantSyncService>();
-
 // Add CORS for development
 builder.Services.AddCors(options =>
 {
@@ -115,6 +116,50 @@ builder.Services.AddLogging(logging =>
 });
 
 var app = builder.Build();
+
+// Initialize the server application
+try
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Initializing server application with multi-business support");
+    
+    var startupService = app.Services.GetRequiredService<IMultiBusinessStartupService>();
+    var initResult = await startupService.InitializeSystemAsync();
+    
+    if (!initResult.IsSuccess)
+    {
+        logger.LogError("Server initialization failed: {Errors}", string.Join(", ", initResult.Errors));
+        // Continue anyway for development, but log the issues
+    }
+    else
+    {
+        logger.LogInformation("Server initialized successfully in {Duration}ms", 
+            initResult.TotalInitializationTime.TotalMilliseconds);
+    }
+}
+catch (Exception ex)
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "Error during server initialization");
+}
+
+// Ensure database is created and migrated
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ServerDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    
+    try
+    {
+        await context.Database.EnsureCreatedAsync();
+        logger.LogInformation("Server database initialized successfully");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error initializing server database");
+        throw;
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -141,24 +186,6 @@ app.Use(async (context, next) =>
     
     await next();
 });
-
-// Ensure database is created and migrated
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<ServerDbContext>();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    
-    try
-    {
-        await context.Database.EnsureCreatedAsync();
-        logger.LogInformation("Database initialized successfully");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Error initializing database");
-        throw;
-    }
-}
 
 app.UseHttpsRedirection();
 
