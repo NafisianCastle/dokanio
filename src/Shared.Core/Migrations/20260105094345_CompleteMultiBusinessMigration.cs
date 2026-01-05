@@ -153,7 +153,7 @@ namespace Shared.Core.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
                     Type = table.Column<int>(type: "INTEGER", nullable: false),
-                    OwnerId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    OwnerId = table.Column<Guid>(type: "TEXT", nullable: true),
                     Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
                     Address = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
                     Phone = table.Column<string>(type: "TEXT", maxLength: 20, nullable: true),
