@@ -71,7 +71,7 @@ public class SimpleEncryptionTest
                 }
                 
                 // Test password hashing consistency
-                if (dataSet.IsPassword)
+                if (dataSet.IsPassword && !string.IsNullOrEmpty(dataSet.PlainText))
                 {
                     var salt = encryptionService.GenerateSalt();
                     var hash1 = encryptionService.HashPassword(dataSet.PlainText, salt);

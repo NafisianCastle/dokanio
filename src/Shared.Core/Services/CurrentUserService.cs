@@ -72,7 +72,9 @@ public class CurrentUserService : ICurrentUserService
         if (_currentSession == null)
             return true;
 
-        return await _sessionService.IsSessionExpiredAsync(_currentSession.SessionToken, inactivityTimeoutMinutes);
+        // Get the current user's role for role-based timeout
+        var userRole = _currentUser?.Role;
+        return await _sessionService.IsSessionExpiredAsync(_currentSession.SessionToken, userRole);
     }
 
     public Guid GetDeviceId() => _deviceId;
