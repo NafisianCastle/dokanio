@@ -46,12 +46,18 @@ public class AuthController : ControllerBase
             request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
             request.UserAgent = HttpContext.Request.Headers["User-Agent"].ToString();
 
+            // Sanitize IP address before logging to prevent log forging
+            var sanitizedIpAddress = (request.IpAddress ?? string.Empty)
+                .Replace(Environment.NewLine, string.Empty)
+                .Replace("\n", string.Empty)
+                .Replace("\r", string.Empty);
+
             var result = await _authService.AuthenticateAsync(request);
 
             if (!result.IsSuccess)
             {
-                _logger.LogWarning("Authentication failed for user {Username} from IP {IpAddress}", 
-                    request.Username, request.IpAddress);
+                _logger.LogWarning("Authentication failed for user {Username} from IP {IpAddress}",
+                    request.Username, sanitizedIpAddress);
 
                 return Unauthorized(new SyncApiResult<AuthenticationResponse>
                 {
@@ -62,8 +68,8 @@ public class AuthController : ControllerBase
                 });
             }
 
-            _logger.LogInformation("User {UserId} authenticated successfully from IP {IpAddress}", 
-                result.User?.Id, request.IpAddress);
+            _logger.LogInformation("User {UserId} authenticated successfully from IP {IpAddress}",
+                result.User?.Id, sanitizedIpAddress);
 
             return Ok(new SyncApiResult<AuthenticationResponse>
             {
