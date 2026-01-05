@@ -268,7 +268,14 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
             "0", 
             keyboard: Keyboard.Numeric);
 
-        if (decimal.TryParse(discountPercentage, out var discount) && discount >= 0 && discount <= 100)
+        if (string.IsNullOrWhiteSpace(discountPercentage))
+            return;
+
+        if (decimal.TryParse(
+                discountPercentage,
+                System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out var discount) && discount >= 0 && discount <= 100)
         {
             item.DiscountPercentage = discount;
             await CalculateTotal();
