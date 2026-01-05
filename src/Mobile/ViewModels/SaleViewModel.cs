@@ -4,26 +4,39 @@ using CommunityToolkit.Mvvm.Input;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Services;
+using Shared.Core.DTOs;
+using Mobile.Services;
+using AppPermissions = Mobile.Services.Permissions;
 
 namespace Mobile.ViewModels;
 
 public partial class SaleViewModel : BaseViewModel, IQueryAttributable
 {
-    private readonly ISaleService _saleService;
+    private readonly IEnhancedSalesService _enhancedSalesService;
     private readonly IProductService _productService;
     private readonly IPrinterService _printerService;
     private readonly IReceiptService _receiptService;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IUserContextService _userContextService;
+    private readonly IBusinessManagementService _businessManagementService;
 
     public SaleViewModel(
-        ISaleService saleService, 
+        IEnhancedSalesService enhancedSalesService,
         IProductService productService,
         IPrinterService printerService,
-        IReceiptService receiptService)
+        IReceiptService receiptService,
+        ICurrentUserService currentUserService,
+        IUserContextService userContextService,
+        IBusinessManagementService businessManagementService)
     {
-        _saleService = saleService;
+        _enhancedSalesService = enhancedSalesService;
         _productService = productService;
         _printerService = printerService;
         _receiptService = receiptService;
+        _currentUserService = currentUserService;
+        _userContextService = userContextService;
+        _businessManagementService = businessManagementService;
+        
         Title = "New Sale";
         SaleItems = new ObservableCollection<SaleItemViewModel>();
         PaymentMethods = Enum.GetValues<PaymentMethod>().ToList();
@@ -32,6 +45,15 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
 
     [ObservableProperty]
     private ObservableCollection<SaleItemViewModel> saleItems;
+
+    [ObservableProperty]
+    private decimal subtotal;
+
+    [ObservableProperty]
+    private decimal discountAmount;
+
+    [ObservableProperty]
+    private decimal taxAmount;
 
     [ObservableProperty]
     private decimal totalAmount;
@@ -48,7 +70,26 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
     [ObservableProperty]
     private bool canCompleteSale;
 
+    [ObservableProperty]
+    private string businessName = string.Empty;
+
+    [ObservableProperty]
+    private string shopName = string.Empty;
+
+    [ObservableProperty]
+    private BusinessType businessType;
+
+    [ObservableProperty]
+    private bool showBusinessTypeFeatures;
+
+    [ObservableProperty]
+    private bool enableExpiryValidation;
+
+    [ObservableProperty]
+    private bool enableWeightBasedPricing;
+
     private Sale? _currentSale;
+    private ShopConfiguration? _shopConfiguration;
 
     [RelayCommand]
     private async Task AddProduct(Product product)
@@ -57,6 +98,18 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
 
         try
         {
+            // Validate product for sale based on business type
+            var validationResult = await _enhancedSalesService.ValidateProductForSaleAsync(
+                product.Id, 
+                _userContextService.CurrentShop?.Id ?? Guid.Empty);
+
+            if (!validationResult.IsValid)
+            {
+                var errorMessage = validationResult.Errors.FirstOrDefault() ?? "Product validation failed";
+                SetError(errorMessage);
+                return;
+            }
+
             // Check if product already exists in sale
             var existingItem = SaleItems.FirstOrDefault(si => si.ProductId == product.Id);
             
@@ -72,13 +125,16 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
                     ProductName = product.Name,
                     UnitPrice = product.UnitPrice,
                     Quantity = 1,
-                    BatchNumber = product.BatchNumber
+                    BatchNumber = product.BatchNumber,
+                    ExpiryDate = product.ExpiryDate,
+                    Weight = product.IsWeightBased ? product.RatePerKilogram : null,
+                    IsWeightBased = product.IsWeightBased
                 };
                 
                 SaleItems.Add(saleItemViewModel);
             }
 
-            CalculateTotal();
+            await CalculateTotal();
         }
         catch (Exception ex)
         {
@@ -87,24 +143,24 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
     }
 
     [RelayCommand]
-    private void RemoveItem(SaleItemViewModel item)
+    private async Task RemoveItem(SaleItemViewModel item)
     {
         if (item == null) return;
 
         SaleItems.Remove(item);
-        CalculateTotal();
+        await CalculateTotal();
     }
 
     [RelayCommand]
-    private void UpdateQuantity(SaleItemViewModel item)
+    private async Task UpdateQuantity(SaleItemViewModel item)
     {
         if (item == null || item.Quantity <= 0)
         {
-            RemoveItem(item);
+            await RemoveItem(item);
             return;
         }
 
-        CalculateTotal();
+        await CalculateTotal();
     }
 
     [RelayCommand]
@@ -117,14 +173,22 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
             IsBusy = true;
             ClearError();
 
-            // Create sale
-            var deviceId = Guid.NewGuid(); // In real app, get from device service
-            _currentSale = await _saleService.CreateSaleAsync(InvoiceNumber, deviceId);
+            var user = _currentUserService.CurrentUser;
+            var shop = _userContextService.CurrentShop;
+            
+            if (user == null || shop == null)
+            {
+                SetError("User or shop context not available");
+                return;
+            }
+
+            // Create sale using enhanced sales service
+            _currentSale = await _enhancedSalesService.CreateSaleWithValidationAsync(shop.Id, user.Id, InvoiceNumber);
 
             // Add items to sale
             foreach (var item in SaleItems)
             {
-                await _saleService.AddItemToSaleAsync(
+                await _enhancedSalesService.AddItemToSaleAsync(
                     _currentSale.Id,
                     item.ProductId,
                     item.Quantity,
@@ -132,8 +196,17 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
                     item.BatchNumber);
             }
 
+            // Calculate with business rules
+            var calculationResult = await _enhancedSalesService.CalculateWithBusinessRulesAsync(_currentSale);
+            
+            if (calculationResult == null)
+            {
+                SetError("Sale calculation failed");
+                return;
+            }
+
             // Complete sale
-            await _saleService.CompleteSaleAsync(_currentSale.Id, SelectedPaymentMethod);
+            await _enhancedSalesService.CompleteSaleAsync(_currentSale.Id, SelectedPaymentMethod);
 
             // Print receipt
             await PrintReceipt();
@@ -158,6 +231,9 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
     private async Task ClearSale()
     {
         SaleItems.Clear();
+        Subtotal = 0;
+        DiscountAmount = 0;
+        TaxAmount = 0;
         TotalAmount = 0;
         InvoiceNumber = GenerateInvoiceNumber();
         _currentSale = null;
@@ -168,6 +244,35 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
     private async Task ScanBarcode()
     {
         await Shell.Current.GoToAsync("//scanner");
+    }
+
+    [RelayCommand]
+    private async Task ApplyDiscount(SaleItemViewModel item)
+    {
+        if (item == null) return;
+
+        // Check if user has permission to apply discounts
+        var hasPermission = await _userContextService.HasPermissionAsync(AppPermissions.ApplyDiscounts);
+        if (!hasPermission)
+        {
+            SetError("You don't have permission to apply discounts");
+            return;
+        }
+
+        // Show discount dialog (simplified for this implementation)
+        var discountPercentage = await Shell.Current.DisplayPromptAsync(
+            "Apply Discount", 
+            "Enter discount percentage (0-100):", 
+            "OK", 
+            "Cancel", 
+            "0", 
+            keyboard: Keyboard.Numeric);
+
+        if (decimal.TryParse(discountPercentage, out var discount) && discount >= 0 && discount <= 100)
+        {
+            item.DiscountPercentage = discount;
+            await CalculateTotal();
+        }
     }
 
     private async Task PrintReceipt()
@@ -195,15 +300,59 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
         }
     }
 
-    private void CalculateTotal()
+    private async Task CalculateTotal()
     {
-        TotalAmount = SaleItems.Sum(item => item.Quantity * item.UnitPrice);
+        try
+        {
+            Subtotal = SaleItems.Sum(item => item.LineTotal);
+            
+            // Apply business-specific calculations if we have a current sale
+            if (_currentSale != null)
+            {
+                var calculationResult = await _enhancedSalesService.CalculateWithBusinessRulesAsync(_currentSale);
+                if (calculationResult != null)
+                {
+                    DiscountAmount = calculationResult.DiscountAmount;
+                    TaxAmount = calculationResult.TaxAmount;
+                    TotalAmount = calculationResult.FinalTotal;
+                }
+                else
+                {
+                    // Fallback to simple calculation
+                    CalculateSimpleTotal();
+                }
+            }
+            else
+            {
+                CalculateSimpleTotal();
+            }
+
+            CanCompleteSale = SaleItems.Any() && TotalAmount > 0;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Calculation error: {ex.Message}");
+            CalculateSimpleTotal();
+        }
+    }
+
+    private void CalculateSimpleTotal()
+    {
+        Subtotal = SaleItems.Sum(item => item.LineTotal);
+        DiscountAmount = SaleItems.Sum(item => item.DiscountAmount);
+        
+        // Apply default tax rate from shop configuration
+        var taxRate = _shopConfiguration?.TaxRate ?? 0.0m;
+        TaxAmount = (Subtotal - DiscountAmount) * taxRate;
+        
+        TotalAmount = Subtotal - DiscountAmount + TaxAmount;
         CanCompleteSale = SaleItems.Any() && TotalAmount > 0;
     }
 
     private string GenerateInvoiceNumber()
     {
-        return $"INV-{DateTime.Now:yyyyMMdd}-{DateTime.Now.Ticks % 10000:D4}";
+        var shopPrefix = _userContextService.CurrentShop?.Name?.Substring(0, Math.Min(3, _userContextService.CurrentShop.Name.Length)).ToUpper() ?? "POS";
+        return $"{shopPrefix}-{DateTime.Now:yyyyMMdd}-{DateTime.Now.Ticks % 10000:D4}";
     }
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -241,8 +390,38 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
 
     public async Task Initialize()
     {
-        InvoiceNumber = GenerateInvoiceNumber();
-        await ClearSale();
+        try
+        {
+            // Load business and shop context
+            var business = _userContextService.CurrentBusiness;
+            var shop = _userContextService.CurrentShop;
+
+            if (business != null)
+            {
+                BusinessName = business.Name;
+                BusinessType = business.Type;
+                ShowBusinessTypeFeatures = true;
+                
+                // Enable business type-specific features
+                EnableExpiryValidation = BusinessType == BusinessType.Pharmacy;
+                EnableWeightBasedPricing = BusinessType == BusinessType.Grocery || BusinessType == BusinessType.SuperShop;
+            }
+
+            if (shop != null)
+            {
+                ShopName = shop.Name;
+                
+                // Load shop configuration
+                _shopConfiguration = await _businessManagementService.GetShopConfigurationAsync(shop.Id);
+            }
+
+            InvoiceNumber = GenerateInvoiceNumber();
+            await ClearSale();
+        }
+        catch (Exception ex)
+        {
+            SetError($"Failed to initialize sale: {ex.Message}");
+        }
     }
 }
 
@@ -263,5 +442,48 @@ public partial class SaleItemViewModel : ObservableObject
     [ObservableProperty]
     private string? batchNumber;
 
-    public decimal Total => Quantity * UnitPrice;
+    [ObservableProperty]
+    private DateTime? expiryDate;
+
+    [ObservableProperty]
+    private decimal? weight;
+
+    [ObservableProperty]
+    private bool isWeightBased;
+
+    [ObservableProperty]
+    private decimal discountPercentage;
+
+    public decimal LineTotal => Quantity * UnitPrice * (IsWeightBased ? (Weight ?? 1) : 1);
+    
+    public decimal DiscountAmount => LineTotal * (DiscountPercentage / 100);
+    
+    public decimal NetTotal => LineTotal - DiscountAmount;
+
+    partial void OnQuantityChanged(int value)
+    {
+        OnPropertyChanged(nameof(LineTotal));
+        OnPropertyChanged(nameof(DiscountAmount));
+        OnPropertyChanged(nameof(NetTotal));
+    }
+
+    partial void OnUnitPriceChanged(decimal value)
+    {
+        OnPropertyChanged(nameof(LineTotal));
+        OnPropertyChanged(nameof(DiscountAmount));
+        OnPropertyChanged(nameof(NetTotal));
+    }
+
+    partial void OnWeightChanged(decimal? value)
+    {
+        OnPropertyChanged(nameof(LineTotal));
+        OnPropertyChanged(nameof(DiscountAmount));
+        OnPropertyChanged(nameof(NetTotal));
+    }
+
+    partial void OnDiscountPercentageChanged(decimal value)
+    {
+        OnPropertyChanged(nameof(DiscountAmount));
+        OnPropertyChanged(nameof(NetTotal));
+    }
 }

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Mobile.ViewModels"
+             x:Class="Mobile.Views.LoginPage"
+             x:DataType="vm:LoginViewModel"
+             Title="{Binding Title}"
+             Shell.NavBarIsVisible="False">
+
+    <ScrollView>
+        <StackLayout Padding="40" Spacing="20" VerticalOptions="Center">
+            
+            <!-- App Logo/Title -->
+            <Label Text="Multi-Business POS"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="DodgerBlue"
+                   Margin="0,0,0,30" />
+
+            <!-- Connection Status -->
+            <Frame BackgroundColor="{Binding IsOnline, Converter={StaticResource BoolToColorConverter}, ConverterParameter='LightGreen,LightCoral'}"
+                   Padding="10"
+                   CornerRadius="5"
+                   Margin="0,0,0,10">
+                <Label Text="{Binding IsOnline, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Online,Offline'}"
+                       FontSize="12"
+                       HorizontalOptions="Center"
+                       TextColor="White" />
+            </Frame>
+
+            <!-- Login Form -->
+            <StackLayout IsVisible="{Binding ShowBusinessSelection, Converter={StaticResource InverseBoolConverter}}"
+                        Spacing="15">
+                
+                <Entry Placeholder="Username"
+                       Text="{Binding Username}"
+                       FontSize="16"
+                       BackgroundColor="White"
+                       PlaceholderColor="Gray" />
+
+                <Entry Placeholder="Password"
+                       Text="{Binding Password}"
+                       IsPassword="True"
+                       FontSize="16"
+                       BackgroundColor="White"
+                       PlaceholderColor="Gray" />
+
+                <StackLayout Orientation="Horizontal">
+                    <CheckBox IsChecked="{Binding RememberMe}" />
+                    <Label Text="Remember me"
+                           VerticalOptions="Center"
+                           FontSize="14" />
+                </StackLayout>
+
+                <Button Text="{Binding LoginButtonText}"
+                        Command="{Binding LoginCommand}"
+                        IsEnabled="{Binding CanLogin}"
+                        BackgroundColor="DodgerBlue"
+                        TextColor="White"
+                        FontSize="16"
+                        HeightRequest="50"
+                        CornerRadius="25" />
+
+                <Button Text="Clear"
+                        Command="{Binding ClearFormCommand}"
+                        BackgroundColor="Gray"
+                        TextColor="White"
+                        FontSize="14"
+                        HeightRequest="40"
+                        CornerRadius="20" />
+            </StackLayout>
+
+            <!-- Business Selection -->
+            <StackLayout IsVisible="{Binding ShowBusinessSelection}"
+                        Spacing="15">
+                
+                <Label Text="Select Business"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center" />
+
+                <CollectionView ItemsSource="{Binding Businesses}"
+                               SelectionMode="Single"
+                               SelectedItem="{Binding SelectedBusiness}"
+                               SelectionChangedCommand="{Binding SelectBusinessCommand}"
+                               HeightRequest="200">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Padding="15" BackgroundColor="White" Margin="0,2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                
+                                <Label Grid.Row="0"
+                                       Text="{Binding Name}"
+                                       FontSize="16"
+                                       FontAttributes="Bold" />
+                                
+                                <Label Grid.Row="1"
+                                       Text="{Binding Type}"
+                                       FontSize="12"
+                                       TextColor="Gray" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </StackLayout>
+
+            <!-- Shop Selection -->
+            <StackLayout IsVisible="{Binding ShowShopSelection}"
+                        Spacing="15">
+                
+                <Label Text="Select Shop"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center" />
+
+                <CollectionView ItemsSource="{Binding Shops}"
+                               SelectionMode="Single"
+                               SelectedItem="{Binding SelectedShop}"
+                               SelectionChangedCommand="{Binding SelectShopCommand}"
+                               HeightRequest="200">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Padding="15" BackgroundColor="White" Margin="0,2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                
+                                <Label Grid.Row="0"
+                                       Text="{Binding Name}"
+                                       FontSize="16"
+                                       FontAttributes="Bold" />
+                                
+                                <Label Grid.Row="1"
+                                       Text="{Binding Address}"
+                                       FontSize="12"
+                                       TextColor="Gray" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Button Text="Continue"
+                        Command="{Binding CompleteLoginCommand}"
+                        IsEnabled="{Binding CanLogin}"
+                        BackgroundColor="Green"
+                        TextColor="White"
+                        FontSize="16"
+                        HeightRequest="50"
+                        CornerRadius="25" />
+            </StackLayout>
+
+            <!-- Loading Indicator -->
+            <ActivityIndicator IsVisible="{Binding IsBusy}"
+                              IsRunning="{Binding IsBusy}"
+                              Color="DodgerBlue"
+                              HeightRequest="50" />
+
+            <!-- Error Message -->
+            <Frame IsVisible="{Binding HasError}"
+                   BackgroundColor="LightCoral"
+                   Padding="15"
+                   CornerRadius="5">
+                <Label Text="{Binding ErrorMessage}"
+                       TextColor="DarkRed"
+                       FontSize="14"
+                       HorizontalOptions="Center" />
+            </Frame>
+
+        </StackLayout>
+    </ScrollView>
+</ContentPage>
