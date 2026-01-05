@@ -266,12 +266,23 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
             _logger.LogError(ex, "Error during performance cleanup");
         }
     }
+private long _cacheHits = 0;
+private long _cacheMisses = 0;
 
-    private double CalculateCacheHitRatio()
+// ... inside OptimizeQueryAsync, when a cache hit occurs:
+// Interlocked.Increment(ref _cacheHits);
+// ... inside OptimizeQueryAsync, when a cache miss occurs:
+// Interlocked.Increment(ref _cacheMisses);
+
+private double CalculateCacheHitRatio()
+{
+    var totalRequests = _cacheHits + _cacheMisses;
+    if (totalRequests == 0)
     {
-        // Simplified cache hit ratio calculation
-        // In a real implementation, this would track hits and misses
-        return _cache.Count > 0 ? 0.8 : 0.0;
+        return 0.0;
+    }
+    return (double)_cacheHits / totalRequests;
+}
     }
 
     private long GetAvailableMemory()
