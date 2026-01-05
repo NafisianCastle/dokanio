@@ -33,7 +33,8 @@ public class BusinessManagementService : IBusinessManagementService
 
     public async Task<BusinessResponse> CreateBusinessAsync(CreateBusinessRequest request)
     {
-        _logger.LogInformation("Creating business: {BusinessName} for owner: {OwnerId}", request.Name, request.OwnerId);
+        var sanitizedBusinessName = request.Name?.Replace("\r", string.Empty).Replace("\n", string.Empty);
+        _logger.LogInformation("Creating business: {BusinessName} for owner: {OwnerId}", sanitizedBusinessName, request.OwnerId);
 
         // Validate owner exists
         var owner = await _userRepository.GetByIdAsync(request.OwnerId);
