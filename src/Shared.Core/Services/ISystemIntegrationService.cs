@@ -60,7 +60,11 @@ public interface ISystemIntegrationService
     /// Performs comprehensive system health check
     /// </summary>
     /// <returns>System health status</returns>
-    Task<SystemHealthStatus> PerformSystemHealthCheckAsync();
+    /// <summary>
+    /// Performs comprehensive system health check
+    /// </summary>
+    /// <returns>System health status</returns>
+    Task<IntegrationSystemHealthStatus> PerformSystemHealthCheckAsync();
 }
 
 /// <summary>
@@ -203,10 +207,10 @@ public class CrossPlatformValidationResult
 /// <summary>
 /// System health status
 /// </summary>
-public class SystemHealthStatus
+public class IntegrationSystemHealthStatus
 {
     public bool IsHealthy { get; set; }
-    public List<ComponentHealth> ComponentHealths { get; set; } = new();
+    public List<IntegrationComponentHealth> ComponentHealths { get; set; } = new();
     public Dictionary<string, object> SystemMetrics { get; set; } = new();
     public List<string> Warnings { get; set; } = new();
     public List<string> Errors { get; set; } = new();
@@ -216,7 +220,7 @@ public class SystemHealthStatus
 /// <summary>
 /// Health status of individual component
 /// </summary>
-public class ComponentHealth
+public class IntegrationComponentHealth
 {
     public string ComponentName { get; set; } = string.Empty;
     public bool IsHealthy { get; set; }

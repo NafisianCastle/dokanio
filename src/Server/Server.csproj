@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <EnableOpenApiSourceGenerator>false</EnableOpenApiSourceGenerator>
+    <PublishAot>True</PublishAot>
   </PropertyGroup>
 
   <ItemGroup>
