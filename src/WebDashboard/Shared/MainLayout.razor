@@ -1,0 +1,162 @@
+@using global::Shared.Core.DTOs
+@using global::Shared.Core.Enums
+@inherits LayoutComponentBase
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@inject IAuthenticationService AuthService
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-outline-secondary me-3" @onclick="ToggleSidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h4 class="mb-0">@PageTitle</h4>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                    <!-- Notifications -->
+                    <div class="dropdown me-3">
+                        <button class="btn btn-outline-secondary position-relative" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-bell"></i>
+                            @if (UnreadNotifications > 0)
+                            {
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    @UnreadNotifications
+                                </span>
+                            }
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" style="width: 300px;">
+                            <li><h6 class="dropdown-header">Notifications</h6></li>
+                            @if (Notifications.Any())
+                            {
+                                @foreach (var notification in Notifications.Take(5))
+                                {
+                                    <li>
+                                        <a class="dropdown-item @(notification.IsRead ? "" : "fw-bold")" href="#">
+                                            <div class="d-flex">
+                                                <div class="flex-shrink-0">
+                                                    <i class="fas @GetNotificationIcon(notification.Type) text-@GetNotificationColor(notification.Priority)"></i>
+                                                </div>
+                                                <div class="flex-grow-1 ms-2">
+                                                    <div class="fw-semibold">@notification.Title</div>
+                                                    <div class="small text-muted">@notification.Message</div>
+                                                    <div class="small text-muted">@notification.CreatedAt.ToString("MMM dd, HH:mm")</div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-center" href="/notifications">View All Notifications</a></li>
+                            }
+                            else
+                            {
+                                <li><span class="dropdown-item-text text-muted">No notifications</span></li>
+                            }
+                        </ul>
+                    </div>
+
+                    <!-- User Menu -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-2"></i>@CurrentUser?.Username
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/profile"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="/settings"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><button class="dropdown-item" @onclick="Logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</button></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+    [Parameter] public string? PageTitle { get; set; } = "Dashboard";
+    
+    private UserDto? CurrentUser;
+    private List<AlertSummary> Notifications = new();
+    private int UnreadNotifications => Notifications.Count(n => !n.IsRead);
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load current user and notifications
+        await LoadUserData();
+        await LoadNotifications();
+    }
+
+    private async Task LoadUserData()
+    {
+        try
+        {
+            CurrentUser = await AuthService.GetCurrentUserAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading user data: {ex.Message}");
+        }
+    }
+
+    private async Task LoadNotifications()
+    {
+        try
+        {
+            if (CurrentUser?.BusinessId != null)
+            {
+                // Load notifications from API
+                // Notifications = await DashboardService.GetActiveAlertsAsync(CurrentUser.BusinessId.Value);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading notifications: {ex.Message}");
+        }
+    }
+
+    private async Task ToggleSidebar()
+    {
+        await JSRuntime.InvokeVoidAsync("toggleSidebar");
+    }
+
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/login");
+    }
+
+    private string GetNotificationIcon(AlertType type) => type switch
+    {
+        AlertType.LowStock => "fa-box",
+        AlertType.OutOfStock => "fa-exclamation-triangle",
+        AlertType.ProductExpiry => "fa-calendar-times",
+        AlertType.HighSales => "fa-chart-line",
+        AlertType.LowSales => "fa-chart-line-down",
+        AlertType.SystemError => "fa-bug",
+        AlertType.SecurityAlert => "fa-shield-alt",
+        AlertType.SyncIssue => "fa-sync-alt",
+        _ => "fa-info-circle"
+    };
+
+    private string GetNotificationColor(AlertPriority priority) => priority switch
+    {
+        AlertPriority.Critical => "danger",
+        AlertPriority.High => "warning",
+        AlertPriority.Medium => "info",
+        AlertPriority.Low => "secondary",
+        _ => "secondary"
+    };
+}

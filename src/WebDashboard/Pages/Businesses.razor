@@ -1,0 +1,380 @@
+@page "/businesses"
+@inject IBusinessApiService BusinessService
+@inject IAuthenticationService AuthService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Business Management - Multi-Business POS</PageTitle>
+
+<div class="business-management-container">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">Business Management</h2>
+                    <p class="text-muted mb-0">Manage your businesses and their configurations</p>
+                </div>
+                <button class="btn btn-primary" @onclick="ShowCreateBusinessModal">
+                    <i class="fas fa-plus me-2"></i>Add New Business
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Business Cards -->
+        <div class="row">
+            @if (BusinessList.Any())
+            {
+                @foreach (var business in BusinessList)
+                {
+                    <div class="col-xl-4 col-lg-6 mb-4">
+                        <div class="card business-card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="business-type-icon me-3">
+                                        <i class="fas @GetBusinessTypeIcon(business.Type)"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-0">@business.Name</h5>
+                                        <small class="text-muted">@business.Type</small>
+                                    </div>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" @onclick="() => EditBusiness(business)"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                                        <li><a class="dropdown-item" href="#" @onclick="() => ViewBusinessDetails(business)"><i class="fas fa-eye me-2"></i>View Details</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="#" @onclick="() => DeleteBusiness(business)"><i class="fas fa-trash me-2"></i>Delete</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <div class="metric-small">
+                                            <div class="metric-value">@business.Shops.Count</div>
+                                            <div class="metric-label">Shops</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-small">
+                                            <div class="metric-value">@business.Shops.Sum(s => s.ProductCount)</div>
+                                            <div class="metric-label">Products</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(business.Description))
+                                {
+                                    <p class="card-text text-muted small">@business.Description</p>
+                                }
+
+                                <div class="business-info">
+                                    @if (!string.IsNullOrEmpty(business.Address))
+                                    {
+                                        <div class="info-item mb-2">
+                                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                            <span class="small">@business.Address</span>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(business.Phone))
+                                    {
+                                        <div class="info-item mb-2">
+                                            <i class="fas fa-phone text-muted me-2"></i>
+                                            <span class="small">@business.Phone</span>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(business.Email))
+                                    {
+                                        <div class="info-item mb-2">
+                                            <i class="fas fa-envelope text-muted me-2"></i>
+                                            <span class="small">@business.Email</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">Created: @business.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                    <span class="badge bg-@(business.IsActive ? "success" : "secondary")">
+                                        @(business.IsActive ? "Active" : "Inactive")
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="fas fa-building fa-3x text-muted mb-3"></i>
+                        <h4>No Businesses Found</h4>
+                        <p class="text-muted">Get started by creating your first business.</p>
+                        <button class="btn btn-primary" @onclick="ShowCreateBusinessModal">
+                            <i class="fas fa-plus me-2"></i>Create Business
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Create/Edit Business Modal -->
+<div class="modal fade" id="businessModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@(IsEditMode ? "Edit Business" : "Create New Business")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="BusinessForm" OnValidSubmit="SaveBusiness">
+                    <DataAnnotationsValidator />
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Business Name *</label>
+                            <InputText @bind-Value="BusinessForm.Name" class="form-control" placeholder="Enter business name" />
+                            <ValidationMessage For="() => BusinessForm.Name" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Business Type *</label>
+                            <InputSelect @bind-Value="BusinessForm.Type" class="form-select">
+                                <option value="">Select business type</option>
+                                @foreach (var type in Enum.GetValues<BusinessType>())
+                                {
+                                    <option value="@type">@type</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="() => BusinessForm.Type" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <InputTextArea @bind-Value="BusinessForm.Description" class="form-control" rows="3" placeholder="Business description (optional)" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Address</label>
+                            <InputTextArea @bind-Value="BusinessForm.Address" class="form-control" rows="2" placeholder="Business address" />
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Phone</label>
+                                <InputText @bind-Value="BusinessForm.Phone" class="form-control" placeholder="Phone number" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <InputText @bind-Value="BusinessForm.Email" class="form-control" type="email" placeholder="Business email" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tax ID</label>
+                            <InputText @bind-Value="BusinessForm.TaxId" class="form-control" placeholder="Tax identification number" />
+                        </div>
+                        @if (IsEditMode)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check mt-4">
+                                    <InputCheckbox @bind-Value="BusinessForm.IsActive" class="form-check-input" id="isActive" />
+                                    <label class="form-check-label" for="isActive">Active</label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" disabled="@IsSaving">
+                            @if (IsSaving)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            }
+                            @(IsEditMode ? "Update Business" : "Create Business")
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<BusinessResponse> BusinessList = new();
+    private bool IsLoading = true;
+    private bool IsSaving = false;
+    private bool IsEditMode = false;
+    private BusinessFormModel BusinessForm = new();
+    private UserDto? CurrentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBusinesses();
+    }
+
+    private async Task LoadBusinesses()
+    {
+        try
+        {
+            IsLoading = true;
+            CurrentUser = await AuthService.GetCurrentUserAsync();
+            
+            if (CurrentUser?.Id != null)
+            {
+                BusinessList = (await BusinessService.GetBusinessesByOwnerAsync(CurrentUser.Id)).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading businesses: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ShowCreateBusinessModal()
+    {
+        IsEditMode = false;
+        BusinessForm = new BusinessFormModel();
+        await JSRuntime.InvokeVoidAsync("showModal", "businessModal");
+    }
+
+    private async Task EditBusiness(BusinessResponse business)
+    {
+        IsEditMode = true;
+        BusinessForm = new BusinessFormModel
+        {
+            Id = business.Id,
+            Name = business.Name,
+            Type = business.Type,
+            Description = business.Description,
+            Address = business.Address,
+            Phone = business.Phone,
+            Email = business.Email,
+            TaxId = business.TaxId,
+            IsActive = business.IsActive
+        };
+        await JSRuntime.InvokeVoidAsync("showModal", "businessModal");
+    }
+
+    private async Task SaveBusiness()
+    {
+        try
+        {
+            IsSaving = true;
+            
+            if (IsEditMode)
+            {
+                var updateRequest = new UpdateBusinessRequest
+                {
+                    Id = BusinessForm.Id,
+                    Name = BusinessForm.Name,
+                    Description = BusinessForm.Description,
+                    Address = BusinessForm.Address,
+                    Phone = BusinessForm.Phone,
+                    Email = BusinessForm.Email,
+                    TaxId = BusinessForm.TaxId,
+                    IsActive = BusinessForm.IsActive
+                };
+                
+                await BusinessService.UpdateBusinessAsync(updateRequest);
+            }
+            else
+            {
+                var createRequest = new CreateBusinessRequest
+                {
+                    Name = BusinessForm.Name,
+                    Type = BusinessForm.Type,
+                    OwnerId = CurrentUser!.Id,
+                    Description = BusinessForm.Description,
+                    Address = BusinessForm.Address,
+                    Phone = BusinessForm.Phone,
+                    Email = BusinessForm.Email,
+                    TaxId = BusinessForm.TaxId
+                };
+                
+                await BusinessService.CreateBusinessAsync(createRequest);
+            }
+
+            await JSRuntime.InvokeVoidAsync("hideModal", "businessModal");
+            await LoadBusinesses();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving business: {ex.Message}");
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private async Task DeleteBusiness(BusinessResponse business)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete '{business.Name}'?"))
+        {
+            try
+            {
+                await BusinessService.DeleteBusinessAsync(business.Id, CurrentUser!.Id);
+                await LoadBusinesses();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting business: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task ViewBusinessDetails(BusinessResponse business)
+    {
+        // Navigate to business details page
+        // Navigation.NavigateTo($"/businesses/{business.Id}");
+    }
+
+    private string GetBusinessTypeIcon(BusinessType type) => type switch
+    {
+        BusinessType.Grocery => "fa-shopping-basket",
+        BusinessType.SuperShop => "fa-store",
+        BusinessType.Pharmacy => "fa-pills",
+        BusinessType.GeneralRetail => "fa-shopping-bag",
+        BusinessType.Custom => "fa-cog",
+        _ => "fa-building"
+    };
+
+    public class BusinessFormModel
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public BusinessType Type { get; set; }
+        public string? Description { get; set; }
+        public string? Address { get; set; }
+        public string? Phone { get; set; }
+        public string? Email { get; set; }
+        public string? TaxId { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
+}

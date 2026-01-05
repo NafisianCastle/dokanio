@@ -1,0 +1,581 @@
+@page "/shops"
+@inject IBusinessApiService BusinessService
+@inject IAuthenticationService AuthService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Shop Management - Multi-Business POS</PageTitle>
+
+<div class="shop-management-container">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">Shop Management</h2>
+                    <p class="text-muted mb-0">Manage shops across all your businesses</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-filter me-2"></i>
+                            @(SelectedBusiness?.Name ?? "All Businesses")
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" @onclick="() => FilterByBusiness(null)">All Businesses</a></li>
+                            @foreach (var business in Businesses)
+                            {
+                                <li><a class="dropdown-item" href="#" @onclick="() => FilterByBusiness(business)">@business.Name</a></li>
+                            }
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary" @onclick="ShowCreateShopModal">
+                        <i class="fas fa-plus me-2"></i>Add New Shop
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Shop Cards -->
+        <div class="row">
+            @if (FilteredShops.Any())
+            {
+                @foreach (var shop in FilteredShops)
+                {
+                    <div class="col-xl-4 col-lg-6 mb-4">
+                        <div class="card shop-card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="shop-icon me-3">
+                                        <i class="fas fa-store"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-0">@shop.Name</h5>
+                                        <small class="text-muted">@shop.BusinessName</small>
+                                    </div>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" @onclick="() => EditShop(shop)"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                                        <li><a class="dropdown-item" href="#" @onclick="() => ConfigureShop(shop)"><i class="fas fa-cog me-2"></i>Configure</a></li>
+                                        <li><a class="dropdown-item" href="#" @onclick="() => ViewShopDetails(shop)"><i class="fas fa-eye me-2"></i>View Details</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="#" @onclick="() => DeleteShop(shop)"><i class="fas fa-trash me-2"></i>Delete</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-4">
+                                        <div class="metric-small">
+                                            <div class="metric-value">@shop.ProductCount</div>
+                                            <div class="metric-label">Products</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="metric-small">
+                                            <div class="metric-value">@shop.InventoryCount</div>
+                                            <div class="metric-label">Inventory</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="metric-small">
+                                            <div class="metric-value">
+                                                <span class="badge bg-@GetBusinessTypeColor(shop.BusinessType)">
+                                                    @shop.BusinessType
+                                                </span>
+                                            </div>
+                                            <div class="metric-label">Type</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="shop-info">
+                                    @if (!string.IsNullOrEmpty(shop.Address))
+                                    {
+                                        <div class="info-item mb-2">
+                                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                            <span class="small">@shop.Address</span>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(shop.Phone))
+                                    {
+                                        <div class="info-item mb-2">
+                                            <i class="fas fa-phone text-muted me-2"></i>
+                                            <span class="small">@shop.Phone</span>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(shop.Email))
+                                    {
+                                        <div class="info-item mb-2">
+                                            <i class="fas fa-envelope text-muted me-2"></i>
+                                            <span class="small">@shop.Email</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">Created: @shop.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                    <span class="badge bg-@(shop.IsActive ? "success" : "secondary")">
+                                        @(shop.IsActive ? "Active" : "Inactive")
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="fas fa-store fa-3x text-muted mb-3"></i>
+                        <h4>No Shops Found</h4>
+                        <p class="text-muted">
+                            @if (SelectedBusiness != null)
+                            {
+                                <text>No shops found for @SelectedBusiness.Name.</text>
+                            }
+                            else
+                            {
+                                <text>Get started by creating your first shop.</text>
+                            }
+                        </p>
+                        <button class="btn btn-primary" @onclick="ShowCreateShopModal">
+                            <i class="fas fa-plus me-2"></i>Create Shop
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Create/Edit Shop Modal -->
+<div class="modal fade" id="shopModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@(IsEditMode ? "Edit Shop" : "Create New Shop")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="ShopForm" OnValidSubmit="SaveShop">
+                    <DataAnnotationsValidator />
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Shop Name *</label>
+                            <InputText @bind-Value="ShopForm.Name" class="form-control" placeholder="Enter shop name" />
+                            <ValidationMessage For="() => ShopForm.Name" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Business *</label>
+                            <InputSelect @bind-Value="ShopForm.BusinessId" class="form-select" disabled="@IsEditMode">
+                                <option value="">Select business</option>
+                                @foreach (var business in Businesses)
+                                {
+                                    <option value="@business.Id">@business.Name (@business.Type)</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="() => ShopForm.BusinessId" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Address</label>
+                        <InputTextArea @bind-Value="ShopForm.Address" class="form-control" rows="2" placeholder="Shop address" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phone</label>
+                            <InputText @bind-Value="ShopForm.Phone" class="form-control" placeholder="Phone number" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <InputText @bind-Value="ShopForm.Email" class="form-control" type="email" placeholder="Shop email" />
+                        </div>
+                    </div>
+
+                    @if (IsEditMode)
+                    {
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <InputCheckbox @bind-Value="ShopForm.IsActive" class="form-check-input" id="shopIsActive" />
+                                <label class="form-check-label" for="shopIsActive">Active</label>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" disabled="@IsSaving">
+                            @if (IsSaving)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            }
+                            @(IsEditMode ? "Update Shop" : "Create Shop")
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Shop Configuration Modal -->
+<div class="modal fade" id="shopConfigModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Shop Configuration - @SelectedShop?.Name</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @if (SelectedShop != null)
+                {
+                    <div class="row">
+                        <!-- General Settings -->
+                        <div class="col-md-6 mb-4">
+                            <h6 class="fw-semibold mb-3">General Settings</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Currency</label>
+                                <select class="form-select">
+                                    <option>USD - US Dollar</option>
+                                    <option>EUR - Euro</option>
+                                    <option>GBP - British Pound</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Tax Rate (%)</label>
+                                <input type="number" class="form-control" step="0.01" min="0" max="100" placeholder="0.00">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Time Zone</label>
+                                <select class="form-select">
+                                    <option>UTC</option>
+                                    <option>America/New_York</option>
+                                    <option>Europe/London</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Pricing Rules -->
+                        <div class="col-md-6 mb-4">
+                            <h6 class="fw-semibold mb-3">Pricing Rules</h6>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="allowPriceOverride">
+                                    <label class="form-check-label" for="allowPriceOverride">
+                                        Allow manual price override
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Max Discount (%)</label>
+                                <input type="number" class="form-control" step="0.01" min="0" max="100" placeholder="0.00">
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="requireManagerApproval">
+                                    <label class="form-check-label" for="requireManagerApproval">
+                                        Require manager approval for large discounts
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inventory Settings -->
+                        <div class="col-md-6 mb-4">
+                            <h6 class="fw-semibold mb-3">Inventory Settings</h6>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enableLowStockAlerts" checked>
+                                    <label class="form-check-label" for="enableLowStockAlerts">
+                                        Enable low stock alerts
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Low Stock Threshold</label>
+                                <input type="number" class="form-control" min="0" value="10">
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enableAutoReorder">
+                                    <label class="form-check-label" for="enableAutoReorder">
+                                        Enable automatic reorder suggestions
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Business Type Specific -->
+                        <div class="col-md-6 mb-4">
+                            <h6 class="fw-semibold mb-3">Business Type Settings</h6>
+                            @if (SelectedShop.BusinessType == BusinessType.Pharmacy)
+                            {
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enableExpiryAlerts" checked>
+                                        <label class="form-check-label" for="enableExpiryAlerts">
+                                            Enable expiry alerts
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Expiry Alert Days</label>
+                                    <input type="number" class="form-control" min="1" value="30">
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enableBatchTracking">
+                                        <label class="form-check-label" for="enableBatchTracking">
+                                            Enable batch tracking
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                            else if (SelectedShop.BusinessType == BusinessType.Grocery)
+                            {
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enableWeightPricing">
+                                        <label class="form-check-label" for="enableWeightPricing">
+                                            Enable weight-based pricing
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enableVolumeMeasurements">
+                                        <label class="form-check-label" for="enableVolumeMeasurements">
+                                            Enable volume measurements
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" @onclick="SaveShopConfiguration">
+                    <i class="fas fa-save me-2"></i>Save Configuration
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<BusinessResponse> Businesses = new();
+    private List<ShopResponse> AllShops = new();
+    private List<ShopResponse> FilteredShops = new();
+    private BusinessResponse? SelectedBusiness;
+    private ShopResponse? SelectedShop;
+    private bool IsLoading = true;
+    private bool IsSaving = false;
+    private bool IsEditMode = false;
+    private ShopFormModel ShopForm = new();
+    private UserDto? CurrentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            IsLoading = true;
+            CurrentUser = await AuthService.GetCurrentUserAsync();
+            
+            if (CurrentUser?.Id != null)
+            {
+                Businesses = (await BusinessService.GetBusinessesByOwnerAsync(CurrentUser.Id)).ToList();
+                
+                // Load shops for all businesses
+                AllShops.Clear();
+                foreach (var business in Businesses)
+                {
+                    var shops = await BusinessService.GetShopsByBusinessAsync(business.Id);
+                    AllShops.AddRange(shops);
+                }
+                
+                FilteredShops = AllShops.ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading data: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void FilterByBusiness(BusinessResponse? business)
+    {
+        SelectedBusiness = business;
+        FilteredShops = business == null 
+            ? AllShops.ToList() 
+            : AllShops.Where(s => s.BusinessId == business.Id).ToList();
+        StateHasChanged();
+    }
+
+    private async Task ShowCreateShopModal()
+    {
+        IsEditMode = false;
+        ShopForm = new ShopFormModel();
+        if (SelectedBusiness != null)
+        {
+            ShopForm.BusinessId = SelectedBusiness.Id;
+        }
+        await JSRuntime.InvokeVoidAsync("showModal", "shopModal");
+    }
+
+    private async Task EditShop(ShopResponse shop)
+    {
+        IsEditMode = true;
+        ShopForm = new ShopFormModel
+        {
+            Id = shop.Id,
+            BusinessId = shop.BusinessId,
+            Name = shop.Name,
+            Address = shop.Address,
+            Phone = shop.Phone,
+            Email = shop.Email,
+            IsActive = shop.IsActive
+        };
+        await JSRuntime.InvokeVoidAsync("showModal", "shopModal");
+    }
+
+    private async Task ConfigureShop(ShopResponse shop)
+    {
+        SelectedShop = shop;
+        await JSRuntime.InvokeVoidAsync("showModal", "shopConfigModal");
+    }
+
+    private async Task SaveShop()
+    {
+        try
+        {
+            IsSaving = true;
+            
+            if (IsEditMode)
+            {
+                var updateRequest = new UpdateShopRequest
+                {
+                    Id = ShopForm.Id,
+                    Name = ShopForm.Name,
+                    Address = ShopForm.Address,
+                    Phone = ShopForm.Phone,
+                    Email = ShopForm.Email,
+                    IsActive = ShopForm.IsActive
+                };
+                
+                await BusinessService.UpdateShopAsync(updateRequest);
+            }
+            else
+            {
+                var createRequest = new CreateShopRequest
+                {
+                    BusinessId = ShopForm.BusinessId,
+                    Name = ShopForm.Name,
+                    Address = ShopForm.Address,
+                    Phone = ShopForm.Phone,
+                    Email = ShopForm.Email
+                };
+                
+                await BusinessService.CreateShopAsync(createRequest);
+            }
+
+            await JSRuntime.InvokeVoidAsync("hideModal", "shopModal");
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving shop: {ex.Message}");
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private async Task SaveShopConfiguration()
+    {
+        try
+        {
+            // Save shop configuration
+            await JSRuntime.InvokeVoidAsync("hideModal", "shopConfigModal");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving shop configuration: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteShop(ShopResponse shop)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete '{shop.Name}'?"))
+        {
+            try
+            {
+                await BusinessService.DeleteShopAsync(shop.Id, CurrentUser!.Id);
+                await LoadData();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting shop: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task ViewShopDetails(ShopResponse shop)
+    {
+        // Navigate to shop details page
+        // Navigation.NavigateTo($"/shops/{shop.Id}");
+    }
+
+    private string GetBusinessTypeColor(BusinessType type) => type switch
+    {
+        BusinessType.Grocery => "success",
+        BusinessType.SuperShop => "primary",
+        BusinessType.Pharmacy => "info",
+        BusinessType.GeneralRetail => "warning",
+        BusinessType.Custom => "secondary",
+        _ => "secondary"
+    };
+
+    public class ShopFormModel
+    {
+        public Guid Id { get; set; }
+        public Guid BusinessId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Address { get; set; }
+        public string? Phone { get; set; }
+        public string? Email { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
+}
