@@ -186,14 +186,15 @@ public class BulkSyncController : ControllerBase
                 Id = c.Id,
                 EntityType = c.EntityType,
                 EntityId = c.EntityId,
-                BusinessId = Guid.Empty, // These properties don't exist in the local DataConflict
-                ShopId = null,
+                BusinessId = c.BusinessId, // Pass BusinessId from the request
+                ShopId = c.ShopId,         // Pass ShopId from the request
                 LocalData = c.LocalData,
                 ServerData = c.ServerData,
-                LocalTimestamp = c.ConflictTimestamp, // Using ConflictTimestamp as LocalTimestamp
-                ServerTimestamp = c.ConflictTimestamp,
+                LocalTimestamp = c.ConflictTimestamp,
+                ServerTimestamp = c.ConflictTimestamp, // This might also need adjustment depending on service logic
                 Type = Shared.Core.Services.ConflictType.UpdateConflict, // Default type
-                ConflictReason = c.ConflictType
+                ConflictReason = c.ConflictType,
+                Resolution = c.Resolution
             }).ToArray());
 
             _logger.LogInformation("Conflict resolution completed: {ResolvedCount} conflicts resolved, {FailedCount} failed",
