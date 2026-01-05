@@ -734,9 +734,9 @@ namespace Shared.Core.Migrations
                 column: "Type");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Products_Barcode",
+                name: "IX_Products_ShopId_Barcode",
                 table: "Products",
-                column: "Barcode",
+                columns: new[] { "ShopId", "Barcode" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
