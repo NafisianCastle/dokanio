@@ -40,8 +40,8 @@ public class SaleCompletedEventHandler : IEventHandler<SaleCompletedEvent>
                     ShopId = eventData.ShopId,
                     BusinessId = eventData.BusinessId,
                     ProductName = product.Name,
-                    CurrentStock = 0, // Will be updated by inventory service
-                    MinimumStock = 10, // Default minimum stock
+                    CurrentStock = product.CurrentStock,
+                    MinimumStock = product.MinimumStock,
                     Source = nameof(SaleCompletedEventHandler)
                 }, cancellationToken);
             }
