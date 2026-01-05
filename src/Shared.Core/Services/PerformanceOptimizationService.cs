@@ -44,6 +44,7 @@ public class PerformanceOptimizationService : IPerformanceOptimizationService
                 DateTime.UtcNow - timestamp < expiration)
             {
                 _logger.LogDebug("Cache hit for key: {CacheKey}", cacheKey);
+                _cacheTimestamps[cacheKey] = DateTime.UtcNow;  // refresh timestamp for LRU
                 return (T)cachedValue;
             }
         }
