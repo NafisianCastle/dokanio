@@ -471,7 +471,7 @@ public class BusinessManagementService : IBusinessManagementService
         }
 
         // Validate tax rate if specified
-        if (configuration.TaxRate.HasValue && (configuration.TaxRate.Value < 0 || configuration.TaxRate.Value > 1))
+        if (configuration.TaxRate < 0 || configuration.TaxRate > 1)
         {
             result.IsValid = false;
             result.Errors.Add("Tax rate must be between 0 and 1 (0% to 100%)");

@@ -56,4 +56,11 @@ public interface IStockRepository : IRepository<Stock>
     /// <param name="requiredQuantity">Required quantity</param>
     /// <returns>True if sufficient stock is available, false otherwise</returns>
     Task<bool> HasSufficientStockAsync(Guid productId, int requiredQuantity);
+    
+    /// <summary>
+    /// Gets all stock entries for a specific shop
+    /// </summary>
+    /// <param name="shopId">Shop identifier</param>
+    /// <returns>Collection of stock entries for the shop</returns>
+    Task<IEnumerable<Stock>> GetStockByShopAsync(Guid shopId);
 }

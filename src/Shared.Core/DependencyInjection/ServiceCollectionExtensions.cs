@@ -28,7 +28,9 @@ public static class ServiceCollectionExtensions
 
         // Register business logic services
         services.AddScoped<ISaleService, SaleService>();
+        services.AddScoped<IEnhancedSalesService, EnhancedSalesService>();
         services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IEnhancedInventoryService, EnhancedInventoryService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
         services.AddScoped<IDiscountService, DiscountService>();
@@ -37,6 +39,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IIntegratedPosService, IntegratedPosService>();
         services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
+        services.AddScoped<IBusinessManagementService, BusinessManagementService>();
         
         // Register repositories
         services.AddScoped<IProductRepository, ProductRepository>();
@@ -50,6 +53,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDiscountRepository, DiscountRepository>();
         services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
         services.AddScoped<ILicenseRepository, LicenseRepository>();
+        services.AddScoped<IBusinessRepository, BusinessRepository>();
+        services.AddScoped<IShopRepository, ShopRepository>();
         
         // Register transaction logging service for offline-first persistence
         services.AddScoped<ITransactionLogService, TransactionLogService>();
@@ -57,6 +62,13 @@ public static class ServiceCollectionExtensions
         // Register security and authentication services
         services.AddScoped<IEncryptionService, EncryptionService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IAuthenticationService>(provider => new AuthenticationService(
+            provider.GetRequiredService<IUserRepository>(),
+            provider.GetRequiredService<IShopRepository>(),
+            provider.GetRequiredService<ISessionService>(),
+            provider.GetRequiredService<IAuthorizationService>(),
+            provider.GetRequiredService<IEncryptionService>(),
+            provider.GetRequiredService<IAuditService>()));
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();
@@ -68,6 +80,9 @@ public static class ServiceCollectionExtensions
         // Register cross-platform configuration service
         services.AddSingleton<ICrossPlatformConfigurationService, CrossPlatformConfigurationService>();
         
+        // Register AI Analytics Engine
+        services.AddScoped<IAIAnalyticsEngine, AIAnalyticsEngine>();
+        
         // Register background services
         services.AddHostedService<SessionCleanupService>();
         
@@ -75,6 +90,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISyncEngine, SyncEngine>();
         services.AddScoped<IConnectivityService, ConnectivityService>();
         services.AddScoped<ISyncApiClient, SyncApiClient>();
+        services.AddScoped<IMultiTenantSyncService, MultiTenantSyncService>();
         services.AddHttpClient<ISyncApiClient, SyncApiClient>();
         
         // Register hardware integration services
@@ -134,7 +150,9 @@ public static class ServiceCollectionExtensions
 
         // Register business logic services
         services.AddScoped<ISaleService, SaleService>();
+        services.AddScoped<IEnhancedSalesService, EnhancedSalesService>();
         services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IEnhancedInventoryService, EnhancedInventoryService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
         services.AddScoped<IDiscountService, DiscountService>();
@@ -149,6 +167,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDiscountRepository, DiscountRepository>();
         services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
         services.AddScoped<ILicenseRepository, LicenseRepository>();
+        services.AddScoped<IBusinessRepository, BusinessRepository>();
+        services.AddScoped<IShopRepository, ShopRepository>();
 
         // Register additional services for testing
         services.AddScoped<IDiscountManagementService, DiscountManagementService>();
@@ -157,11 +177,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IIntegratedPosService, IntegratedPosService>();
         services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
         services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
+        services.AddScoped<IBusinessManagementService, BusinessManagementService>();
         
         // Register sync services for testing
         services.AddScoped<ISyncEngine, SyncEngine>();
         services.AddScoped<IConnectivityService, ConnectivityService>();
         services.AddScoped<ISyncApiClient, SyncApiClient>();
+        services.AddScoped<IMultiTenantSyncService, MultiTenantSyncService>();
         services.AddHttpClient<ISyncApiClient, SyncApiClient>();
         
         // Register hardware integration services for testing
@@ -177,6 +199,17 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITransactionLogService, TransactionLogService>();
         services.AddScoped<IEncryptionService, EncryptionService>();
         services.AddScoped<IUserService, UserService>();
+        
+        // Register AI Analytics Engine
+        services.AddScoped<IAIAnalyticsEngine, AIAnalyticsEngine>();
+        
+        services.AddScoped<IAuthenticationService>(provider => new AuthenticationService(
+            provider.GetRequiredService<IUserRepository>(),
+            provider.GetRequiredService<IShopRepository>(),
+            provider.GetRequiredService<ISessionService>(),
+            provider.GetRequiredService<IAuthorizationService>(),
+            provider.GetRequiredService<IEncryptionService>(),
+            provider.GetRequiredService<IAuditService>()));
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();

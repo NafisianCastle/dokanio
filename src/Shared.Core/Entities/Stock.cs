@@ -25,6 +25,11 @@ public class Stock : ISoftDeletable
     
     public SyncStatus SyncStatus { get; set; } = SyncStatus.NotSynced;
     
+    // Server-side properties for conflict resolution testing
+    public int? ServerQuantity { get; set; }
+    public DateTime? ServerLastUpdatedAt { get; set; }
+    public Guid? ServerDeviceId { get; set; }
+    
     // Soft delete properties
     public bool IsDeleted { get; set; } = false;
     public DateTime? DeletedAt { get; set; }
