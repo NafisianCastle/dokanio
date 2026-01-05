@@ -250,8 +250,8 @@ public class EnhancedSecurityService : IEnhancedSecurityService
                 userId,
                 AuditAction.SecurityViolation,
                 $"Data isolation enforcement error: {ex.Message}");
-            
-            return false;
+    
+            throw;
         }
     }
 
