@@ -127,7 +127,7 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
                     Quantity = 1,
                     BatchNumber = product.BatchNumber,
                     ExpiryDate = product.ExpiryDate,
-                    Weight = product.IsWeightBased ? product.RatePerKilogram : null,
+                    Weight = product.IsWeightBased ? 1m : null,
                     IsWeightBased = product.IsWeightBased
                 };
                 
