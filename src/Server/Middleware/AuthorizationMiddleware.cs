@@ -82,19 +82,21 @@ public class AuthorizationMiddleware
         var path = context.Request.Path.Value?.ToLowerInvariant();
         
         // Skip authorization for these paths
-        var skipPaths = new[]
+        var skipExactPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "/api/device/register",
-            "/api/device/authenticate", 
+            "/api/device/authenticate",
             "/api/auth/login",
             "/api/auth/offline-login",
-            "/api/sync", // Health check endpoint
-            "/swagger",
+            "/api/sync", // health check endpoint (exact match only)
             "/health",
             "/favicon.ico"
         };
 
-        return skipPaths.Any(skipPath => path?.StartsWith(skipPath) == true);
+        if (path != null && skipExactPaths.Contains(path))
+            return true;
+
+        return path?.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase) == true;
     }
 
     private async Task<bool> ValidateEndpointPermission(
