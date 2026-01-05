@@ -47,13 +47,13 @@ public class AuthController : ControllerBase
             request.UserAgent = HttpContext.Request.Headers["User-Agent"].ToString();
 
             // Sanitize IP address before logging to prevent log forging
-            var sanitizedIpAddress = (request.IpAddress ?? string.Empty)
+            var sanitizedIpAddress = (request?.IpAddress ?? string.Empty)
                 .Replace(Environment.NewLine, string.Empty)
                 .Replace("\n", string.Empty)
                 .Replace("\r", string.Empty);
 
             // Sanitize username before logging to prevent log forging
-            var sanitizedUsername = (request.Username ?? string.Empty)
+            var sanitizedUsername = (request?.Username ?? string.Empty)
                 .Replace(Environment.NewLine, string.Empty)
                 .Replace("\n", string.Empty)
                 .Replace("\r", string.Empty);
