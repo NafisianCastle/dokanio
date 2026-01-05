@@ -186,8 +186,6 @@ public class BulkSyncController : ControllerBase
                 Id = c.Id,
                 EntityType = c.EntityType,
                 EntityId = c.EntityId,
-                BusinessId = c.BusinessId, // Pass BusinessId from the request
-                ShopId = c.ShopId,         // Pass ShopId from the request
                 LocalData = c.LocalData,
                 ServerData = c.ServerData,
                 LocalTimestamp = c.ConflictTimestamp,
