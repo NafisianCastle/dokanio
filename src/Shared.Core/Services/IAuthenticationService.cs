@@ -105,7 +105,7 @@ public class UserPermissions
     public UserRole Role { get; set; }
     public Guid BusinessId { get; set; }
     public Guid? ShopId { get; set; }
-    public HashSet<string> Permissions { get; set; } = new();
+    public HashSet<string> Permissions { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public Dictionary<string, object> CustomPermissions { get; set; } = new();
     
     /// <summary>
