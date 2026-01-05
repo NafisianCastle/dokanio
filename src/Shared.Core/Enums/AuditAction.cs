@@ -21,5 +21,13 @@ public enum AuditAction
     SecurityViolation = 13,
     DataEncryption = 14,
     DataDecryption = 15,
-    SystemMaintenance = 16
+    SystemMaintenance = 16,
+    DataAccess = 17,
+    SecurityAlert = 18,
+    ComplianceCheck = 19,
+    ThreatDetection = 20,
+    SessionTimeout = 21,
+    PasswordChange = 22,
+    AccountLocked = 23,
+    AccountUnlocked = 24
 }

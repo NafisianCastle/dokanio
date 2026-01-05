@@ -45,6 +45,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
         services.AddScoped<IBusinessManagementService, BusinessManagementService>();
         
+        // Register system integration service
+        services.AddScoped<ISystemIntegrationService, SystemIntegrationService>();
+        
+        // Register multi-business startup service
+        services.AddScoped<IMultiBusinessStartupService, MultiBusinessStartupService>();
+        
         // Register repositories
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ISaleRepository, SaleRepository>();
@@ -86,6 +92,19 @@ public static class ServiceCollectionExtensions
         
         // Register AI Analytics Engine
         services.AddScoped<IAIAnalyticsEngine, AIAnalyticsEngine>();
+        
+        // Register ML Pipeline Services
+        services.AddScoped<IMLPipelineService, MLPipelineService>();
+        services.AddScoped<IDataPreprocessingService, DataPreprocessingService>();
+        services.AddScoped<IFeatureEngineeringService, FeatureEngineeringService>();
+        services.AddScoped<IModelTrainingService, ModelTrainingService>();
+        services.AddScoped<IModelPerformanceMonitoringService, ModelPerformanceMonitoringService>();
+        
+        // Register performance optimization services
+        services.AddScoped<IPerformanceOptimizationService, PerformanceOptimizationService>();
+        services.AddScoped<ISystemHealthMonitoringService, SystemHealthMonitoringService>();
+        services.AddScoped<IDatabaseQueryOptimizationService, DatabaseQueryOptimizationService>();
+        services.AddScoped<ICachingStrategyService, CachingStrategyService>();
         
         // Register background services
         services.AddHostedService<SessionCleanupService>();
@@ -193,6 +212,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
         services.AddScoped<IBusinessManagementService, BusinessManagementService>();
         
+        // Register system integration service for testing
+        services.AddScoped<ISystemIntegrationService, SystemIntegrationService>();
+        
+        // Register multi-business startup service for testing
+        services.AddScoped<IMultiBusinessStartupService, MultiBusinessStartupService>();
+        
         // Register sync services for testing
         services.AddScoped<ISyncEngine, SyncEngine>();
         services.AddScoped<IConnectivityService, ConnectivityService>();
@@ -216,6 +241,19 @@ public static class ServiceCollectionExtensions
         
         // Register AI Analytics Engine
         services.AddScoped<IAIAnalyticsEngine, AIAnalyticsEngine>();
+        
+        // Register ML Pipeline Services
+        services.AddScoped<IMLPipelineService, MLPipelineService>();
+        services.AddScoped<IDataPreprocessingService, DataPreprocessingService>();
+        services.AddScoped<IFeatureEngineeringService, FeatureEngineeringService>();
+        services.AddScoped<IModelTrainingService, ModelTrainingService>();
+        services.AddScoped<IModelPerformanceMonitoringService, ModelPerformanceMonitoringService>();
+        
+        // Register performance optimization services
+        services.AddScoped<IPerformanceOptimizationService, PerformanceOptimizationService>();
+        services.AddScoped<ISystemHealthMonitoringService, SystemHealthMonitoringService>();
+        services.AddScoped<IDatabaseQueryOptimizationService, DatabaseQueryOptimizationService>();
+        services.AddScoped<ICachingStrategyService, CachingStrategyService>();
         
         services.AddScoped<IAuthenticationService>(provider => new AuthenticationService(
             provider.GetRequiredService<IUserRepository>(),
