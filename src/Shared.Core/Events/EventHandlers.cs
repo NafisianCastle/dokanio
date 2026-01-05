@@ -34,14 +34,18 @@ public class SaleCompletedEventHandler : IEventHandler<SaleCompletedEvent>
             
             foreach (var product in lowStockProducts)
             {
+                // Get current stock from the product's stock entries
+                var currentStock = product.StockEntries.FirstOrDefault()?.Quantity ?? 0;
+                var minimumStock = 10; // Default minimum stock threshold - this should be configurable per product
+                
                 await _eventBus.PublishAsync(new LowStockDetectedEvent
                 {
                     ProductId = product.Id,
                     ShopId = eventData.ShopId,
                     BusinessId = eventData.BusinessId,
                     ProductName = product.Name,
-                    CurrentStock = product.CurrentStock,
-                    MinimumStock = product.MinimumStock,
+                    CurrentStock = currentStock,
+                    MinimumStock = minimumStock,
                     Source = nameof(SaleCompletedEventHandler)
                 }, cancellationToken);
             }
