@@ -55,7 +55,7 @@ public class BulkSyncController : ControllerBase
             _logger.LogInformation("Starting bulk sync for business {BusinessId} by user {UserId}", 
                 businessId, userId);
 
-            var result = await _syncService.SyncBusinessDataAsync(businessId);
+            var result = await _syncService.SyncBusinessDataAsync(request);
 
             _logger.LogInformation("Bulk sync completed for business {BusinessId}: {SyncedRecords} records synced, {ConflictsResolved} conflicts resolved",
                 businessId, result.ItemsSynced, result.ConflictsResolved);
