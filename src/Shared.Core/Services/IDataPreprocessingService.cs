@@ -107,68 +107,6 @@ public class PreprocessedInteractionData
 }
 
 /// <summary>
-/// Data quality validation report
-/// </summary>
-public class DataQualityReport
-{
-    public int TotalRecords { get; set; }
-    public int ValidRecords { get; set; }
-    public Dictionary<string, int> MissingValueCounts { get; set; } = new();
-    public Dictionary<string, int> OutlierCounts { get; set; } = new();
-    public Dictionary<string, DataTypeInfo> ColumnInfo { get; set; } = new();
-    public List<DataQualityIssue> Issues { get; set; } = new();
-    public double OverallQualityScore { get; set; }
-    public DateTime GeneratedAt { get; set; } = DateTime.UtcNow;
-}
-
 /// <summary>
 /// Information about a data column
 /// </summary>
-public class DataTypeInfo
-{
-    public string DataType { get; set; } = string.Empty;
-    public int NonNullCount { get; set; }
-    public int NullCount { get; set; }
-    public object? MinValue { get; set; }
-    public object? MaxValue { get; set; }
-    public double? Mean { get; set; }
-    public double? StandardDeviation { get; set; }
-    public List<object> UniqueValues { get; set; } = new();
-}
-
-/// <summary>
-/// Data quality issue
-/// </summary>
-public class DataQualityIssue
-{
-    public DataQualityIssueType Type { get; set; }
-    public string Column { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public int AffectedRecords { get; set; }
-    public DataQualityIssueSeverity Severity { get; set; }
-    public string RecommendedAction { get; set; } = string.Empty;
-}
-
-/// <summary>
-/// Data quality issue types
-/// </summary>
-public enum DataQualityIssueType
-{
-    MissingValues,
-    Outliers,
-    InconsistentFormat,
-    DuplicateRecords,
-    InvalidValues,
-    DataTypeInconsistency
-}
-
-/// <summary>
-/// Data quality issue severity levels
-/// </summary>
-public enum DataQualityIssueSeverity
-{
-    Low,
-    Medium,
-    High,
-    Critical
-}

@@ -658,7 +658,7 @@ public class MLPipelineService : IMLPipelineService
                 {
                     interactionData.Add(new InteractionDataPoint
                     {
-                        UserId = sale.UserId ?? Guid.Empty,
+                        UserId = sale.UserId,
                         ItemId = item.ProductId,
                         InteractionType = "purchase",
                         Rating = 5.0, // Implicit rating for purchases
