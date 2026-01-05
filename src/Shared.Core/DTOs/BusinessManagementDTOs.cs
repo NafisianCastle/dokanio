@@ -464,3 +464,59 @@ public class ShopDto
     public DateTime UpdatedAt { get; set; }
 }
 
+/// <summary>
+/// Business hours configuration
+/// </summary>
+public class BusinessHours
+{
+    public TimeSpan OpenTime { get; set; } = new TimeSpan(9, 0, 0); // 9:00 AM
+    public TimeSpan CloseTime { get; set; } = new TimeSpan(18, 0, 0); // 6:00 PM
+    public List<DayOfWeek> OperatingDays { get; set; } = new() { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday };
+    public bool IsOpen24Hours { get; set; } = false;
+}
+
+/// <summary>
+/// Receipt settings configuration
+/// </summary>
+public class ReceiptSettings
+{
+    public bool PrintReceipts { get; set; } = true;
+    public bool EmailReceipts { get; set; } = false;
+    public string ReceiptHeader { get; set; } = string.Empty;
+    public string ReceiptFooter { get; set; } = string.Empty;
+    public bool ShowBusinessLogo { get; set; } = false;
+}
+
+/// <summary>
+/// Notification settings configuration
+/// </summary>
+public class NotificationSettings
+{
+    public bool EnableLowStockAlerts { get; set; } = true;
+    public bool EnableExpiryAlerts { get; set; } = true;
+    public bool EnableSalesNotifications { get; set; } = false;
+    public string NotificationEmail { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Security settings configuration
+/// </summary>
+public class SecuritySettings
+{
+    public bool RequireManagerApproval { get; set; } = false;
+    public bool EnableAuditLogging { get; set; } = true;
+    public int SessionTimeoutMinutes { get; set; } = 60;
+    public bool RequireStrongPasswords { get; set; } = false;
+}
+
+/// <summary>
+/// Tax bracket configuration
+/// </summary>
+public class TaxBracket
+{
+    public string Name { get; set; } = string.Empty;
+    public decimal Rate { get; set; }
+    public decimal MinAmount { get; set; }
+    public decimal MaxAmount { get; set; }
+}
+

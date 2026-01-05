@@ -12,7 +12,7 @@ public class SystemHealthMonitoringService : ISystemHealthMonitoringService, IDi
     private readonly IErrorRecoveryService _errorRecoveryService;
     private readonly IComprehensiveLoggingService _loggingService;
     private readonly ILogger<SystemHealthMonitoringService> _logger;
-    private readonly Timer? _monitoringTimer;
+    private Timer? _monitoringTimer;
     private readonly object _lockObject = new();
     
     private bool _isMonitoring = false;
@@ -58,7 +58,7 @@ public class SystemHealthMonitoringService : ISystemHealthMonitoringService, IDi
                 deviceId);
 
             // Start the monitoring timer
-            var timer = new Timer(async _ => await PerformHealthCheckAsync(), null, TimeSpan.Zero, monitoringInterval);
+            _monitoringTimer = new Timer(async _ => await PerformHealthCheckAsync(), null, TimeSpan.Zero, monitoringInterval);
 
             _logger.LogInformation("System health monitoring started with interval: {Interval}", monitoringInterval);
         }
