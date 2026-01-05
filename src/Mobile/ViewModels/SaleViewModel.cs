@@ -458,7 +458,7 @@ public partial class SaleItemViewModel : ObservableObject
 
     [ObservableProperty]
     private DateTime? expiryDate;
-
+public decimal LineTotal => Quantity * UnitPrice * (IsWeightBased ? Math.Max(Weight ?? 1m, 0m) : 1m);
     [ObservableProperty]
     private decimal? weight;
 
