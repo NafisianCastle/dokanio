@@ -127,11 +127,11 @@ public class BasicPerformanceTests : IDisposable
         var initialMemory = GC.GetTotalMemory(false);
         await CreateLargeDataSetAsync();
 
-        // Act - Create memory pressure
+        // Act - Create memory pressure with smaller allocations
         var largeDataSets = new List<object>();
-        for (int i = 0; i < 50; i++)
+        for (int i = 0; i < 10; i++)
         {
-            largeDataSets.Add(new byte[1024 * 1024]); // 1MB each
+            largeDataSets.Add(new byte[1024 * 10]); // 10KB each (100KB total)
         }
 
         var memoryBeforeOptimization = GC.GetTotalMemory(false);

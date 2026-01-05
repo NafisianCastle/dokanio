@@ -102,6 +102,7 @@ public class DataConflict
     public DateTime ServerTimestamp { get; set; }
     public ConflictType Type { get; set; }
     public string ConflictReason { get; set; } = string.Empty;
+    public string Resolution { get; set; } = string.Empty; // Added Resolution property
 }
 
 /// <summary>

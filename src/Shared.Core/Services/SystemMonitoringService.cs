@@ -68,7 +68,7 @@ namespace Shared.Core.Services
             }
         }
 
-        public async Task<BusinessHealthStatus> GetBusinessHealthAsync(int businessId)
+        public async Task<BusinessHealthStatus> GetBusinessHealthAsync(Guid businessId)
         {
             try
             {
@@ -86,13 +86,13 @@ namespace Shared.Core.Services
                     };
                 }
 
-                var activeUsers = business.Users.Count(u => u.LastLoginDate > DateTime.UtcNow.AddDays(-7));
+                var activeUsers = business.Users.Count(u => u.LastLoginAt > DateTime.UtcNow.AddDays(-7));
                 var activeShops = business.Shops.Count(s => s.IsActive);
 
                 var lastActivity = await _dbContext.Sales
-                    .Where(s => s.BusinessId == businessId)
-                    .OrderByDescending(s => s.SaleDate)
-                    .Select(s => s.SaleDate)
+                    .Where(s => s.Shop.BusinessId == businessId)
+                    .OrderByDescending(s => s.CreatedAt)
+                    .Select(s => s.CreatedAt)
                     .FirstOrDefaultAsync();
 
                 return new BusinessHealthStatus
@@ -145,36 +145,38 @@ namespace Shared.Core.Services
             }
         }
 
-        public async Task<BusinessMetrics> GetBusinessMetricsAsync(int businessId)
+        public async Task<BusinessMetrics> GetBusinessMetricsAsync(Guid businessId)
         {
             try
             {
                 var today = DateTime.UtcNow.Date;
                 
                 var dailySales = await _dbContext.Sales
-                    .Where(s => s.BusinessId == businessId && s.SaleDate.Date == today)
+                    .Where(s => s.Shop.BusinessId == businessId && s.CreatedAt.Date == today)
                     .CountAsync();
 
                 var dailyRevenue = await _dbContext.Sales
-                    .Where(s => s.BusinessId == businessId && s.SaleDate.Date == today)
+                    .Where(s => s.Shop.BusinessId == businessId && s.CreatedAt.Date == today)
                     .SumAsync(s => s.TotalAmount);
 
                 var activeUsers = await _dbContext.Users
-                    .Where(u => u.BusinessId == businessId && u.LastLoginDate > DateTime.UtcNow.AddDays(-7))
+                    .Where(u => u.BusinessId == businessId && u.LastLoginAt > DateTime.UtcNow.AddDays(-7))
                     .CountAsync();
 
                 var totalProducts = await _dbContext.Products
-                    .Where(p => p.BusinessId == businessId)
+                    .Where(p => p.Shop.BusinessId == businessId)
                     .CountAsync();
 
-                var lowStockItems = await _dbContext.Products
-                    .Where(p => p.BusinessId == businessId && p.StockQuantity < 10)
+                var lowStockItems = await _dbContext.Stock
+                    .Where(s => s.Shop.BusinessId == businessId && s.Quantity < 10)
+                    .Select(s => s.ProductId)
+                    .Distinct()
                     .CountAsync();
 
-                var lastSyncTime = await _dbContext.SyncLogs
-                    .Where(sl => sl.BusinessId == businessId)
-                    .OrderByDescending(sl => sl.SyncTime)
-                    .Select(sl => sl.SyncTime)
+                // Simplify last sync time since SyncLogs table doesn't exist
+                var lastSyncTime = await _dbContext.Businesses
+                    .Where(b => b.Id == businessId)
+                    .Select(b => b.UpdatedAt) // Use UpdatedAt as proxy
                     .FirstOrDefaultAsync();
 
                 return new BusinessMetrics
@@ -255,9 +257,10 @@ namespace Shared.Core.Services
                 var violations = new List<DataIsolationViolation>();
 
                 // Check for cross-business data leaks in sales
-                var crossBusinessSales = await _dbContext.Sales
-                    .Join(_dbContext.Products, s => s.ProductId, p => p.Id, (s, p) => new { Sale = s, Product = p })
-                    .Where(sp => sp.Sale.BusinessId != sp.Product.BusinessId)
+                var crossBusinessSales = await _dbContext.SaleItems
+                    .Include(si => si.Sale.Shop)
+                    .Include(si => si.Product.Shop)
+                    .Where(si => si.Sale.Shop.BusinessId != si.Product.Shop.BusinessId)
                     .CountAsync();
 
                 if (crossBusinessSales > 0)

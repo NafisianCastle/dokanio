@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Shared.Core.Services;
 
@@ -15,6 +16,7 @@ public class CachingStrategyService : ICachingStrategyService, IDisposable
     private readonly ConcurrentDictionary<string, CacheEntry> _persistentCache = new();
     private readonly Timer _cleanupTimer;
     private readonly object _lockObject = new();
+    private readonly JsonSerializerOptions _jsonOptions;
 
     // Cache configuration
     private readonly TimeSpan _memoryExpiration = TimeSpan.FromMinutes(5);
@@ -25,6 +27,14 @@ public class CachingStrategyService : ICachingStrategyService, IDisposable
     public CachingStrategyService(ILogger<CachingStrategyService> logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        
+        // Configure JSON serializer options to handle circular references
+        _jsonOptions = new JsonSerializerOptions
+        {
+            ReferenceHandler = ReferenceHandler.IgnoreCycles,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = false
+        };
         
         // Start cleanup timer
         _cleanupTimer = new Timer(PerformCleanup, null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
@@ -42,7 +52,7 @@ public class CachingStrategyService : ICachingStrategyService, IDisposable
             
             try
             {
-                return JsonSerializer.Deserialize<T>(entry.Data);
+                return JsonSerializer.Deserialize<T>(entry.Data, _jsonOptions);
             }
             catch (Exception ex)
             {
@@ -62,7 +72,7 @@ public class CachingStrategyService : ICachingStrategyService, IDisposable
     public async Task SetMemoryCacheAsync<T>(string key, T data, TimeSpan? customExpiration = null) where T : class
     {
         var expiration = customExpiration ?? _memoryExpiration;
-        var serializedData = JsonSerializer.Serialize(data);
+        var serializedData = JsonSerializer.Serialize(data, _jsonOptions);
         
         var cacheEntry = new CacheEntry
         {
@@ -107,7 +117,7 @@ public class CachingStrategyService : ICachingStrategyService, IDisposable
             
             try
             {
-                return JsonSerializer.Deserialize<T>(entry.Data);
+                return JsonSerializer.Deserialize<T>(entry.Data, _jsonOptions);
             }
             catch (Exception ex)
             {
@@ -127,7 +137,7 @@ public class CachingStrategyService : ICachingStrategyService, IDisposable
     public async Task SetPersistentCacheAsync<T>(string key, T data, TimeSpan? customExpiration = null) where T : class
     {
         var expiration = customExpiration ?? _persistentExpiration;
-        var serializedData = JsonSerializer.Serialize(data);
+        var serializedData = JsonSerializer.Serialize(data, _jsonOptions);
         
         var cacheEntry = new CacheEntry
         {

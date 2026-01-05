@@ -111,7 +111,7 @@ builder.Services.AddLogging(logging =>
     logging.AddDebug();
     if (builder.Environment.IsDevelopment())
     {
-        logging.SetMinimumLevel(LogLevel.Debug);
+        logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Debug);
     }
 });
 
@@ -162,6 +162,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
+app.UseMiddleware<Server.Middleware.GlobalExceptionHandlerMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
