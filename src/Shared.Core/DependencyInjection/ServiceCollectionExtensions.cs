@@ -2,10 +2,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using Moq;
+using Shared.Core.Architecture;
 using Shared.Core.Data;
 using Shared.Core.DTOs;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
+using Shared.Core.Events;
+using Shared.Core.Integration;
+using Shared.Core.Plugins;
 using Shared.Core.Repositories;
 using Shared.Core.Services;
 using Shared.Core.Tests.TestImplementations;
@@ -131,6 +135,16 @@ public static class ServiceCollectionExtensions
             MaxRetryAttempts = 3,
             InitialRetryDelay = TimeSpan.FromSeconds(1),
             RetryBackoffMultiplier = 2.0
+        });
+
+        // Add extensible architecture services
+        services.AddExtensibleArchitecture(new MultiTenantServiceConfiguration
+        {
+            EnablePluginSystem = true,
+            EnableEventBus = true,
+            EnableAnalyticsIntegration = false, // Disabled by default
+            EnableAIIntegration = false, // Disabled by default
+            PluginDirectory = "plugins"
         });
 
         return services;
@@ -277,6 +291,16 @@ public static class ServiceCollectionExtensions
             mockService.Setup(x => x.GetUserId()).Returns(user.Id);
             mockService.Setup(x => x.GetUsername()).Returns(user.Username);
             return mockService.Object;
+        });
+
+        // Add extensible architecture services for testing
+        services.AddExtensibleArchitecture(new MultiTenantServiceConfiguration
+        {
+            EnablePluginSystem = false, // Disabled for testing
+            EnableEventBus = true,
+            EnableAnalyticsIntegration = false,
+            EnableAIIntegration = false,
+            PluginDirectory = "test-plugins"
         });
 
         return services;

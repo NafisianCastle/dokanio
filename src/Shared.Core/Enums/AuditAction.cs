@@ -18,5 +18,8 @@ public enum AuditAction
     SystemConfiguration = 10,
     DataExport = 11,
     DataImport = 12,
-    SecurityViolation = 13
+    SecurityViolation = 13,
+    DataEncryption = 14,
+    DataDecryption = 15,
+    SystemMaintenance = 16
 }
