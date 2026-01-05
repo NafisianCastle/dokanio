@@ -125,16 +125,20 @@ public class TestOptimizationService : ITestOptimizationService
         {
             _logger.LogDebug("Validating memory limits for test: {TestName}", testName);
 
-            var initialMemory = GC.GetTotalMemory(false);
-            
-            // Simulate test execution monitoring
-            await Task.Delay(10); // Simulate test execution time
-            
-            var currentMemory = GC.GetTotalMemory(false);
-            var memoryUsed = currentMemory - initialMemory;
+            var baseline = GC.GetTotalMemory(false);
+            var peak = baseline;
 
+            // Sample for a short window to reduce noise
+            for (var i = 0; i < 10; i++)
+            {
+                await Task.Delay(25);
+                var sample = GC.GetTotalMemory(false);
+                if (sample > peak) peak = sample;
+            }
+
+            var memoryUsed = Math.Max(0, peak - baseline);
             var withinLimits = memoryUsed <= memoryLimitBytes;
-            
+
             if (!withinLimits)
             {
                 _logger.LogWarning("Test {TestName} exceeded memory limit. Used: {UsedMB} MB, Limit: {LimitMB} MB",
