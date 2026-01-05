@@ -87,6 +87,13 @@ public static class ServiceCollectionExtensions
         // Register AI Analytics Engine
         services.AddScoped<IAIAnalyticsEngine, AIAnalyticsEngine>();
         
+        // Register ML Pipeline Services
+        services.AddScoped<IMLPipelineService, MLPipelineService>();
+        services.AddScoped<IDataPreprocessingService, DataPreprocessingService>();
+        services.AddScoped<IFeatureEngineeringService, FeatureEngineeringService>();
+        services.AddScoped<IModelTrainingService, ModelTrainingService>();
+        services.AddScoped<IModelPerformanceMonitoringService, ModelPerformanceMonitoringService>();
+        
         // Register background services
         services.AddHostedService<SessionCleanupService>();
         
@@ -216,6 +223,13 @@ public static class ServiceCollectionExtensions
         
         // Register AI Analytics Engine
         services.AddScoped<IAIAnalyticsEngine, AIAnalyticsEngine>();
+        
+        // Register ML Pipeline Services
+        services.AddScoped<IMLPipelineService, MLPipelineService>();
+        services.AddScoped<IDataPreprocessingService, DataPreprocessingService>();
+        services.AddScoped<IFeatureEngineeringService, FeatureEngineeringService>();
+        services.AddScoped<IModelTrainingService, ModelTrainingService>();
+        services.AddScoped<IModelPerformanceMonitoringService, ModelPerformanceMonitoringService>();
         
         services.AddScoped<IAuthenticationService>(provider => new AuthenticationService(
             provider.GetRequiredService<IUserRepository>(),
