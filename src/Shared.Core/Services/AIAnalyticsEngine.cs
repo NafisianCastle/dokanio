@@ -722,7 +722,7 @@ public class AIAnalyticsEngine : IAIAnalyticsEngine
         foreach (var association in productAssociations.OrderByDescending(a => a.Confidence).Take(10))
         {
             var targetProduct = productList.FirstOrDefault(p => p.Id == association.ProductB);
-            if (targetProduct == null) continue;
+            if (targetProduct == null || !targetProduct.IsActive) continue;
 
             var baseProduct = productList.FirstOrDefault(p => p.Id == association.ProductA);
             var baseProductName = baseProduct?.Name ?? "Unknown";
@@ -789,6 +789,8 @@ public class AIAnalyticsEngine : IAIAnalyticsEngine
             var category = categoryGroup.Key;
             var purchasedProducts = categoryGroup.Value;
             var avgPurchasePrice = purchasedProducts.Average(p => p.UnitPrice);
+            if (avgPurchasePrice <= 0m)
+                continue;
 
             // Find higher-priced products in the same category
             var premiumProducts = productList
@@ -1488,11 +1490,13 @@ public class AIAnalyticsEngine : IAIAnalyticsEngine
             { new[] { "baby" }, new[] { "diaper", "formula", "care" } }
         };
 
-        foreach (var pattern in crossSellPatterns)
-        {
-            var triggerProducts = products.Where(p => 
-                pattern.Key.Any(keyword => p.Name.ToLower().Contains(keyword))).ToList();
-            
+        var triggerProducts = products.Where(p =>
+            p.Name != null && pattern.Key.Any(keyword => p.Name.Contains(keyword, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+        var recommendedProducts = products.Where(p =>
+            p.Name != null && pattern.Value.Any(keyword => p.Name.Contains(keyword, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
             var recommendedProducts = products.Where(p => 
                 pattern.Value.Any(keyword => p.Name.ToLower().Contains(keyword))).ToList();
 
