@@ -454,7 +454,7 @@ public partial class SaleItemViewModel : ObservableObject
     [ObservableProperty]
     private decimal discountPercentage;
 
-    public decimal LineTotal => Quantity * UnitPrice * (IsWeightBased ? (Weight ?? 1) : 1);
+    public decimal LineTotal => Quantity * UnitPrice * (IsWeightBased ? (Weight ?? 0) : 1);
     
     public decimal DiscountAmount => LineTotal * (DiscountPercentage / 100);
     
