@@ -236,8 +236,8 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error validating permission {Permission} for user {UserId}", 
-                request.Permission, request.UserId);
+            _logger.LogError(ex, "Error validating permission {Permission} for user {UserId}",
+                SanitizeForLogging(request.Permission), request.UserId);
             return StatusCode(500, new SyncApiResult<bool>
             {
                 Success = false,
@@ -246,6 +246,16 @@ public class AuthController : ControllerBase
                 Errors = new List<string> { ex.Message }
             });
         }
+    }
+
+    private static string SanitizeForLogging(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return string.Empty;
+
+        // Remove newline characters to mitigate log forging
+        return value.Replace("\r", string.Empty)
+                    .Replace("\n", string.Empty);
     }
 
     /// <summary>
