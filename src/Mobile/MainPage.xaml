@@ -7,16 +7,43 @@
              Title="{Binding Title}">
 
     <ScrollView>
-        <VerticalStackLayout Padding="30" Spacing="25">
+        <VerticalStackLayout Padding="20" Spacing="20">
             
-            <!-- Header -->
-            <Label Text="Offline POS Mobile"
-                   Style="{StaticResource Headline}"
-                   SemanticProperties.HeadingLevel="Level1"
-                   HorizontalOptions="Center" />
+            <!-- Header with User Info -->
+            <Frame BackgroundColor="DodgerBlue" Padding="15" CornerRadius="10">
+                <StackLayout Spacing="5">
+                    <Label Text="{Binding WelcomeMessage}"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalOptions="Center" />
+                    
+                    <Label Text="{Binding UserRole}"
+                           FontSize="12"
+                           TextColor="LightGray"
+                           HorizontalOptions="Center" />
+                    
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Spacing="10">
+                        <Label Text="{Binding BusinessName}"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="White" />
+                        
+                        <Label Text="•"
+                               FontSize="14"
+                               TextColor="LightGray"
+                               IsVisible="{Binding ShopName, Converter={StaticResource IsNotNullConverter}}" />
+                        
+                        <Label Text="{Binding ShopName}"
+                               FontSize="14"
+                               TextColor="LightGray"
+                               IsVisible="{Binding ShopName, Converter={StaticResource IsNotNullConverter}}" />
+                    </StackLayout>
+                </StackLayout>
+            </Frame>
 
             <!-- Sync Status -->
-            <Frame BackgroundColor="LightGray" Padding="15">
+            <Frame BackgroundColor="LightGray" Padding="15" CornerRadius="5">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -34,9 +61,9 @@
                            FontAttributes="Bold" />
 
                     <Label Grid.Row="0" Grid.Column="1"
-                           Text="{Binding IsOnline, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Online|Offline'}"
+                           Text="{Binding IsOnline, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Online,Offline'}"
                            FontSize="14"
-                           TextColor="{Binding IsOnline, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Green|Red'}" />
+                           TextColor="{Binding IsOnline, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Green,Red'}" />
 
                     <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
                            Text="{Binding SyncStatus}"
@@ -47,11 +74,16 @@
                            Text="{Binding LastSyncTime, StringFormat='Last sync: {0:MM/dd/yyyy HH:mm}'}"
                            FontSize="10"
                            TextColor="Gray"
-                           IsVisible="{Binding LastSyncTime, Converter={StaticResource DateTimeToVisibilityConverter}}" />
+                           IsVisible="{Binding LastSyncTime, Converter={StaticResource IsNotNullConverter}}" />
                 </Grid>
             </Frame>
 
-            <!-- Quick Actions -->
+            <!-- Core Actions (Always Visible) -->
+            <Label Text="Core Functions"
+                   FontSize="16"
+                   FontAttributes="Bold"
+                   Margin="0,10,0,0" />
+            
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -65,6 +97,7 @@
                 <Button Grid.Row="0" Grid.Column="0"
                         Text="New Sale"
                         Command="{Binding NavigateToNewSaleCommand}"
+                        IsEnabled="{Binding CanCreateSales}"
                         BackgroundColor="Green"
                         TextColor="White"
                         FontSize="16"
@@ -74,6 +107,7 @@
                 <Button Grid.Row="0" Grid.Column="1"
                         Text="Scan Barcode"
                         Command="{Binding NavigateToScannerCommand}"
+                        IsEnabled="{Binding CanCreateSales}"
                         BackgroundColor="DodgerBlue"
                         TextColor="White"
                         FontSize="16"
@@ -83,6 +117,7 @@
                 <Button Grid.Row="1" Grid.Column="0"
                         Text="Products"
                         Command="{Binding NavigateToProductListCommand}"
+                        IsEnabled="{Binding CanViewProducts}"
                         BackgroundColor="Orange"
                         TextColor="White"
                         FontSize="16"
@@ -92,6 +127,7 @@
                 <Button Grid.Row="1" Grid.Column="1"
                         Text="Daily Sales"
                         Command="{Binding NavigateToDailySalesCommand}"
+                        IsEnabled="{Binding CanViewReports}"
                         BackgroundColor="Purple"
                         TextColor="White"
                         FontSize="16"
@@ -99,14 +135,82 @@
                         Margin="5,5,0,0" />
             </Grid>
 
-            <!-- Manual Sync Button -->
-            <Button Text="Manual Sync"
-                    Command="{Binding ManualSyncCommand}"
-                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
-                    BackgroundColor="DarkBlue"
-                    TextColor="White"
-                    FontSize="14"
-                    Margin="0,20,0,0" />
+            <!-- Advanced Features (Role-Based) -->
+            <StackLayout IsVisible="{Binding ShowAdvancedFeatures}" Spacing="15">
+                <Label Text="Advanced Features"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       Margin="0,10,0,0" />
+                
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Row="0" Grid.Column="0"
+                            Text="Analytics"
+                            Command="{Binding NavigateToAnalyticsCommand}"
+                            IsEnabled="{Binding CanViewAnalytics}"
+                            IsVisible="{Binding CanViewAnalytics}"
+                            BackgroundColor="Teal"
+                            TextColor="White"
+                            FontSize="14"
+                            HeightRequest="60"
+                            Margin="0,0,5,5" />
+
+                    <Button Grid.Row="0" Grid.Column="1"
+                            Text="Inventory"
+                            Command="{Binding NavigateToInventoryCommand}"
+                            IsEnabled="{Binding CanManageInventory}"
+                            IsVisible="{Binding CanManageInventory}"
+                            BackgroundColor="Brown"
+                            TextColor="White"
+                            FontSize="14"
+                            HeightRequest="60"
+                            Margin="5,0,0,5" />
+
+                    <Button Grid.Row="1" Grid.Column="0"
+                            Text="Users"
+                            Command="{Binding NavigateToUserManagementCommand}"
+                            IsEnabled="{Binding CanManageUsers}"
+                            IsVisible="{Binding CanManageUsers}"
+                            BackgroundColor="DarkRed"
+                            TextColor="White"
+                            FontSize="14"
+                            HeightRequest="60"
+                            Margin="0,5,5,0" />
+
+                    <Button Grid.Row="1" Grid.Column="1"
+                            Text="Switch Shop"
+                            Command="{Binding SwitchBusinessShopCommand}"
+                            BackgroundColor="Gray"
+                            TextColor="White"
+                            FontSize="14"
+                            HeightRequest="60"
+                            Margin="5,5,0,0" />
+                </Grid>
+            </StackLayout>
+
+            <!-- System Actions -->
+            <StackLayout Spacing="10" Margin="0,20,0,0">
+                <Button Text="Manual Sync"
+                        Command="{Binding ManualSyncCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                        BackgroundColor="DarkBlue"
+                        TextColor="White"
+                        FontSize="14" />
+
+                <Button Text="Logout"
+                        Command="{Binding LogoutCommand}"
+                        BackgroundColor="DarkGray"
+                        TextColor="White"
+                        FontSize="14" />
+            </StackLayout>
 
             <!-- Loading Indicator -->
             <ActivityIndicator IsVisible="{Binding IsBusy}"
@@ -114,12 +218,15 @@
                               Color="DodgerBlue" />
 
             <!-- Error Message -->
-            <Label Text="{Binding ErrorMessage}"
-                   TextColor="Red"
-                   FontSize="14"
-                   HorizontalOptions="Center"
-                   IsVisible="{Binding HasError}"
-                   Margin="0,10" />
+            <Frame IsVisible="{Binding HasError}"
+                   BackgroundColor="LightCoral"
+                   Padding="15"
+                   CornerRadius="5">
+                <Label Text="{Binding ErrorMessage}"
+                       TextColor="DarkRed"
+                       FontSize="14"
+                       HorizontalOptions="Center" />
+            </Frame>
 
         </VerticalStackLayout>
     </ScrollView>
