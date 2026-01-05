@@ -119,7 +119,7 @@ public class BulkSyncController : ControllerBase
             _logger.LogInformation("Starting shop sync for shop {ShopId} by user {UserId}", 
                 shopId, userId);
 
-            var result = await _syncService.SyncShopDataAsync(shopId);
+            var result = await _syncService.SyncShopDataAsync(request);
 
             _logger.LogInformation("Shop sync completed for shop {ShopId}: {SyncedRecords} records synced, {ConflictsResolved} conflicts resolved",
                 shopId, result.ItemsSynced, result.ConflictsResolved);
