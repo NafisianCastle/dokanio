@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Shared.Core.Data;
 using Shared.Core.DTOs;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
@@ -31,10 +32,11 @@ public class EnhancedSalesService : SaleService, IEnhancedSalesService
         IBusinessManagementService businessManagementService,
         IShopRepository shopRepository,
         ICurrentUserService currentUserService,
+        PosDbContext context,
         ILogger<EnhancedSalesService> logger)
         : base(saleRepository, saleItemRepository, productService, inventoryService, 
                weightBasedPricingService, membershipService, discountService, 
-               configurationService, licenseService)
+               configurationService, licenseService, context, logger)
     {
         _businessManagementService = businessManagementService;
         _shopRepository = shopRepository;

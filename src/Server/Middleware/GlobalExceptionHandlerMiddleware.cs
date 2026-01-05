@@ -2,23 +2,34 @@ using System.Net;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
+using Shared.Core.Services;
 
 namespace Server.Middleware;
 
 /// <summary>
-/// Global middleware to handle unhandled exceptions across the application
+/// Enhanced global middleware to handle unhandled exceptions across the server application
+/// Uses comprehensive exception handling with user-friendly messages and recovery suggestions
 /// </summary>
 public class GlobalExceptionHandlerMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<GlobalExceptionHandlerMiddleware> _logger;
     private readonly IHostEnvironment _env;
+    private readonly IGlobalExceptionHandler _globalExceptionHandler;
+    private readonly ICurrentUserService _currentUserService;
 
-    public GlobalExceptionHandlerMiddleware(RequestDelegate next, ILogger<GlobalExceptionHandlerMiddleware> logger, IHostEnvironment env)
+    public GlobalExceptionHandlerMiddleware(
+        RequestDelegate next, 
+        ILogger<GlobalExceptionHandlerMiddleware> logger, 
+        IHostEnvironment env,
+        IGlobalExceptionHandler globalExceptionHandler,
+        ICurrentUserService currentUserService)
     {
         _next = next;
         _logger = logger;
         _env = env;
+        _globalExceptionHandler = globalExceptionHandler;
+        _currentUserService = currentUserService;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -38,44 +49,78 @@ public class GlobalExceptionHandlerMiddleware
     {
         context.Response.ContentType = "application/json";
         
-        // Determine status code based on exception type if needed
-        context.Response.StatusCode = exception switch
+        try
         {
-            ArgumentException => (int)HttpStatusCode.BadRequest,
-            KeyNotFoundException => (int)HttpStatusCode.NotFound,
-            UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
-            InvalidOperationException => (int)HttpStatusCode.BadRequest,
-            _ => (int)HttpStatusCode.InternalServerError
-        };
+            // Get device and user context
+            var deviceId = _currentUserService.GetDeviceId();
+            var userId = _currentUserService.GetUserId();
+            var requestContext = $"HTTP {context.Request.Method} {context.Request.Path}";
 
-        var response = new ErrorResponse
+            // Use comprehensive exception handler
+            var errorResponse = await _globalExceptionHandler.HandleExceptionAsync(
+                exception, 
+                requestContext, 
+                deviceId, 
+                userId);
+
+            // Set HTTP status code
+            context.Response.StatusCode = errorResponse.StatusCode;
+
+            // Add trace ID
+            errorResponse.TraceId = context.TraceIdentifier;
+
+            // Attempt automatic recovery for recoverable exceptions
+            if (errorResponse.RecoveryAction?.IsAutomatic == true)
+            {
+                var recoveryResult = await _globalExceptionHandler.AttemptAutomaticRecoveryAsync(
+                    exception, 
+                    requestContext, 
+                    deviceId);
+
+                if (recoveryResult.Success)
+                {
+                    errorResponse.Metadata["AutoRecovery"] = "Successful";
+                    errorResponse.Metadata["RecoveryActions"] = recoveryResult.ActionsPerformed;
+                }
+                else
+                {
+                    errorResponse.Metadata["AutoRecovery"] = "Failed";
+                    errorResponse.Metadata["RecoveryFailure"] = recoveryResult.Message;
+                }
+            }
+
+            // Serialize and send response
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = _env.IsDevelopment()
+            };
+
+            var json = JsonSerializer.Serialize(errorResponse, jsonOptions);
+            await context.Response.WriteAsync(json);
+        }
+        catch (Exception handlingException)
         {
-            StatusCode = context.Response.StatusCode,
-            Message = _env.IsDevelopment() || context.Response.StatusCode != 500 
-                ? exception.Message 
-                : "An unexpected error occurred. Please try again later.",
-            DetailedMessage = _env.IsDevelopment() ? exception.ToString() : null,
-            TraceId = context.TraceIdentifier
-        };
+            // Fallback error handling if comprehensive handler fails
+            _logger.LogCritical(handlingException, "Exception handler middleware failed while processing exception: {OriginalException}", exception.Message);
+            
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            
+            var fallbackResponse = new
+            {
+                StatusCode = context.Response.StatusCode,
+                Message = "An unexpected error occurred while processing your request.",
+                DetailedMessage = _env.IsDevelopment() ? exception.ToString() : null,
+                TraceId = context.TraceIdentifier,
+                Timestamp = DateTime.UtcNow
+            };
 
-        var jsonOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = true
-        };
-
-        var json = JsonSerializer.Serialize(response, jsonOptions);
-        await context.Response.WriteAsync(json);
+            var fallbackJson = JsonSerializer.Serialize(fallbackResponse, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+            
+            await context.Response.WriteAsync(fallbackJson);
+        }
     }
-}
-
-/// <summary>
-/// Standardized error response model
-/// </summary>
-public class ErrorResponse
-{
-    public int StatusCode { get; set; }
-    public string Message { get; set; } = string.Empty;
-    public string? DetailedMessage { get; set; }
-    public string? TraceId { get; set; }
 }

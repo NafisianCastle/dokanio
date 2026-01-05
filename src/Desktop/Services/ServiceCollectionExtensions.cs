@@ -13,6 +13,9 @@ public static class ServiceCollectionExtensions
         // Add shared core services
         services.AddSharedCore(connectionString);
         
+        // Add desktop-specific exception handling
+        services.AddScoped<GlobalExceptionHandlerService>();
+        
         // Add ViewModels
         services.AddTransient<MainViewModel>();
         services.AddTransient<SaleViewModel>();

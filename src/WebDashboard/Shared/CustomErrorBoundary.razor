@@ -1,0 +1,165 @@
+@using WebDashboard.Services
+@using global::Shared.Core.Services
+@inject WebDashboard.Services.GlobalExceptionHandlerService ExceptionHandler
+@inject ILogger<CustomErrorBoundary> Logger
+
+<ErrorBoundary @ref="errorBoundary">
+    <ChildContent>
+        @ChildContent
+    </ChildContent>
+    <ErrorContent Context="exception">
+        @{
+            // Handle the exception when it occurs
+            _ = Task.Run(async () => await HandleExceptionAsync(exception));
+        }
+        
+        @if (errorInfo != null)
+        {
+            <div class="alert alert-@GetAlertClass(errorInfo.Severity) alert-dismissible fade show" role="alert">
+                <h4 class="alert-heading">
+                    <i class="fas fa-@GetIconClass(errorInfo.Severity)"></i>
+                    @errorInfo.Title
+                </h4>
+                
+                <p class="mb-3">@errorInfo.Message</p>
+                
+                @if (!string.IsNullOrEmpty(errorInfo.DetailedMessage))
+                {
+                    <details class="mb-3">
+                        <summary>Technical Details</summary>
+                        <pre class="mt-2 small">@errorInfo.DetailedMessage</pre>
+                    </details>
+                }
+                
+                @if (errorInfo.RecoveryResult?.Success == true)
+                {
+                    <div class="alert alert-success mt-3">
+                        <i class="fas fa-check-circle"></i>
+                        <strong>Automatic Recovery Successful</strong>
+                        <p class="mb-0">@errorInfo.RecoveryResult.Message</p>
+                        @if (errorInfo.RecoveryResult.ActionsPerformed.Any())
+                        {
+                            <small class="text-muted">
+                                Actions: @string.Join(", ", errorInfo.RecoveryResult.ActionsPerformed)
+                            </small>
+                        }
+                    </div>
+                }
+                else if (errorInfo.RecoveryAction != null && !errorInfo.RecoveryAction.IsAutomatic)
+                {
+                    <div class="mt-3">
+                        <h6>What you can do:</h6>
+                        <p>@errorInfo.RecoveryAction.Description</p>
+                        @if (errorInfo.RecoveryAction.Steps.Any())
+                        {
+                            <ol class="small">
+                                @foreach (var step in errorInfo.RecoveryAction.Steps.Take(5))
+                                {
+                                    <li>@step</li>
+                                }
+                            </ol>
+                        }
+                    </div>
+                }
+                
+                <hr>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        Error Code: @errorInfo.ErrorCode | 
+                        Time: @errorInfo.Timestamp.ToString("HH:mm:ss")
+                    </small>
+                    <div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm me-2" @onclick="RefreshPage">
+                            <i class="fas fa-refresh"></i> Refresh
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" @onclick="ReportError">
+                            <i class="fas fa-bug"></i> Report Issue
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        else
+        {
+            <!-- Fallback error display -->
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    An Error Occurred
+                </h4>
+                <p>Something went wrong while processing your request. Please try refreshing the page.</p>
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">Time: @DateTime.Now.ToString("HH:mm:ss")</small>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="RefreshPage">
+                        <i class="fas fa-refresh"></i> Refresh Page
+                    </button>
+                </div>
+            </div>
+        }
+    </ErrorContent>
+</ErrorBoundary>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    
+    private WebErrorInfo? errorInfo;
+    private ErrorBoundary? errorBoundary;
+
+    public async Task HandleExceptionAsync(Exception exception)
+    {
+        try
+        {
+            Logger.LogError(exception, "Custom error boundary caught exception");
+            errorInfo = await ExceptionHandler.HandleUnhandledExceptionAsync(exception, "Blazor Component");
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception handlingException)
+        {
+            Logger.LogCritical(handlingException, "Custom error boundary failed to handle exception: {OriginalException}", exception.Message);
+            errorInfo = null; // Will show fallback error display
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private string GetAlertClass(WebErrorSeverity severity)
+    {
+        return severity switch
+        {
+            WebErrorSeverity.Low => "info",
+            WebErrorSeverity.Medium => "warning",
+            WebErrorSeverity.High => "danger",
+            WebErrorSeverity.Critical => "danger",
+            _ => "warning"
+        };
+    }
+
+    private string GetIconClass(WebErrorSeverity severity)
+    {
+        return severity switch
+        {
+            WebErrorSeverity.Low => "info-circle",
+            WebErrorSeverity.Medium => "exclamation-triangle",
+            WebErrorSeverity.High => "exclamation-circle",
+            WebErrorSeverity.Critical => "times-circle",
+            _ => "exclamation-triangle"
+        };
+    }
+
+    private void RefreshPage()
+    {
+        // In a real implementation, this would refresh the current page or component
+        // For now, we'll just clear the error and let the user try again
+        errorInfo = null;
+        StateHasChanged();
+    }
+
+    private void ReportError()
+    {
+        // In a real implementation, this would open a support ticket or send error details
+        // For now, we'll just log that the user wants to report the error
+        Logger.LogInformation("User requested to report error: {ErrorCode}", errorInfo?.ErrorCode);
+    }
+}

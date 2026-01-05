@@ -45,6 +45,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
         services.AddScoped<IBusinessManagementService, BusinessManagementService>();
         
+        // Register device context service
+        services.AddSingleton<IDeviceContextService, DeviceContextService>();
+        
         // Register system integration service
         services.AddScoped<ISystemIntegrationService, SystemIntegrationService>();
         
@@ -83,6 +86,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
+        
+        // Register comprehensive logging service
+        services.AddScoped<IComprehensiveLoggingService, ComprehensiveLoggingService>();
+        
+        // Register error recovery and exception handling services
+        services.AddScoped<IErrorRecoveryService, ErrorRecoveryService>();
+        services.AddScoped<IGlobalExceptionHandler, GlobalExceptionHandler>();
         
         // Register database migration service
         services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
@@ -192,6 +202,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDiscountService, DiscountService>();
         services.AddScoped<IMembershipService, MembershipService>();
         
+        // Register device context service
+        services.AddSingleton<IDeviceContextService, DeviceContextService>();
+        
         // Register repositories
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ISaleRepository, SaleRepository>();
@@ -268,6 +281,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();
         services.AddSingleton<ICrossPlatformConfigurationService, CrossPlatformConfigurationService>();
+        
+        // Register comprehensive logging service
+        services.AddScoped<IComprehensiveLoggingService, ComprehensiveLoggingService>();
+        
+        // Register error recovery and exception handling services
+        services.AddScoped<IErrorRecoveryService, ErrorRecoveryService>();
+        services.AddScoped<IGlobalExceptionHandler, GlobalExceptionHandler>();
         
         // Add test configurations
         services.AddSingleton(provider => new SyncConfiguration

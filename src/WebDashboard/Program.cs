@@ -39,6 +39,7 @@ builder.Services.AddScoped<IDashboardApiService, DashboardApiService>();
 builder.Services.AddScoped<IBusinessApiService, BusinessApiService>();
 builder.Services.AddScoped<IUserApiService, UserApiService>();
 builder.Services.AddScoped<WebDashboard.Services.IAuthenticationService, WebDashboard.Services.AuthenticationService>();
+builder.Services.AddScoped<WebDashboard.Services.GlobalExceptionHandlerService>();
 
 var app = builder.Build();
 
@@ -73,6 +74,11 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
+}
+else
+{
+    // In development, we still want to use our custom exception handling
+    app.UseExceptionHandler("/Error");
 }
 
 app.UseHttpsRedirection();
