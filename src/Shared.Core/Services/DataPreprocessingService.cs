@@ -526,8 +526,44 @@ public class DataPreprocessingService : IDataPreprocessingService
 
     private List<Dictionary<string, object>> HandleMissingValuesWithMedian(List<Dictionary<string, object>> data)
     {
-        // Simplified implementation - similar to mean but using median
-        return HandleMissingValuesWithMean(data); // Placeholder
+        if (!data.Any()) return data;
+
+        var numericColumns = GetNumericColumns(data);
+        var columnMedians = new Dictionary<string, double>();
+
+        foreach (var column in numericColumns)
+        {
+            var values = data.Where(d => d.ContainsKey(column) && d[column] != null)
+                            .Select(d => Convert.ToDouble(d[column]))
+                            .OrderBy(v => v)
+                            .ToList();
+        
+            if (values.Any())
+            {
+                var mid = values.Count / 2;
+                columnMedians[column] = (values.Count % 2 != 0)
+                    ? values[mid]
+                    : (values[mid - 1] + values[mid]) / 2.0;
+            }
+        }
+
+        var processedData = data.Select(record =>
+        {
+            var newRecord = new Dictionary<string, object>(record);
+            foreach (var column in numericColumns)
+            {
+                if (!newRecord.ContainsKey(column) || newRecord[column] == null)
+                {
+                    if (columnMedians.ContainsKey(column))
+                    {
+                        newRecord[column] = columnMedians[column];
+                    }
+                }
+            }
+            return newRecord;
+        }).ToList();
+
+        return processedData;
     }
 
     private List<Dictionary<string, object>> HandleMissingValuesWithMode(List<Dictionary<string, object>> data)
