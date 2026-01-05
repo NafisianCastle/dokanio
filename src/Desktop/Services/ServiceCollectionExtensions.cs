@@ -20,6 +20,9 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ReportsViewModel>();
         services.AddTransient<UserManagementViewModel>();
         services.AddTransient<LoginViewModel>();
+        services.AddTransient<BusinessManagementViewModel>();
+        services.AddTransient<AdvancedReportsViewModel>();
+        services.AddTransient<AIInventoryViewModel>();
         
         return services;
     }
