@@ -820,9 +820,9 @@ namespace Shared.Core.Migrations
                 column: "DeviceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Sales_InvoiceNumber",
+                name: "IX_Sales_ShopId_InvoiceNumber",
                 table: "Sales",
-                column: "InvoiceNumber",
+                columns: new[] { "ShopId", "InvoiceNumber" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
