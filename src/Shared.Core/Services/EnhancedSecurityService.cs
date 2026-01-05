@@ -308,13 +308,23 @@ public class EnhancedSecurityService : IEnhancedSecurityService
             return dataBusinessId?.Equals(businessId) == true;
         }
 
-        // For collections, check first item
+        // For collections, check all items
         if (data is System.Collections.IEnumerable enumerable)
         {
+            // The check should not be on the collection itself, but its items.
+            // We assume an empty collection is valid.
+            var hasItems = false;
             foreach (var item in enumerable)
             {
-                return ValidateBusinessDataIsolation(businessId, item);
+                hasItems = true;
+                if (!ValidateBusinessDataIsolation(businessId, item))
+                {
+                    return false; // Found an invalid item, fail immediately.
+                }
             }
+            // If we are here, either the collection was empty or all items were valid.
+            // If it had items, it's valid. If not, we continue to the final return statement.
+            if (hasItems) return true;
         }
 
         // If no business ID property found, assume valid (for non-business-specific data)
