@@ -92,7 +92,13 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during authentication for user {Username}", request.Username);
+            // Sanitize username before logging to prevent log forging
+            var sanitizedUsername = (request.Username ?? string.Empty)
+                .Replace(Environment.NewLine, string.Empty)
+                .Replace("\n", string.Empty)
+                .Replace("\r", string.Empty);
+
+            _logger.LogError(ex, "Error during authentication for user {Username}", sanitizedUsername);
             return StatusCode(500, new SyncApiResult<AuthenticationResponse>
             {
                 Success = false,
