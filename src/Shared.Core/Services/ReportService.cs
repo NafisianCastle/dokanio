@@ -907,16 +907,14 @@ public class ReportService : IReportService
         return Encoding.UTF8.GetBytes(csv.ToString());
     }
 
-    private async Task<byte[]> ExportToExcelAsync<T>(T reportData) where T : ReportResponse
+    private Task<byte[]> ExportToExcelAsync<T>(T reportData) where T : ReportResponse
     {
-        // For now, return CSV format as Excel implementation would require additional libraries
-        return await ExportToCsvAsync(reportData);
+        throw new NotImplementedException("Excel export is not implemented. Please implement or remove this method.");
     }
 
-    private async Task<byte[]> ExportToPdfAsync<T>(T reportData) where T : ReportResponse
+    private Task<byte[]> ExportToPdfAsync<T>(T reportData) where T : ReportResponse
     {
-        // For now, return CSV format as PDF implementation would require additional libraries
-        return await ExportToCsvAsync(reportData);
+        throw new NotImplementedException("PDF export is not implemented. Please implement or remove this method.");
     }
 
     private async Task<byte[]> ExportToJsonAsync<T>(T reportData) where T : ReportResponse
