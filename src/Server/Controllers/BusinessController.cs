@@ -276,9 +276,17 @@ public class BusinessController : ControllerBase
     {
         try
         {
-            var shop = await _businessService.CreateShopAsync(request);
+            var userId = GetUserIdFromToken();
+            if (userId == null)
+            {
+                return Unauthorized(new SyncApiResult<ShopResponse> { Success = false, Message = "Invalid user token", StatusCode = 401 });
+            }
 
-            _logger.LogInformation("Shop {ShopId} created for business {BusinessId}", shop.Id, request.BusinessId);
+            // It's assumed the service layer performs the authorization check.
+            // Pass the userId to the service method for validation.
+            var shop = await _businessService.CreateShopAsync(request, userId.Value);
+
+            _logger.LogInformation("Shop {ShopId} created for business {BusinessId} by user {UserId}", shop.Id, request.BusinessId, userId);
 
             return Ok(new SyncApiResult<ShopResponse>
             {
@@ -287,6 +295,11 @@ public class BusinessController : ControllerBase
                 StatusCode = 200,
                 Data = shop
             });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Unauthorized attempt to create shop for business {BusinessId} by user {UserId}", request.BusinessId, GetUserIdFromToken());
+            return Forbid();
         }
         catch (Exception ex)
         {
