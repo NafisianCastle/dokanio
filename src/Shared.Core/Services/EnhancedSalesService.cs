@@ -71,7 +71,7 @@ public class EnhancedSalesService : SaleService, IEnhancedSalesService
             PaymentMethod = PaymentMethod.Cash, // Default
             CreatedAt = DateTime.UtcNow,
             SyncStatus = SyncStatus.NotSynced,
-            DeviceId = Guid.NewGuid() // This should come from the calling context
+            DeviceId = deviceId
         };
 
         // Apply business type-specific initialization
