@@ -3,6 +3,7 @@ using Shared.Core.DTOs;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Repositories;
+using System.Linq;
 
 namespace Shared.Core.Services;
 
@@ -710,17 +711,17 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
 
             var shopRevenue = sales.Sum(s => s.TotalAmount);
             var shopTransactions = sales.Count;
-            var shopProducts = products.Count();
+            var shopProducts = ((IEnumerable<Product>)products).Count();
             var inventoryValue = stocks.Sum(s => s.Quantity * (s.Product?.UnitPrice ?? 0));
 
             var shopKPIs = new Dictionary<string, decimal>
             {
                 ["Revenue"] = shopRevenue,
-                ["Transactions"] = shopTransactions,
-                ["AverageOrderValue"] = shopTransactions > 0 ? shopRevenue / shopTransactions : 0,
-                ["ProductCount"] = shopProducts,
+                ["Transactions"] = (decimal)shopTransactions,
+                ["AverageOrderValue"] = shopTransactions > 0 ? shopRevenue / (decimal)shopTransactions : 0,
+                ["ProductCount"] = (decimal)shopProducts,
                 ["InventoryValue"] = inventoryValue,
-                ["RevenuePerProduct"] = shopProducts > 0 ? shopRevenue / shopProducts : 0,
+                ["RevenuePerProduct"] = shopProducts > 0 ? shopRevenue / (decimal)shopProducts : 0,
                 ["TransactionsPerDay"] = (decimal)(shopTransactions / Math.Max(period.Duration.TotalDays, 1))
             };
 
@@ -852,14 +853,14 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
             var productCount = products.Count();
 
             var salesPerHour = operatingHours > 0 ? revenue / (decimal)operatingHours : 0;
-            var transactionsPerHour = operatingHours > 0 ? transactions / operatingHours : 0;
+            var transactionsPerHour = operatingHours > 0 ? (decimal)transactions / (decimal)operatingHours : 0;
             var inventoryTurnover = 12; // Estimated annual turnover
-            var staffProductivity = transactions > 0 ? revenue / transactions : 0; // Simplified metric
+            var staffProductivity = transactions > 0 ? revenue / (decimal)transactions : 0; // Simplified metric
 
             // Calculate efficiency score (0-100)
             var efficiencyScore = Math.Min(100, 
                 (double)(salesPerHour / 100) * 20 + // 20% weight
-                transactionsPerHour * 10 + // 30% weight  
+                (double)transactionsPerHour * 10 + // 30% weight  
                 inventoryTurnover * 5 + // 25% weight
                 (double)(staffProductivity / 50) * 25); // 25% weight
 
@@ -868,7 +869,7 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
                 ShopId = shopId,
                 ShopName = shop?.Name ?? "Unknown",
                 SalesPerHour = (double)salesPerHour,
-                TransactionsPerHour = transactionsPerHour,
+                TransactionsPerHour = (double)transactionsPerHour,
                 InventoryTurnover = inventoryTurnover,
                 StaffProductivity = (double)staffProductivity,
                 OverallEfficiencyScore = efficiencyScore
@@ -1048,7 +1049,7 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
                 {
                     AverageRevenue = avgRevenue,
                     AverageTransactions = avgTransactions,
-                    SeasonalityIndex = avgRevenue / (allSales.Sum(s => s.TotalAmount) / 12), // Simplified seasonality index
+                    SeasonalityIndex = (double)(avgRevenue / (allSales.Sum(s => s.TotalAmount) / 12)), // Simplified seasonality index
                     VariancePercentage = variance
                 };
             }
@@ -1071,7 +1072,7 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
                 {
                     AverageRevenue = avgRevenue,
                     AverageTransactions = avgTransactions,
-                    SeasonalityIndex = avgRevenue / (allSales.Sum(s => s.TotalAmount) / 7), // Simplified
+                    SeasonalityIndex = (double)(avgRevenue / (allSales.Sum(s => s.TotalAmount) / 7)), // Simplified
                     VariancePercentage = variance
                 };
             }
@@ -1425,7 +1426,7 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
                 Date = date,
                 Revenue = totalRevenue,
                 TransactionCount = totalTransactions,
-                AverageOrderValue = totalTransactions > 0 ? totalRevenue / totalTransactions : 0,
+                AverageOrderValue = totalTransactions > 0 ? totalRevenue / (decimal)totalTransactions : 0,
                 ShopRevenues = shopRevenues
             });
         }

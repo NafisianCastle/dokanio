@@ -4,6 +4,7 @@ using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Repositories;
 using System.Globalization;
+using System.Linq;
 
 namespace Shared.Core.Services;
 
@@ -708,7 +709,7 @@ public class DashboardService : IDashboardService
             var todayRevenue = todaySales.Sum(s => s.TotalAmount);
             var yesterdayRevenue = yesterdaySales.Sum(s => s.TotalAmount);
             var todayTransactions = todaySales.Count;
-            var averageOrderValue = todayTransactions > 0 ? todayRevenue / todayTransactions : 0;
+            var averageOrderValue = todayTransactions > 0 ? todayRevenue / (decimal)todayTransactions : 0;
 
             var revenueGrowthPercentage = yesterdayRevenue > 0 
                 ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100 
@@ -755,7 +756,7 @@ public class DashboardService : IDashboardService
 
             var revenue = sales.Sum(s => s.TotalAmount);
             var transactionCount = sales.Count;
-            var averageOrderValue = transactionCount > 0 ? revenue / transactionCount : 0;
+            var averageOrderValue = transactionCount > 0 ? revenue / (decimal)transactionCount : 0;
             var profitEstimate = revenue * 0.3m; // Estimate
             var inventoryValue = stocks.Sum(s => s.Quantity * (s.Product?.UnitPrice ?? 0));
 
@@ -767,7 +768,7 @@ public class DashboardService : IDashboardService
                 TransactionCount = transactionCount,
                 AverageOrderValue = averageOrderValue,
                 ProfitEstimate = profitEstimate,
-                ProductCount = products.Count(),
+                ProductCount = (decimal)products.Count(),
                 InventoryValue = inventoryValue,
                 Performance = new PerformanceMetrics
                 {
