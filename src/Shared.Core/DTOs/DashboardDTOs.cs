@@ -449,3 +449,45 @@ public enum RecommendationCategory
     Finance,
     Staff
 }
+
+/// <summary>
+/// Top product data for dashboard
+/// </summary>
+public class TopProductData
+{
+    public Guid ProductId { get; set; }
+    public string ProductName { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
+    public int QuantitySold { get; set; }
+    public decimal Revenue { get; set; }
+    public Guid ShopId { get; set; }
+    public string ShopName { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Inventory status data for dashboard
+/// </summary>
+public class InventoryStatusData
+{
+    public int TotalProducts { get; set; }
+    public int LowStockProducts { get; set; }
+    public int OutOfStockProducts { get; set; }
+    public int ExpiringProducts { get; set; }
+    public decimal TotalInventoryValue { get; set; }
+}
+
+/// <summary>
+/// Shop performance data for dashboard
+/// </summary>
+public class ShopPerformanceData
+{
+    public Guid ShopId { get; set; }
+    public string ShopName { get; set; } = string.Empty;
+    public decimal TodayRevenue { get; set; }
+    public int TodayTransactions { get; set; }
+    public decimal AverageOrderValue { get; set; }
+    public decimal RevenueGrowthPercentage { get; set; }
+    public int LowStockAlerts { get; set; }
+    public int ExpiryAlerts { get; set; }
+    public PerformanceRating Rating { get; set; }
+}

@@ -1,0 +1,134 @@
+@inject NavigationManager Navigation
+@inject IAuthenticationService AuthService
+
+<div class="nav-menu">
+    <div class="navbar-brand p-3">
+        <i class="fas fa-store me-2"></i>
+        <span class="brand-text">POS Dashboard</span>
+    </div>
+
+    <nav class="flex-column">
+        <!-- Dashboard -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                <i class="fas fa-tachometer-alt me-2"></i>
+                <span class="nav-text">Dashboard</span>
+            </NavLink>
+        </div>
+
+        <!-- Business Management -->
+        @if (CanAccessBusinessManagement)
+        {
+            <div class="nav-section">
+                <div class="nav-section-header px-3 py-2">
+                    <small class="text-muted fw-semibold">BUSINESS</small>
+                </div>
+                
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/businesses">
+                        <i class="fas fa-building me-2"></i>
+                        <span class="nav-text">Businesses</span>
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/shops">
+                        <i class="fas fa-store me-2"></i>
+                        <span class="nav-text">Shops</span>
+                    </NavLink>
+                </div>
+            </div>
+        }
+
+        <!-- Analytics -->
+        <div class="nav-section">
+            <div class="nav-section-header px-3 py-2">
+                <small class="text-muted fw-semibold">ANALYTICS</small>
+            </div>
+            
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/sales-analytics">
+                    <i class="fas fa-chart-line me-2"></i>
+                    <span class="nav-text">Sales Analytics</span>
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/inventory-analytics">
+                    <i class="fas fa-boxes me-2"></i>
+                    <span class="nav-text">Inventory Analytics</span>
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/financial-reports">
+                    <i class="fas fa-file-invoice-dollar me-2"></i>
+                    <span class="nav-text">Financial Reports</span>
+                </NavLink>
+            </div>
+        </div>
+
+        <!-- Management -->
+        @if (CanAccessManagement)
+        {
+            <div class="nav-section">
+                <div class="nav-section-header px-3 py-2">
+                    <small class="text-muted fw-semibold">MANAGEMENT</small>
+                </div>
+                
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/users">
+                        <i class="fas fa-users me-2"></i>
+                        <span class="nav-text">User Management</span>
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/roles">
+                        <i class="fas fa-user-shield me-2"></i>
+                        <span class="nav-text">Roles & Permissions</span>
+                    </NavLink>
+                </div>
+            </div>
+        }
+
+        <!-- Settings -->
+        <div class="nav-section">
+            <div class="nav-section-header px-3 py-2">
+                <small class="text-muted fw-semibold">SETTINGS</small>
+            </div>
+            
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/settings">
+                    <i class="fas fa-cog me-2"></i>
+                    <span class="nav-text">Settings</span>
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/notifications">
+                    <i class="fas fa-bell me-2"></i>
+                    <span class="nav-text">Notifications</span>
+                </NavLink>
+            </div>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private UserDto? CurrentUser;
+    private bool CanAccessBusinessManagement => CurrentUser?.Role == UserRole.BusinessOwner;
+    private bool CanAccessManagement => CurrentUser?.Role == UserRole.BusinessOwner || CurrentUser?.Role == UserRole.ShopManager;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            CurrentUser = await AuthService.GetCurrentUserAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading user data: {ex.Message}");
+        }
+    }
+}
