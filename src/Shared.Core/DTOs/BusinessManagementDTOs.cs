@@ -465,32 +465,6 @@ public class ShopDto
 }
 
 /// <summary>
-/// Business settings configuration
-/// </summary>
-public class BusinessSettings
-{
-    /// <summary>
-    /// Business hours configuration
-    /// </summary>
-    public BusinessHours BusinessHours { get; set; } = new();
-    
-    /// <summary>
-    /// Receipt settings
-    /// </summary>
-    public ReceiptSettings ReceiptSettings { get; set; } = new();
-    
-    /// <summary>
-    /// Notification settings
-    /// </summary>
-    public NotificationSettings NotificationSettings { get; set; } = new();
-    
-    /// <summary>
-    /// Security settings
-    /// </summary>
-    public SecuritySettings SecuritySettings { get; set; } = new();
-}
-
-/// <summary>
 /// Business hours configuration
 /// </summary>
 public class BusinessHours
@@ -536,18 +510,6 @@ public class SecuritySettings
 }
 
 /// <summary>
-/// Tax settings configuration
-/// </summary>
-public class TaxSettings
-{
-    public bool EnableTax { get; set; } = true;
-    public decimal DefaultTaxRate { get; set; } = 0.0m;
-    public string TaxDisplayName { get; set; } = "Tax";
-    public bool TaxInclusivePricing { get; set; } = false;
-    public List<TaxBracket> TaxBrackets { get; set; } = new();
-}
-
-/// <summary>
 /// Tax bracket configuration
 /// </summary>
 public class TaxBracket
@@ -556,29 +518,5 @@ public class TaxBracket
     public decimal Rate { get; set; }
     public decimal MinAmount { get; set; }
     public decimal MaxAmount { get; set; }
-}
-
-/// <summary>
-/// Currency settings configuration
-/// </summary>
-public class CurrencySettings
-{
-    public string CurrencyCode { get; set; } = "USD";
-    public string CurrencySymbol { get; set; } = "$";
-    public int DecimalPlaces { get; set; } = 2;
-    public string CurrencyFormat { get; set; } = "{0:C}";
-    public bool ShowCurrencySymbol { get; set; } = true;
-}
-
-/// <summary>
-/// Localization settings configuration
-/// </summary>
-public class LocalizationSettings
-{
-    public string Language { get; set; } = "en-US";
-    public string DateFormat { get; set; } = "MM/dd/yyyy";
-    public string TimeFormat { get; set; } = "HH:mm";
-    public string NumberFormat { get; set; } = "N2";
-    public string Timezone { get; set; } = "UTC";
 }
 
