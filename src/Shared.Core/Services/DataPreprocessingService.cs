@@ -10,7 +10,7 @@ namespace Shared.Core.Services;
 public class DataPreprocessingService : IDataPreprocessingService
 {
     private readonly ILogger<DataPreprocessingService> _logger;
-    private readonly Dictionary<Guid, DataPreprocessingConfig> _configurations = new();
+    private readonly ConcurrentDictionary<Guid, DataPreprocessingConfig> _configurations = new();
 
     public DataPreprocessingService(ILogger<DataPreprocessingService> logger)
     {
