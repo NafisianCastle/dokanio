@@ -14,6 +14,7 @@ namespace Desktop;
 public partial class App : Application
 {
     private IServiceProvider? _serviceProvider;
+    private GlobalExceptionHandlerService? _exceptionHandler;
 
     public override void Initialize()
     {
@@ -42,6 +43,10 @@ public partial class App : Application
 
         _serviceProvider = services.BuildServiceProvider();
 
+        // Set up global exception handling
+        _exceptionHandler = _serviceProvider.GetRequiredService<GlobalExceptionHandlerService>();
+        SetupGlobalExceptionHandling();
+
         // Initialize database
         Task.Run(async () =>
         {
@@ -55,6 +60,12 @@ public partial class App : Application
             {
                 var logger = _serviceProvider.GetService<ILogger<App>>();
                 logger?.LogError(ex, "Failed to initialize database");
+                
+                // Handle database initialization exception
+                if (_exceptionHandler != null)
+                {
+                    await _exceptionHandler.HandleUnhandledExceptionAsync(ex, "Database Initialization");
+                }
             }
         });
 
@@ -65,6 +76,28 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void SetupGlobalExceptionHandling()
+    {
+        // Handle unhandled exceptions in the current AppDomain
+        AppDomain.CurrentDomain.UnhandledException += async (sender, e) =>
+        {
+            if (e.ExceptionObject is Exception exception && _exceptionHandler != null)
+            {
+                await _exceptionHandler.HandleUnhandledExceptionAsync(exception, "AppDomain Unhandled Exception");
+            }
+        };
+
+        // Handle unhandled exceptions in tasks
+        TaskScheduler.UnobservedTaskException += async (sender, e) =>
+        {
+            if (_exceptionHandler != null)
+            {
+                await _exceptionHandler.HandleUnhandledExceptionAsync(e.Exception, "Task Unobserved Exception");
+            }
+            e.SetObserved(); // Prevent the process from terminating
+        };
     }
 }
 
