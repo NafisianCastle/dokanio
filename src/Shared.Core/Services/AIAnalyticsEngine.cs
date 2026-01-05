@@ -433,7 +433,7 @@ public class AIAnalyticsEngine : IAIAnalyticsEngine
         return analysis;
     }
 
-    #region Private Helper Methods
+    
 
     private async Task<List<SalesTrend>> AnalyzeSalesTrendsInternal(List<Sale> sales, DateRange period)
     {
@@ -698,85 +698,185 @@ public class AIAnalyticsEngine : IAIAnalyticsEngine
     private async Task<List<AIProductRecommendation>> GenerateCrossSellRecommendations(
         IEnumerable<Product> products, IEnumerable<Sale> recentSales, Guid? customerId)
     {
-        // Simplified cross-sell logic - in production would use association rules mining
-        var recommendations = new List<AIProductRecommendation>();
+        _logger.LogInformation("Generating cross-sell recommendations for customer {CustomerId}", customerId);
         
-        // Example: If customer bought medicine, recommend vitamins
-        var medicineProducts = products.Where(p => p.Category?.ToLower().Contains("medicine") == true);
-        var vitaminProducts = products.Where(p => p.Category?.ToLower().Contains("vitamin") == true);
+        var recommendations = new List<AIProductRecommendation>();
+        var productList = products.ToList();
+        var salesList = recentSales.ToList();
 
-        foreach (var vitamin in vitaminProducts.Take(3))
+        // Build product association matrix from sales data
+        var productAssociations = await BuildProductAssociationMatrix(salesList);
+        
+        // Get customer's purchase history if available
+        var customerPurchases = new List<Guid>();
+        if (customerId.HasValue)
         {
-            recommendations.Add(new AIProductRecommendation
-            {
-                ProductId = vitamin.Id,
-                ProductName = vitamin.Name,
-                Category = vitamin.Category ?? "Unknown",
-                Price = vitamin.UnitPrice,
-                RelevanceScore = 0.6,
-                Type = RecommendationType.CrossSell,
-                Reasoning = "Customers who buy medicine often purchase vitamins"
-            });
+            customerPurchases = salesList
+                .Where(s => s.CustomerId == customerId.Value)
+                .SelectMany(s => s.Items.Select(i => i.ProductId))
+                .Distinct()
+                .ToList();
         }
 
-        return recommendations;
+        // Generate recommendations based on association rules
+        foreach (var association in productAssociations.OrderByDescending(a => a.Confidence).Take(10))
+        {
+            var targetProduct = productList.FirstOrDefault(p => p.Id == association.ProductB);
+            if (targetProduct == null) continue;
+
+            var baseProduct = productList.FirstOrDefault(p => p.Id == association.ProductA);
+            var baseProductName = baseProduct?.Name ?? "Unknown";
+
+            var recommendation = new AIProductRecommendation
+            {
+                ProductId = targetProduct.Id,
+                ProductName = targetProduct.Name,
+                Category = targetProduct.Category ?? "Unknown",
+                Price = targetProduct.UnitPrice,
+                RelevanceScore = association.Confidence,
+                Type = RecommendationType.CrossSell,
+                Reasoning = $"Customers who buy {baseProductName} often purchase {targetProduct.Name} (confidence: {association.Confidence:P1})",
+                BasedOnProducts = new List<Guid> { association.ProductA }
+            };
+
+            recommendations.Add(recommendation);
+        }
+
+        // Add category-based cross-sell recommendations
+        var categoryRecommendations = await GenerateCategoryBasedCrossSell(productList, salesList);
+        recommendations.AddRange(categoryRecommendations);
+
+        // Add business type-specific cross-sell recommendations
+        var businessTypeRecommendations = await GenerateBusinessTypeSpecificCrossSell(productList);
+        recommendations.AddRange(businessTypeRecommendations);
+
+        _logger.LogInformation("Generated {Count} cross-sell recommendations", recommendations.Count);
+        return recommendations.OrderByDescending(r => r.RelevanceScore).Take(5).ToList();
     }
 
     private async Task<List<AIProductRecommendation>> GenerateUpSellRecommendations(
         IEnumerable<Product> products, IEnumerable<Sale> recentSales, Guid? customerId)
     {
-        // Simplified up-sell logic
+        _logger.LogInformation("Generating up-sell recommendations for customer {CustomerId}", customerId);
+        
         var recommendations = new List<AIProductRecommendation>();
-        
-        // Recommend higher-priced products in same category
-        var categories = products.GroupBy(p => p.Category);
-        
-        foreach (var category in categories.Take(3))
+        var productList = products.ToList();
+        var salesList = recentSales.ToList();
+
+        // Get customer's purchase history and preferences
+        var customerPurchaseHistory = new Dictionary<string, List<Product>>();
+        if (customerId.HasValue)
         {
-            var highestPriced = category.OrderByDescending(p => p.UnitPrice).FirstOrDefault();
-            if (highestPriced != null)
+            var customerSales = salesList.Where(s => s.CustomerId == customerId.Value);
+            foreach (var sale in customerSales)
             {
-                recommendations.Add(new AIProductRecommendation
+                foreach (var item in sale.Items)
                 {
-                    ProductId = highestPriced.Id,
-                    ProductName = highestPriced.Name,
-                    Category = highestPriced.Category ?? "Unknown",
-                    Price = highestPriced.UnitPrice,
-                    RelevanceScore = 0.5,
-                    Type = RecommendationType.UpSell,
-                    Reasoning = $"Premium option in {highestPriced.Category} category"
-                });
+                    var product = productList.FirstOrDefault(p => p.Id == item.ProductId);
+                    if (product?.Category != null)
+                    {
+                        if (!customerPurchaseHistory.ContainsKey(product.Category))
+                            customerPurchaseHistory[product.Category] = new List<Product>();
+                        customerPurchaseHistory[product.Category].Add(product);
+                    }
+                }
             }
         }
 
-        return recommendations;
+        // Generate up-sell recommendations based on purchase history
+        foreach (var categoryGroup in customerPurchaseHistory)
+        {
+            var category = categoryGroup.Key;
+            var purchasedProducts = categoryGroup.Value;
+            var avgPurchasePrice = purchasedProducts.Average(p => p.UnitPrice);
+
+            // Find higher-priced products in the same category
+            var premiumProducts = productList
+                .Where(p => p.Category == category && p.UnitPrice > avgPurchasePrice * 1.2m)
+                .OrderByDescending(p => p.UnitPrice)
+                .Take(2);
+
+            foreach (var premiumProduct in premiumProducts)
+            {
+                var priceIncrease = ((premiumProduct.UnitPrice - avgPurchasePrice) / avgPurchasePrice) * 100;
+                var recommendation = new AIProductRecommendation
+                {
+                    ProductId = premiumProduct.Id,
+                    ProductName = premiumProduct.Name,
+                    Category = premiumProduct.Category ?? "Unknown",
+                    Price = premiumProduct.UnitPrice,
+                    RelevanceScore = Math.Min(0.9, 1.0 - (double)(priceIncrease / 200)), // Higher relevance for smaller price increases
+                    Type = RecommendationType.UpSell,
+                    Reasoning = $"Premium {category} option - {priceIncrease:F0}% higher quality than your usual purchases",
+                    BasedOnProducts = purchasedProducts.Select(p => p.Id).ToList()
+                };
+
+                recommendations.Add(recommendation);
+            }
+        }
+
+        // Add general up-sell recommendations based on sales patterns
+        var generalUpSells = await GenerateGeneralUpSellRecommendations(productList, salesList);
+        recommendations.AddRange(generalUpSells);
+
+        _logger.LogInformation("Generated {Count} up-sell recommendations", recommendations.Count);
+        return recommendations.OrderByDescending(r => r.RelevanceScore).Take(5).ToList();
     }
 
     private async Task<List<ProductBundle>> GenerateBundleRecommendations(
         IEnumerable<Product> products, IEnumerable<Sale> recentSales)
     {
-        // Simplified bundle logic
-        var bundles = new List<ProductBundle>();
+        _logger.LogInformation("Generating product bundle recommendations");
         
+        var bundles = new List<ProductBundle>();
         var productList = products.ToList();
-        if (productList.Count >= 2)
+        var salesList = recentSales.ToList();
+
+        // Build product co-occurrence matrix
+        var coOccurrenceMatrix = await BuildProductCoOccurrenceMatrix(salesList);
+        
+        // Generate bundles based on frequently bought together patterns
+        var frequentPairs = coOccurrenceMatrix
+            .Where(co => co.CoOccurrenceCount >= 3) // Minimum 3 co-occurrences
+            .OrderByDescending(co => co.CoOccurrenceScore)
+            .Take(10);
+
+        foreach (var pair in frequentPairs)
         {
-            // Create a simple bundle with first two products
+            var productA = productList.FirstOrDefault(p => p.Id == pair.ProductA);
+            var productB = productList.FirstOrDefault(p => p.Id == pair.ProductB);
+            
+            if (productA == null || productB == null) continue;
+
+            var individualPrice = productA.UnitPrice + productB.UnitPrice;
+            var discountPercentage = Math.Min(0.15m, (decimal)pair.CoOccurrenceScore * 0.2m); // Max 15% discount
+            var bundlePrice = individualPrice * (1 - discountPercentage);
+
             var bundle = new ProductBundle
             {
-                BundleName = "Popular Combo",
-                ProductIds = productList.Take(2).Select(p => p.Id).ToList(),
-                ProductNames = productList.Take(2).Select(p => p.Name).ToList(),
-                IndividualPrice = productList.Take(2).Sum(p => p.UnitPrice),
-                BundlePrice = productList.Take(2).Sum(p => p.UnitPrice) * 0.9m, // 10% discount
-                SavingsAmount = productList.Take(2).Sum(p => p.UnitPrice) * 0.1m,
-                RelevanceScore = 0.4,
-                Description = "Save 10% when you buy these items together"
+                BundleName = $"{productA.Name} + {productB.Name} Combo",
+                ProductIds = new List<Guid> { productA.Id, productB.Id },
+                ProductNames = new List<string> { productA.Name, productB.Name },
+                IndividualPrice = individualPrice,
+                BundlePrice = bundlePrice,
+                SavingsAmount = individualPrice - bundlePrice,
+                RelevanceScore = pair.CoOccurrenceScore,
+                Description = $"Save {discountPercentage:P0} when you buy these items together - frequently purchased by other customers"
             };
+
             bundles.Add(bundle);
         }
 
-        return bundles;
+        // Generate category-based bundles
+        var categoryBundles = await GenerateCategoryBasedBundles(productList, salesList);
+        bundles.AddRange(categoryBundles);
+
+        // Generate business type-specific bundles
+        var businessTypeBundles = await GenerateBusinessTypeSpecificBundles(productList);
+        bundles.AddRange(businessTypeBundles);
+
+        _logger.LogInformation("Generated {Count} bundle recommendations", bundles.Count);
+        return bundles.OrderByDescending(b => b.RelevanceScore).Take(5).ToList();
     }
 
     private async Task<List<PriceOptimization>> GeneratePriceOptimizations(
@@ -1126,6 +1226,658 @@ public class AIAnalyticsEngine : IAIAnalyticsEngine
         }
 
         return recommendations;
+    }
+
+    #region Business Recommendation Helper Methods
+
+    private async Task<List<ProductAssociation>> BuildProductAssociationMatrix(List<Sale> sales)
+    {
+        _logger.LogInformation("Building product association matrix from {SalesCount} sales", sales.Count);
+        
+        var associations = new List<ProductAssociation>();
+        var productPairs = new Dictionary<(Guid ProductA, Guid ProductB), int>();
+        var productCounts = new Dictionary<Guid, int>();
+
+        // Count individual products and product pairs
+        foreach (var sale in sales)
+        {
+            var productIds = sale.Items.Select(i => i.ProductId).Distinct().ToList();
+            
+            // Count individual products
+            foreach (var productId in productIds)
+            {
+                productCounts[productId] = productCounts.GetValueOrDefault(productId, 0) + 1;
+            }
+
+            // Count product pairs (combinations)
+            for (int i = 0; i < productIds.Count; i++)
+            {
+                for (int j = i + 1; j < productIds.Count; j++)
+                {
+                    var pair = (productIds[i], productIds[j]);
+                    var reversePair = (productIds[j], productIds[i]);
+                    
+                    // Use consistent ordering for pairs
+                    var orderedPair = pair.Item1.CompareTo(pair.Item2) < 0 ? pair : reversePair;
+                    productPairs[orderedPair] = productPairs.GetValueOrDefault(orderedPair, 0) + 1;
+                }
+            }
+        }
+
+        // Calculate association rules (A -> B)
+        foreach (var pair in productPairs.Where(p => p.Value >= 2)) // Minimum 2 co-occurrences
+        {
+            var productA = pair.Key.ProductA;
+            var productB = pair.Key.ProductB;
+            var coOccurrences = pair.Value;
+            
+            var countA = productCounts.GetValueOrDefault(productA, 0);
+            var countB = productCounts.GetValueOrDefault(productB, 0);
+            
+            if (countA > 0 && countB > 0)
+            {
+                // Calculate confidence: P(B|A) = count(A,B) / count(A)
+                var confidenceAB = (double)coOccurrences / countA;
+                var confidenceBA = (double)coOccurrences / countB;
+                
+                // Calculate support: P(A,B) = count(A,B) / total_transactions
+                var support = (double)coOccurrences / sales.Count;
+                
+                // Calculate lift: P(B|A) / P(B)
+                var liftAB = confidenceAB / ((double)countB / sales.Count);
+                var liftBA = confidenceBA / ((double)countA / sales.Count);
+
+                // Add both directions if they meet minimum thresholds
+                if (confidenceAB >= 0.1 && support >= 0.01 && liftAB > 1.0) // Minimum thresholds
+                {
+                    associations.Add(new ProductAssociation
+                    {
+                        ProductA = productA,
+                        ProductB = productB,
+                        Support = support,
+                        Confidence = confidenceAB,
+                        Lift = liftAB,
+                        CoOccurrences = coOccurrences
+                    });
+                }
+
+                if (confidenceBA >= 0.1 && support >= 0.01 && liftBA > 1.0)
+                {
+                    associations.Add(new ProductAssociation
+                    {
+                        ProductA = productB,
+                        ProductB = productA,
+                        Support = support,
+                        Confidence = confidenceBA,
+                        Lift = liftBA,
+                        CoOccurrences = coOccurrences
+                    });
+                }
+            }
+        }
+
+        _logger.LogInformation("Generated {AssociationCount} product associations", associations.Count);
+        return associations.OrderByDescending(a => a.Confidence).ToList();
+    }
+
+    private async Task<List<ProductCoOccurrence>> BuildProductCoOccurrenceMatrix(List<Sale> sales)
+    {
+        _logger.LogInformation("Building product co-occurrence matrix from {SalesCount} sales", sales.Count);
+        
+        var coOccurrences = new List<ProductCoOccurrence>();
+        var productPairs = new Dictionary<(Guid ProductA, Guid ProductB), int>();
+
+        // Count product co-occurrences in the same transaction
+        foreach (var sale in sales)
+        {
+            var productIds = sale.Items.Select(i => i.ProductId).Distinct().ToList();
+            
+            for (int i = 0; i < productIds.Count; i++)
+            {
+                for (int j = i + 1; j < productIds.Count; j++)
+                {
+                    var pair = (productIds[i], productIds[j]);
+                    var reversePair = (productIds[j], productIds[i]);
+                    
+                    // Use consistent ordering for pairs
+                    var orderedPair = pair.Item1.CompareTo(pair.Item2) < 0 ? pair : reversePair;
+                    productPairs[orderedPair] = productPairs.GetValueOrDefault(orderedPair, 0) + 1;
+                }
+            }
+        }
+
+        // Convert to co-occurrence objects with scores
+        foreach (var pair in productPairs.Where(p => p.Value >= 2)) // Minimum 2 co-occurrences
+        {
+            var coOccurrenceScore = Math.Min(1.0, (double)pair.Value / sales.Count * 10); // Normalize score
+            
+            coOccurrences.Add(new ProductCoOccurrence
+            {
+                ProductA = pair.Key.ProductA,
+                ProductB = pair.Key.ProductB,
+                CoOccurrenceCount = pair.Value,
+                CoOccurrenceScore = coOccurrenceScore
+            });
+        }
+
+        _logger.LogInformation("Generated {CoOccurrenceCount} product co-occurrences", coOccurrences.Count);
+        return coOccurrences.OrderByDescending(c => c.CoOccurrenceScore).ToList();
+    }
+
+    private async Task<List<AIProductRecommendation>> GenerateCategoryBasedCrossSell(
+        List<Product> products, List<Sale> sales)
+    {
+        _logger.LogInformation("Generating category-based cross-sell recommendations");
+        
+        var recommendations = new List<AIProductRecommendation>();
+        
+        // Group products by category
+        var categoryGroups = products.GroupBy(p => p.Category ?? "Unknown").ToList();
+        
+        // Analyze cross-category purchase patterns
+        var categorySales = new Dictionary<string, List<string>>();
+        
+        foreach (var sale in sales)
+        {
+            var categories = sale.Items
+                .Select(i => i.Product?.Category ?? "Unknown")
+                .Distinct()
+                .ToList();
+            
+            foreach (var category in categories)
+            {
+                if (!categorySales.ContainsKey(category))
+                    categorySales[category] = new List<string>();
+                
+                categorySales[category].AddRange(categories.Where(c => c != category));
+            }
+        }
+
+        // Generate recommendations based on category associations
+        foreach (var categoryGroup in categoryGroups.Take(5)) // Limit to top 5 categories
+        {
+            var category = categoryGroup.Key;
+            var categoryProducts = categoryGroup.ToList();
+            
+            if (categorySales.ContainsKey(category))
+            {
+                var associatedCategories = categorySales[category]
+                    .GroupBy(c => c)
+                    .OrderByDescending(g => g.Count())
+                    .Take(2)
+                    .Select(g => g.Key);
+
+                foreach (var associatedCategory in associatedCategories)
+                {
+                    var associatedProducts = products
+                        .Where(p => p.Category == associatedCategory)
+                        .OrderByDescending(p => p.UnitPrice) // Prefer higher-value items
+                        .Take(2);
+
+                    foreach (var product in associatedProducts)
+                    {
+                        var associationStrength = (double)categorySales[category].Count(c => c == associatedCategory) / 
+                                                categorySales[category].Count;
+
+                        recommendations.Add(new AIProductRecommendation
+                        {
+                            ProductId = product.Id,
+                            ProductName = product.Name,
+                            Category = product.Category ?? "Unknown",
+                            Price = product.UnitPrice,
+                            RelevanceScore = associationStrength,
+                            Type = RecommendationType.CrossSell,
+                            Reasoning = $"Customers who buy {category} products often also purchase {associatedCategory} items",
+                            BasedOnProducts = categoryProducts.Select(p => p.Id).ToList()
+                        });
+                    }
+                }
+            }
+        }
+
+        return recommendations.OrderByDescending(r => r.RelevanceScore).Take(5).ToList();
+    }
+
+    private async Task<List<AIProductRecommendation>> GenerateBusinessTypeSpecificCrossSell(List<Product> products)
+    {
+        _logger.LogInformation("Generating business type-specific cross-sell recommendations");
+        
+        var recommendations = new List<AIProductRecommendation>();
+        
+        // Get business type from the first product's shop (simplified approach)
+        var firstProduct = products.FirstOrDefault();
+        if (firstProduct?.Shop?.Business?.Type == null)
+            return recommendations;
+
+        var businessType = firstProduct.Shop.Business.Type;
+        
+        // Generate business type-specific cross-sell patterns
+        switch (businessType)
+        {
+            case BusinessType.Pharmacy:
+                recommendations.AddRange(GeneratePharmacyCrossSell(products));
+                break;
+                
+            case BusinessType.Grocery:
+                recommendations.AddRange(GenerateGroceryCrossSell(products));
+                break;
+                
+            case BusinessType.SuperShop:
+                recommendations.AddRange(GenerateSuperShopCrossSell(products));
+                break;
+                
+            case BusinessType.GeneralRetail:
+                recommendations.AddRange(GenerateGeneralRetailCrossSell(products));
+                break;
+        }
+
+        return recommendations.Take(3).ToList();
+    }
+
+    private List<AIProductRecommendation> GeneratePharmacyCrossSell(List<Product> products)
+    {
+        var recommendations = new List<AIProductRecommendation>();
+        
+        // Common pharmacy cross-sell patterns
+        var crossSellPatterns = new Dictionary<string[], string[]>
+        {
+            { new[] { "medicine", "tablet", "capsule" }, new[] { "vitamin", "supplement", "health" } },
+            { new[] { "pain", "relief" }, new[] { "gel", "cream", "ointment" } },
+            { new[] { "cold", "flu" }, new[] { "tissue", "throat", "cough" } },
+            { new[] { "diabetes" }, new[] { "glucose", "test", "strip" } },
+            { new[] { "baby" }, new[] { "diaper", "formula", "care" } }
+        };
+
+        foreach (var pattern in crossSellPatterns)
+        {
+            var triggerProducts = products.Where(p => 
+                pattern.Key.Any(keyword => p.Name.ToLower().Contains(keyword))).ToList();
+            
+            var recommendedProducts = products.Where(p => 
+                pattern.Value.Any(keyword => p.Name.ToLower().Contains(keyword))).ToList();
+
+            foreach (var triggerProduct in triggerProducts.Take(2))
+            {
+                foreach (var recommendedProduct in recommendedProducts.Take(1))
+                {
+                    recommendations.Add(new AIProductRecommendation
+                    {
+                        ProductId = recommendedProduct.Id,
+                        ProductName = recommendedProduct.Name,
+                        Category = recommendedProduct.Category ?? "Unknown",
+                        Price = recommendedProduct.UnitPrice,
+                        RelevanceScore = 0.7,
+                        Type = RecommendationType.CrossSell,
+                        Reasoning = "Commonly purchased together in pharmacy settings",
+                        BasedOnProducts = new List<Guid> { triggerProduct.Id }
+                    });
+                }
+            }
+        }
+
+        return recommendations;
+    }
+
+    private List<AIProductRecommendation> GenerateGroceryCrossSell(List<Product> products)
+    {
+        var recommendations = new List<AIProductRecommendation>();
+        
+        // Common grocery cross-sell patterns
+        var crossSellPatterns = new Dictionary<string[], string[]>
+        {
+            { new[] { "bread", "loaf" }, new[] { "butter", "jam", "cheese" } },
+            { new[] { "pasta" }, new[] { "sauce", "cheese", "olive" } },
+            { new[] { "cereal" }, new[] { "milk", "banana", "yogurt" } },
+            { new[] { "chicken", "meat" }, new[] { "spice", "seasoning", "marinade" } },
+            { new[] { "coffee" }, new[] { "sugar", "cream", "cookie" } }
+        };
+
+        foreach (var pattern in crossSellPatterns)
+        {
+            var triggerProducts = products.Where(p => 
+                pattern.Key.Any(keyword => p.Name.ToLower().Contains(keyword))).ToList();
+            
+            var recommendedProducts = products.Where(p => 
+                pattern.Value.Any(keyword => p.Name.ToLower().Contains(keyword))).ToList();
+
+            foreach (var triggerProduct in triggerProducts.Take(2))
+            {
+                foreach (var recommendedProduct in recommendedProducts.Take(1))
+                {
+                    recommendations.Add(new AIProductRecommendation
+                    {
+                        ProductId = recommendedProduct.Id,
+                        ProductName = recommendedProduct.Name,
+                        Category = recommendedProduct.Category ?? "Unknown",
+                        Price = recommendedProduct.UnitPrice,
+                        RelevanceScore = 0.8,
+                        Type = RecommendationType.CrossSell,
+                        Reasoning = "Frequently bought together in grocery shopping",
+                        BasedOnProducts = new List<Guid> { triggerProduct.Id }
+                    });
+                }
+            }
+        }
+
+        return recommendations;
+    }
+
+    private List<AIProductRecommendation> GenerateSuperShopCrossSell(List<Product> products)
+    {
+        var recommendations = new List<AIProductRecommendation>();
+        
+        // Super shop combines grocery and general retail patterns
+        recommendations.AddRange(GenerateGroceryCrossSell(products));
+        recommendations.AddRange(GenerateGeneralRetailCrossSell(products));
+        
+        return recommendations.Take(3).ToList();
+    }
+
+    private List<AIProductRecommendation> GenerateGeneralRetailCrossSell(List<Product> products)
+    {
+        var recommendations = new List<AIProductRecommendation>();
+        
+        // General retail cross-sell patterns
+        var crossSellPatterns = new Dictionary<string[], string[]>
+        {
+            { new[] { "phone", "mobile" }, new[] { "case", "charger", "screen" } },
+            { new[] { "laptop", "computer" }, new[] { "mouse", "keyboard", "bag" } },
+            { new[] { "shirt", "clothing" }, new[] { "belt", "accessory", "shoe" } },
+            { new[] { "book" }, new[] { "bookmark", "light", "pen" } },
+            { new[] { "gift" }, new[] { "wrap", "card", "bag" } }
+        };
+
+        foreach (var pattern in crossSellPatterns)
+        {
+            var triggerProducts = products.Where(p => 
+                pattern.Key.Any(keyword => p.Name.ToLower().Contains(keyword))).ToList();
+            
+            var recommendedProducts = products.Where(p => 
+                pattern.Value.Any(keyword => p.Name.ToLower().Contains(keyword))).ToList();
+
+            foreach (var triggerProduct in triggerProducts.Take(2))
+            {
+                foreach (var recommendedProduct in recommendedProducts.Take(1))
+                {
+                    recommendations.Add(new AIProductRecommendation
+                    {
+                        ProductId = recommendedProduct.Id,
+                        ProductName = recommendedProduct.Name,
+                        Category = recommendedProduct.Category ?? "Unknown",
+                        Price = recommendedProduct.UnitPrice,
+                        RelevanceScore = 0.6,
+                        Type = RecommendationType.CrossSell,
+                        Reasoning = "Complementary products often purchased together",
+                        BasedOnProducts = new List<Guid> { triggerProduct.Id }
+                    });
+                }
+            }
+        }
+
+        return recommendations;
+    }
+
+    private async Task<List<AIProductRecommendation>> GenerateGeneralUpSellRecommendations(
+        List<Product> products, List<Sale> sales)
+    {
+        _logger.LogInformation("Generating general up-sell recommendations");
+        
+        var recommendations = new List<AIProductRecommendation>();
+        
+        // Group products by category and find premium alternatives
+        var categoryGroups = products.GroupBy(p => p.Category ?? "Unknown");
+        
+        foreach (var categoryGroup in categoryGroups.Take(3))
+        {
+            var categoryProducts = categoryGroup.OrderBy(p => p.UnitPrice).ToList();
+            if (categoryProducts.Count < 2) continue;
+            
+            // Find products in the lower price range
+            var medianPrice = categoryProducts[categoryProducts.Count / 2].UnitPrice;
+            var lowerPriceProducts = categoryProducts.Where(p => p.UnitPrice <= medianPrice).ToList();
+            var higherPriceProducts = categoryProducts.Where(p => p.UnitPrice > medianPrice).ToList();
+            
+            // Generate up-sell recommendations from lower to higher price products
+            foreach (var lowerProduct in lowerPriceProducts.Take(2))
+            {
+                var premiumAlternative = higherPriceProducts
+                    .Where(p => p.UnitPrice <= lowerProduct.UnitPrice * 1.5m) // Max 50% price increase
+                    .OrderBy(p => p.UnitPrice)
+                    .FirstOrDefault();
+                
+                if (premiumAlternative != null)
+                {
+                    var priceIncrease = ((premiumAlternative.UnitPrice - lowerProduct.UnitPrice) / lowerProduct.UnitPrice) * 100;
+                    
+                    recommendations.Add(new AIProductRecommendation
+                    {
+                        ProductId = premiumAlternative.Id,
+                        ProductName = premiumAlternative.Name,
+                        Category = premiumAlternative.Category ?? "Unknown",
+                        Price = premiumAlternative.UnitPrice,
+                        RelevanceScore = Math.Max(0.3, 1.0 - (double)(priceIncrease / 100)), // Higher relevance for smaller price increases
+                        Type = RecommendationType.UpSell,
+                        Reasoning = $"Premium {categoryGroup.Key} option with {priceIncrease:F0}% better value",
+                        BasedOnProducts = new List<Guid> { lowerProduct.Id }
+                    });
+                }
+            }
+        }
+
+        return recommendations.OrderByDescending(r => r.RelevanceScore).Take(3).ToList();
+    }
+
+    private async Task<List<ProductBundle>> GenerateCategoryBasedBundles(
+        List<Product> products, List<Sale> sales)
+    {
+        _logger.LogInformation("Generating category-based product bundles");
+        
+        var bundles = new List<ProductBundle>();
+        
+        // Analyze which categories are frequently bought together
+        var categoryCoOccurrences = new Dictionary<(string CategoryA, string CategoryB), int>();
+        
+        foreach (var sale in sales)
+        {
+            var categories = sale.Items
+                .Select(i => i.Product?.Category ?? "Unknown")
+                .Distinct()
+                .ToList();
+            
+            for (int i = 0; i < categories.Count; i++)
+            {
+                for (int j = i + 1; j < categories.Count; j++)
+                {
+                    var pair = (categories[i], categories[j]);
+                    var reversePair = (categories[j], categories[i]);
+                    
+                    // Use consistent ordering
+                    var orderedPair = string.Compare(pair.Item1, pair.Item2) < 0 ? pair : reversePair;
+                    categoryCoOccurrences[orderedPair] = categoryCoOccurrences.GetValueOrDefault(orderedPair, 0) + 1;
+                }
+            }
+        }
+
+        // Generate bundles for frequently co-occurring categories
+        var topCategoryPairs = categoryCoOccurrences
+            .Where(c => c.Value >= 3) // Minimum 3 co-occurrences
+            .OrderByDescending(c => c.Value)
+            .Take(5);
+
+        foreach (var categoryPair in topCategoryPairs)
+        {
+            var categoryA = categoryPair.Key.CategoryA;
+            var categoryB = categoryPair.Key.CategoryB;
+            
+            var productsA = products.Where(p => p.Category == categoryA).OrderBy(p => p.UnitPrice).Take(2);
+            var productsB = products.Where(p => p.Category == categoryB).OrderBy(p => p.UnitPrice).Take(2);
+            
+            foreach (var productA in productsA)
+            {
+                foreach (var productB in productsB)
+                {
+                    var individualPrice = productA.UnitPrice + productB.UnitPrice;
+                    var discountPercentage = 0.1m; // 10% bundle discount
+                    var bundlePrice = individualPrice * (1 - discountPercentage);
+                    
+                    bundles.Add(new ProductBundle
+                    {
+                        BundleName = $"{categoryA} & {categoryB} Bundle",
+                        ProductIds = new List<Guid> { productA.Id, productB.Id },
+                        ProductNames = new List<string> { productA.Name, productB.Name },
+                        IndividualPrice = individualPrice,
+                        BundlePrice = bundlePrice,
+                        SavingsAmount = individualPrice - bundlePrice,
+                        RelevanceScore = (double)categoryPair.Value / sales.Count,
+                        Description = $"Popular combination: {productA.Name} + {productB.Name}"
+                    });
+                }
+            }
+        }
+
+        return bundles.OrderByDescending(b => b.RelevanceScore).Take(3).ToList();
+    }
+
+    private async Task<List<ProductBundle>> GenerateBusinessTypeSpecificBundles(List<Product> products)
+    {
+        _logger.LogInformation("Generating business type-specific product bundles");
+        
+        var bundles = new List<ProductBundle>();
+        
+        // Get business type from the first product's shop (simplified approach)
+        var firstProduct = products.FirstOrDefault();
+        if (firstProduct?.Shop?.Business?.Type == null)
+            return bundles;
+
+        var businessType = firstProduct.Shop.Business.Type;
+        
+        // Generate business type-specific bundles
+        switch (businessType)
+        {
+            case BusinessType.Pharmacy:
+                bundles.AddRange(GeneratePharmacyBundles(products));
+                break;
+                
+            case BusinessType.Grocery:
+                bundles.AddRange(GenerateGroceryBundles(products));
+                break;
+                
+            case BusinessType.SuperShop:
+                bundles.AddRange(GenerateGroceryBundles(products)); // Super shop uses grocery patterns
+                break;
+        }
+
+        return bundles.Take(2).ToList();
+    }
+
+    private List<ProductBundle> GeneratePharmacyBundles(List<Product> products)
+    {
+        var bundles = new List<ProductBundle>();
+        
+        // Common pharmacy bundles
+        var bundlePatterns = new[]
+        {
+            new { Name = "Cold & Flu Care Bundle", Keywords = new[] { "cold", "flu", "cough", "throat" } },
+            new { Name = "Pain Relief Bundle", Keywords = new[] { "pain", "relief", "gel", "cream" } },
+            new { Name = "Baby Care Bundle", Keywords = new[] { "baby", "diaper", "formula", "care" } },
+            new { Name = "Diabetes Care Bundle", Keywords = new[] { "diabetes", "glucose", "test", "strip" } }
+        };
+
+        foreach (var pattern in bundlePatterns)
+        {
+            var matchingProducts = products.Where(p => 
+                pattern.Keywords.Any(keyword => p.Name.ToLower().Contains(keyword)))
+                .OrderBy(p => p.UnitPrice)
+                .Take(3)
+                .ToList();
+
+            if (matchingProducts.Count >= 2)
+            {
+                var individualPrice = matchingProducts.Sum(p => p.UnitPrice);
+                var discountPercentage = 0.15m; // 15% bundle discount for pharmacy
+                var bundlePrice = individualPrice * (1 - discountPercentage);
+                
+                bundles.Add(new ProductBundle
+                {
+                    BundleName = pattern.Name,
+                    ProductIds = matchingProducts.Select(p => p.Id).ToList(),
+                    ProductNames = matchingProducts.Select(p => p.Name).ToList(),
+                    IndividualPrice = individualPrice,
+                    BundlePrice = bundlePrice,
+                    SavingsAmount = individualPrice - bundlePrice,
+                    RelevanceScore = 0.8,
+                    Description = $"Complete {pattern.Name.Replace(" Bundle", "")} solution"
+                });
+            }
+        }
+
+        return bundles;
+    }
+
+    private List<ProductBundle> GenerateGroceryBundles(List<Product> products)
+    {
+        var bundles = new List<ProductBundle>();
+        
+        // Common grocery bundles
+        var bundlePatterns = new[]
+        {
+            new { Name = "Breakfast Bundle", Keywords = new[] { "cereal", "milk", "bread", "butter", "jam" } },
+            new { Name = "Pasta Night Bundle", Keywords = new[] { "pasta", "sauce", "cheese", "olive" } },
+            new { Name = "Coffee Time Bundle", Keywords = new[] { "coffee", "sugar", "cream", "cookie" } },
+            new { Name = "Cooking Essentials Bundle", Keywords = new[] { "oil", "salt", "spice", "onion", "garlic" } }
+        };
+
+        foreach (var pattern in bundlePatterns)
+        {
+            var matchingProducts = products.Where(p => 
+                pattern.Keywords.Any(keyword => p.Name.ToLower().Contains(keyword)))
+                .OrderBy(p => p.UnitPrice)
+                .Take(4)
+                .ToList();
+
+            if (matchingProducts.Count >= 2)
+            {
+                var individualPrice = matchingProducts.Sum(p => p.UnitPrice);
+                var discountPercentage = 0.12m; // 12% bundle discount for grocery
+                var bundlePrice = individualPrice * (1 - discountPercentage);
+                
+                bundles.Add(new ProductBundle
+                {
+                    BundleName = pattern.Name,
+                    ProductIds = matchingProducts.Select(p => p.Id).ToList(),
+                    ProductNames = matchingProducts.Select(p => p.Name).ToList(),
+                    IndividualPrice = individualPrice,
+                    BundlePrice = bundlePrice,
+                    SavingsAmount = individualPrice - bundlePrice,
+                    RelevanceScore = 0.7,
+                    Description = $"Everything you need for {pattern.Name.Replace(" Bundle", "").ToLower()}"
+                });
+            }
+        }
+
+        return bundles;
+    }
+
+    #endregion
+
+    #region Helper Classes for Business Recommendations
+
+    private class ProductAssociation
+    {
+        public Guid ProductA { get; set; }
+        public Guid ProductB { get; set; }
+        public double Support { get; set; }
+        public double Confidence { get; set; }
+        public double Lift { get; set; }
+        public int CoOccurrences { get; set; }
+    }
+
+    private class ProductCoOccurrence
+    {
+        public Guid ProductA { get; set; }
+        public Guid ProductB { get; set; }
+        public int CoOccurrenceCount { get; set; }
+        public double CoOccurrenceScore { get; set; }
     }
 
     #endregion
