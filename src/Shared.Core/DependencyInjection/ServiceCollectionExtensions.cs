@@ -105,6 +105,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISystemHealthMonitoringService, SystemHealthMonitoringService>();
         services.AddScoped<IDatabaseQueryOptimizationService, DatabaseQueryOptimizationService>();
         services.AddScoped<ICachingStrategyService, CachingStrategyService>();
+        services.AddScoped<ITestOptimizationService, TestOptimizationService>();
         
         // Register background services
         services.AddHostedService<SessionCleanupService>();
@@ -254,6 +255,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISystemHealthMonitoringService, SystemHealthMonitoringService>();
         services.AddScoped<IDatabaseQueryOptimizationService, DatabaseQueryOptimizationService>();
         services.AddScoped<ICachingStrategyService, CachingStrategyService>();
+        services.AddScoped<ITestOptimizationService, TestOptimizationService>();
         
         services.AddScoped<IAuthenticationService>(provider => new AuthenticationService(
             provider.GetRequiredService<IUserRepository>(),
