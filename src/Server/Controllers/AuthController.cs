@@ -47,7 +47,13 @@ public class AuthController : ControllerBase
             request.UserAgent = HttpContext.Request.Headers["User-Agent"].ToString();
 
             // Sanitize IP address before logging to prevent log forging
-            var sanitizedIpAddress = (request.IpAddress ?? string.Empty)
+            var sanitizedIpAddress = (request?.IpAddress ?? string.Empty)
+                .Replace(Environment.NewLine, string.Empty)
+                .Replace("\n", string.Empty)
+                .Replace("\r", string.Empty);
+
+            // Sanitize username before logging to prevent log forging
+            var sanitizedUsername = (request?.Username ?? string.Empty)
                 .Replace(Environment.NewLine, string.Empty)
                 .Replace("\n", string.Empty)
                 .Replace("\r", string.Empty);
@@ -57,7 +63,7 @@ public class AuthController : ControllerBase
             if (!result.IsSuccess)
             {
                 _logger.LogWarning("Authentication failed for user {Username} from IP {IpAddress}",
-                    request.Username, sanitizedIpAddress);
+                    sanitizedUsername, sanitizedIpAddress);
 
                 return Unauthorized(new SyncApiResult<AuthenticationResponse>
                 {
@@ -130,11 +136,15 @@ public class AuthController : ControllerBase
                 });
             }
 
+            var sanitizedUsername = request.Username?
+                .Replace("\r", string.Empty)
+                .Replace("\n", string.Empty);
+
             var result = await _authService.AuthenticateOfflineAsync(request.Username, request.CachedToken);
 
             if (!result.IsSuccess)
             {
-                _logger.LogWarning("Offline authentication failed for user {Username}", request.Username);
+                _logger.LogWarning("Offline authentication failed for user {Username}", sanitizedUsername);
 
                 return Unauthorized(new SyncApiResult<AuthenticationResponse>
                 {
@@ -168,7 +178,11 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during offline authentication for user {Username}", request.Username);
+            var sanitizedUsername = request.Username?
+                .Replace("\r", string.Empty)
+                .Replace("\n", string.Empty);
+
+            _logger.LogError(ex, "Error during offline authentication for user {Username}", sanitizedUsername);
             return StatusCode(500, new SyncApiResult<AuthenticationResponse>
             {
                 Success = false,
@@ -190,6 +204,23 @@ public class AuthController : ControllerBase
     {
         try
         {
+            var callerUserId = GetUserIdFromToken();
+            if (callerUserId == null)
+            {
+                return Unauthorized(new SyncApiResult<UserPermissions>
+                {
+                    Success = false,
+                    Message = "Invalid user token",
+                    StatusCode = 401
+                });
+            }
+
+            // Prevent IDOR: only allow users to access their own permissions
+            if (callerUserId.Value != userId)
+            {
+                return Forbid();
+            }
+
             var permissions = await _authService.GetUserPermissionsAsync(userId);
 
             return Ok(new SyncApiResult<UserPermissions>
@@ -228,10 +259,13 @@ public class AuthController : ControllerBase
 
             return Ok(new SyncApiResult<bool>
             {
-                Success = true,
-                Message = "Permission validation completed",
-                StatusCode = 200,
-                Data = hasPermission
+            // Remove newline characters to mitigate log forging
+            var sanitized = value.Replace("\r", string.Empty)
+                                 .Replace("\n", string.Empty);
+
+            // Bound log size to prevent log flooding
+            return sanitized.Length <= 200 ? sanitized : sanitized.Substring(0, 200);
+        }
             });
         }
         catch (Exception ex)

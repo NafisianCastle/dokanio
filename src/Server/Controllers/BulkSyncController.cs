@@ -186,8 +186,6 @@ public class BulkSyncController : ControllerBase
                 Id = c.Id,
                 EntityType = c.EntityType,
                 EntityId = c.EntityId,
-                BusinessId = c.BusinessId, // Pass BusinessId from the request
-                ShopId = c.ShopId,         // Pass ShopId from the request
                 LocalData = c.LocalData,
                 ServerData = c.ServerData,
                 LocalTimestamp = c.ConflictTimestamp,
@@ -347,29 +345,38 @@ public class BulkSyncController : ControllerBase
             foreach (var deviceData in request.DeviceData)
             {
                 try
+            {
+                // Process sales
+                foreach (var sale in deviceData.Sales)
                 {
-                    // Process sales
-                    foreach (var sale in deviceData.Sales)
+                    try
                     {
                         // Process individual sale (implementation would go here)
                         result.ProcessedRecords++;
                     }
+                    catch (Exception ex)
+                    {
+                        result.FailedRecords++;
+                        result.Errors.Add($"Device {deviceData.DeviceId} sale: {ex.Message}");
+                        _logger.LogWarning(ex, "Error processing sale from device {DeviceId}", deviceData.DeviceId);
+                    }
+                }
 
-                    // Process stock updates
-                    foreach (var stockUpdate in deviceData.StockUpdates)
+                // Process stock updates
+                foreach (var stockUpdate in deviceData.StockUpdates)
+                {
+                    try
                     {
                         // Process individual stock update (implementation would go here)
                         result.ProcessedRecords++;
                     }
+                    catch (Exception ex)
+                    {
+                        result.FailedRecords++;
+                        result.Errors.Add($"Device {deviceData.DeviceId} stock update: {ex.Message}");
+                        _logger.LogWarning(ex, "Error processing stock update from device {DeviceId}", deviceData.DeviceId);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    result.FailedRecords++;
-                    result.Errors.Add($"Device {deviceData.DeviceId}: {ex.Message}");
-                    _logger.LogWarning(ex, "Error processing data from device {DeviceId}", deviceData.DeviceId);
-                }
-            }
-
             result.IsSuccess = result.FailedRecords == 0;
 
             _logger.LogInformation("Bulk upload completed: {ProcessedRecords} processed, {FailedRecords} failed",
