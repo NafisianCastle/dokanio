@@ -323,9 +323,8 @@ public partial class LoginViewModel : BaseViewModel
     {
         try
         {
-            // In a real implementation, this would retrieve from secure storage
-            // For now, we'll use Preferences as a simple cache
-            return Preferences.Get($"cached_token_{username}", null);
+            // Use secure storage for auth tokens
+            return await SecureStorage.GetAsync($"cached_token_{username}");
         }
         catch
         {
