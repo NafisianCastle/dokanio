@@ -577,7 +577,7 @@ namespace Shared.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Barcode")
+                    b.HasIndex("ShopId", "Barcode")
                         .IsUnique();
 
                     b.HasIndex("Category");
@@ -1189,7 +1189,7 @@ namespace Shared.Core.Migrations
                     b.HasOne("Shared.Core.Entities.Shop", "Shop")
                         .WithMany("Sales")
                         .HasForeignKey("ShopId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Shared.Core.Entities.User", "User")

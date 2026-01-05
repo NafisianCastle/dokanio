@@ -127,7 +127,7 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
                     Quantity = 1,
                     BatchNumber = product.BatchNumber,
                     ExpiryDate = product.ExpiryDate,
-                    Weight = product.IsWeightBased ? product.RatePerKilogram : null,
+                    Weight = product.IsWeightBased ? 1m : null,
                     IsWeightBased = product.IsWeightBased
                 };
                 
@@ -268,10 +268,21 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
             "0", 
             keyboard: Keyboard.Numeric);
 
-        if (decimal.TryParse(discountPercentage, out var discount) && discount >= 0 && discount <= 100)
+        if (string.IsNullOrWhiteSpace(discountPercentage))
+            return;
+
+        if (decimal.TryParse(
+                discountPercentage,
+                System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out var discount) && discount >= 0 && discount <= 100)
         {
             item.DiscountPercentage = discount;
             await CalculateTotal();
+        }
+        else
+        {
+            SetError("Invalid discount percentage");
         }
     }
 
@@ -351,7 +362,10 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
 
     private string GenerateInvoiceNumber()
     {
-        var shopPrefix = _userContextService.CurrentShop?.Name?.Substring(0, Math.Min(3, _userContextService.CurrentShop.Name.Length)).ToUpper() ?? "POS";
+        var shopName = _userContextService.CurrentShop?.Name?.Trim();
+        var shopPrefix = !string.IsNullOrEmpty(shopName)
+            ? shopName.Substring(0, Math.Min(3, shopName.Length)).ToUpperInvariant()
+            : "POS";
         return $"{shopPrefix}-{DateTime.Now:yyyyMMdd}-{DateTime.Now.Ticks % 10000:D4}";
     }
 
@@ -444,7 +458,7 @@ public partial class SaleItemViewModel : ObservableObject
 
     [ObservableProperty]
     private DateTime? expiryDate;
-
+public decimal LineTotal => Quantity * UnitPrice * (IsWeightBased ? Math.Max(Weight ?? 1m, 0m) : 1m);
     [ObservableProperty]
     private decimal? weight;
 

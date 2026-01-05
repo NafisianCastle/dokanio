@@ -681,15 +681,23 @@ public class AnalyticsController : ControllerBase
 
     private DateRange? CreateDateRange(DateTime? startDate, DateTime? endDate)
     {
-        if (startDate.HasValue || endDate.HasValue)
+        if (!startDate.HasValue && !endDate.HasValue)
+            return null;
+
+        var defaultEnd = DateTime.UtcNow.Date;
+        var range = new DateRange
         {
-            return new DateRange
-            {
-                StartDate = startDate ?? DateTime.Today.AddDays(-30),
-                EndDate = endDate ?? DateTime.Today
-            };
+            StartDate = startDate ?? defaultEnd.AddDays(-30),
+            EndDate = endDate ?? defaultEnd
+        };
+
+        if (range.EndDate < range.StartDate)
+        {
+            // Normalize to avoid invalid ranges causing misleading analytics
+            range.EndDate = range.StartDate;
         }
-        return null;
+
+        return range;
     }
 
     #endregion

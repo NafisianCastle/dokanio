@@ -153,7 +153,7 @@ namespace Shared.Core.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
                     Type = table.Column<int>(type: "INTEGER", nullable: false),
-                    OwnerId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    OwnerId = table.Column<Guid>(type: "TEXT", nullable: true),
                     Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
                     Address = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
                     Phone = table.Column<string>(type: "TEXT", maxLength: 20, nullable: true),
@@ -394,7 +394,7 @@ namespace Shared.Core.Migrations
                         column: x => x.ShopId,
                         principalTable: "Shops",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Sales_Users_UserId",
                         column: x => x.UserId,
@@ -734,9 +734,9 @@ namespace Shared.Core.Migrations
                 column: "Type");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Products_ShopId_Barcode",
+                name: "IX_Products_Barcode",
                 table: "Products",
-                columns: new[] { "ShopId", "Barcode" },
+                column: "Barcode",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -820,9 +820,9 @@ namespace Shared.Core.Migrations
                 column: "DeviceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Sales_ShopId_InvoiceNumber",
+                name: "IX_Sales_InvoiceNumber",
                 table: "Sales",
-                columns: new[] { "ShopId", "InvoiceNumber" },
+                column: "InvoiceNumber",
                 unique: true);
 
             migrationBuilder.CreateIndex(
