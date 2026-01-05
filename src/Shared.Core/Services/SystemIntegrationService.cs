@@ -540,9 +540,9 @@ public class SystemIntegrationService : ISystemIntegrationService
         return result;
     }
 
-    public async Task<SystemHealthStatus> PerformSystemHealthCheckAsync()
+    public async Task<IntegrationSystemHealthStatus> PerformSystemHealthCheckAsync()
     {
-        var result = new SystemHealthStatus();
+        var result = new IntegrationSystemHealthStatus();
         
         _logger.LogInformation("Starting system health check");
 
@@ -692,10 +692,10 @@ public class SystemIntegrationService : ISystemIntegrationService
         };
     }
 
-    private async Task CheckServiceHealth<T>(string serviceName, SystemHealthStatus result)
+    private async Task CheckServiceHealth<T>(string serviceName, IntegrationSystemHealthStatus result)
     {
         var stopwatch = Stopwatch.StartNew();
-        var componentHealth = new ComponentHealth { ComponentName = serviceName };
+        var componentHealth = new IntegrationComponentHealth { ComponentName = serviceName };
         
         try
         {

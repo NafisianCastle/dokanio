@@ -8,6 +8,7 @@ using Shared.Core.Services;
 using System.Diagnostics;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.Data.Sqlite;
 
 namespace Shared.Core.Tests;
 
@@ -18,6 +19,7 @@ namespace Shared.Core.Tests;
 public class PerformanceOptimizationTests : IDisposable
 {
     private readonly ITestOutputHelper _output;
+    private readonly SqliteConnection _connection;
     private readonly ServiceProvider _serviceProvider;
     private readonly PosDbContext _context;
     private readonly IPerformanceOptimizationService _performanceService;
@@ -27,10 +29,13 @@ public class PerformanceOptimizationTests : IDisposable
     public PerformanceOptimizationTests(ITestOutputHelper output)
     {
         _output = output;
+        
+        _connection = new SqliteConnection("Filename=:memory:");
+        _connection.Open();
 
         var services = new ServiceCollection();
         services.AddDbContext<PosDbContext>(options =>
-            options.UseSqlite("Data Source=:memory:"));
+            options.UseSqlite(_connection));
         services.AddLogging(builder => builder.AddConsole());
         services.AddScoped<IPerformanceOptimizationService, PerformanceOptimizationService>();
         services.AddScoped<IDatabaseQueryOptimizationService, DatabaseQueryOptimizationService>();
@@ -526,6 +531,8 @@ public class PerformanceOptimizationTests : IDisposable
     {
         _context?.Dispose();
         _serviceProvider?.Dispose();
+        _connection?.Close();
+        _connection?.Dispose();
     }
 
     private class TestData

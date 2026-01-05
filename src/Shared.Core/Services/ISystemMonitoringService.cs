@@ -17,7 +17,7 @@ namespace Shared.Core.Services
         /// <summary>
         /// Get health status for a specific business
         /// </summary>
-        Task<BusinessHealthStatus> GetBusinessHealthAsync(int businessId);
+        Task<BusinessHealthStatus> GetBusinessHealthAsync(Guid businessId);
 
         /// <summary>
         /// Get system performance metrics
@@ -27,7 +27,7 @@ namespace Shared.Core.Services
         /// <summary>
         /// Get business-specific performance metrics
         /// </summary>
-        Task<BusinessMetrics> GetBusinessMetricsAsync(int businessId);
+        Task<BusinessMetrics> GetBusinessMetricsAsync(Guid businessId);
 
         /// <summary>
         /// Record a system event for monitoring
@@ -68,7 +68,7 @@ namespace Shared.Core.Services
 
     public class BusinessHealthStatus
     {
-        public int BusinessId { get; set; }
+        public Guid BusinessId { get; set; }
         public bool IsHealthy { get; set; }
         public int ActiveUsers { get; set; }
         public int ActiveShops { get; set; }
@@ -90,7 +90,7 @@ namespace Shared.Core.Services
 
     public class BusinessMetrics
     {
-        public int BusinessId { get; set; }
+        public Guid BusinessId { get; set; }
         public int DailySales { get; set; }
         public decimal DailyRevenue { get; set; }
         public int ActiveUsers { get; set; }
@@ -106,7 +106,7 @@ namespace Shared.Core.Services
         public string Source { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
         public string Severity { get; set; } = string.Empty;
-        public int? BusinessId { get; set; }
+        public Guid? BusinessId { get; set; }
         public int? UserId { get; set; }
         public DateTime Timestamp { get; set; }
         public Dictionary<string, object> Properties { get; set; } = new();
@@ -121,7 +121,7 @@ namespace Shared.Core.Services
         public string Status { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime? ResolvedAt { get; set; }
-        public int? BusinessId { get; set; }
+        public Guid? BusinessId { get; set; }
         public Dictionary<string, object> Metadata { get; set; } = new();
     }
 
@@ -137,7 +137,7 @@ namespace Shared.Core.Services
     {
         public string Type { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public int? BusinessId { get; set; }
+        public Guid? BusinessId { get; set; }
         public string TableName { get; set; } = string.Empty;
         public DateTime DetectedAt { get; set; }
     }
