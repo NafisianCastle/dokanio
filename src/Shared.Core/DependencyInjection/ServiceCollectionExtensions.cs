@@ -45,6 +45,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
         services.AddScoped<IBusinessManagementService, BusinessManagementService>();
         
+        // Register system integration service
+        services.AddScoped<ISystemIntegrationService, SystemIntegrationService>();
+        
+        // Register multi-business startup service
+        services.AddScoped<IMultiBusinessStartupService, MultiBusinessStartupService>();
+        
         // Register repositories
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ISaleRepository, SaleRepository>();
@@ -205,6 +211,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
         services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
         services.AddScoped<IBusinessManagementService, BusinessManagementService>();
+        
+        // Register system integration service for testing
+        services.AddScoped<ISystemIntegrationService, SystemIntegrationService>();
+        
+        // Register multi-business startup service for testing
+        services.AddScoped<IMultiBusinessStartupService, MultiBusinessStartupService>();
         
         // Register sync services for testing
         services.AddScoped<ISyncEngine, SyncEngine>();
