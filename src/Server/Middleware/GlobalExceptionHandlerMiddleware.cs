@@ -40,7 +40,19 @@ public class GlobalExceptionHandlerMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception occurred during request processing path: {Path}", context.Request.Path);
+            var safePath = context.Request.Path.ToString()
+                .Replace("\r", string.Empty)
+                .Replace("\n", string.Empty);
+
+            _logger.LogError(ex, "An unhandled exception occurred during request processing path: {Path}", safePath);
+
+            if (context.Response.HasStarted)
+            {
+                _logger.LogWarning("Response already started; cannot write error body for path: {Path}", safePath);
+                throw;
+            }
+
+            context.Response.Clear();
             await HandleExceptionAsync(context, ex);
         }
     }
