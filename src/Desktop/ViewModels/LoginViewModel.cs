@@ -115,7 +115,7 @@ public partial class LoginViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void ClearError()
+    private new void ClearError()
     {
         ErrorMessage = null;
     }

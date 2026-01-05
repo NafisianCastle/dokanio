@@ -283,7 +283,6 @@ private double CalculateCacheHitRatio()
     }
     return (double)_cacheHits / totalRequests;
 }
-    }
 
     private long GetAvailableMemory()
     {

@@ -181,12 +181,12 @@ public class DeviceController : ControllerBase
 
             _logger.LogInformation("Device {DeviceId} authenticated successfully", device.Id);
 
-            return Ok(new SyncApiResult<AuthenticationResponse>
+            return Ok(new SyncApiResult<Shared.Core.Services.AuthenticationResponse>
             {
                 Success = true,
                 Message = "Authentication successful",
                 StatusCode = 200,
-                Data = new AuthenticationResponse
+                Data = new Shared.Core.Services.AuthenticationResponse
                 {
                     AccessToken = token,
                     RefreshToken = refreshToken,

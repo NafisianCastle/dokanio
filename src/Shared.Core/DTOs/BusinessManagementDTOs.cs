@@ -519,4 +519,3 @@ public class TaxBracket
     public decimal MinAmount { get; set; }
     public decimal MaxAmount { get; set; }
 }
-

@@ -86,6 +86,12 @@ builder.Services.AddAuthorization();
 // Register application services
 builder.Services.AddScoped<IJwtService, JwtService>();
 
+// Register multi-business services (these would need to be implemented)
+// builder.Services.AddScoped<IBusinessManagementService, BusinessManagementService>();
+// builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+// builder.Services.AddScoped<IDashboardService, DashboardService>();
+// builder.Services.AddScoped<IMultiTenantSyncService, MultiTenantSyncService>();
+
 // Add CORS for development
 builder.Services.AddCors(options =>
 {
@@ -155,6 +161,10 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
+
+// Custom authentication and authorization middleware
+// app.UseMiddleware<Server.Middleware.AuthenticationMiddleware>();
+// app.UseMiddleware<Server.Middleware.AuthorizationMiddleware>();
 
 // Authentication and authorization must be in this order
 app.UseAuthentication();

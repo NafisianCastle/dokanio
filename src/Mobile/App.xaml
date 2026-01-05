@@ -13,8 +13,11 @@
             
             <!-- Converters -->
             <converters:BoolToTextConverter x:Key="BoolToTextConverter" />
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
             <converters:IntToBoolConverter x:Key="IntToBoolConverter" />
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+            <converters:GreaterThanZeroConverter x:Key="GreaterThanZeroConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -16,6 +16,9 @@ public partial class BaseViewModel : ObservableValidator
     [ObservableProperty]
     private bool hasError;
 
+    [ObservableProperty]
+    private string? successMessage;
+
     protected void SetError(string message)
     {
         ErrorMessage = message;

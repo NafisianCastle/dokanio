@@ -1,0 +1,450 @@
+@page "/"
+@inject IDashboardApiService DashboardService
+@inject IAuthenticationService AuthService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Dashboard - Multi-Business POS</PageTitle>
+
+<div class="dashboard-container">
+    @if (IsLoading)
+    {
+        <div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (DashboardData != null)
+    {
+        <!-- Dashboard Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1">@DashboardData.BusinessName Dashboard</h2>
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-store me-1"></i>@DashboardData.TotalShops shops
+                            <span class="mx-2">•</span>
+                            <i class="fas fa-clock me-1"></i>Last updated: @DashboardData.GeneratedAt.ToString("MMM dd, yyyy HH:mm")
+                        </p>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-primary me-2" @onclick="RefreshData">
+                            <i class="fas fa-sync-alt me-1"></i>Refresh
+                        </button>
+                        <div class="dropdown d-inline-block">
+                            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-filter me-1"></i>Filter
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" @onclick="() => SetDateFilter(DateFilterType.Today)">Today</a></li>
+                                <li><a class="dropdown-item" href="#" @onclick="() => SetDateFilter(DateFilterType.Week)">This Week</a></li>
+                                <li><a class="dropdown-item" href="#" @onclick="() => SetDateFilter(DateFilterType.Month)">This Month</a></li>
+                                <li><a class="dropdown-item" href="#" @onclick="() => SetDateFilter(DateFilterType.Quarter)">This Quarter</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card metric-card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div class="metric-value">@DashboardData.RealTimeSales.TodayRevenue.ToString("C")</div>
+                                <div class="metric-label">Today's Revenue</div>
+                                <div class="metric-change">
+                                    <i class="fas @(DashboardData.RealTimeSales.RevenueChangePercentage >= 0 ? "fa-arrow-up" : "fa-arrow-down")"></i>
+                                    @Math.Abs(DashboardData.RealTimeSales.RevenueChangePercentage).ToString("F1")%
+                                </div>
+                            </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card metric-card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div class="metric-value">@DashboardData.RealTimeSales.TodayTransactionCount</div>
+                                <div class="metric-label">Today's Transactions</div>
+                                <div class="metric-change">
+                                    <i class="fas @(DashboardData.RealTimeSales.TransactionChangePercentage >= 0 ? "fa-arrow-up" : "fa-arrow-down")"></i>
+                                    @Math.Abs(DashboardData.RealTimeSales.TransactionChangePercentage).ToString("F1")%
+                                </div>
+                            </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card metric-card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div class="metric-value">@DashboardData.RealTimeSales.AverageOrderValue.ToString("C")</div>
+                                <div class="metric-label">Average Order Value</div>
+                                <div class="metric-change">
+                                    <i class="fas fa-chart-line"></i>
+                                    AOV
+                                </div>
+                            </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-receipt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card metric-card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div class="metric-value">@DashboardData.InventoryStatus.LowStockProducts</div>
+                                <div class="metric-label">Low Stock Alerts</div>
+                                <div class="metric-change">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    @DashboardData.InventoryStatus.OutOfStockProducts out of stock
+                                </div>
+                            </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <!-- Sales Trend Chart -->
+            <div class="col-xl-8 mb-3">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Sales Trend</h5>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <input type="radio" class="btn-check" name="salesChartType" id="hourly" checked @onchange="() => SetSalesChartType(SalesChartType.Hourly)">
+                            <label class="btn btn-outline-primary" for="hourly">Hourly</label>
+                            
+                            <input type="radio" class="btn-check" name="salesChartType" id="daily" @onchange="() => SetSalesChartType(SalesChartType.Daily)">
+                            <label class="btn btn-outline-primary" for="daily">Daily</label>
+                            
+                            <input type="radio" class="btn-check" name="salesChartType" id="monthly" @onchange="() => SetSalesChartType(SalesChartType.Monthly)">
+                            <label class="btn btn-outline-primary" for="monthly">Monthly</label>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="salesChart" style="height: 350px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Products -->
+            <div class="col-xl-4 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Top Selling Products</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (DashboardData.RealTimeSales.TopProducts.Any())
+                        {
+                            @foreach (var product in DashboardData.RealTimeSales.TopProducts.Take(5))
+                            {
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold">@product.ProductName</div>
+                                        <div class="small text-muted">@product.ShopName</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-semibold">@product.QuantitySold units</div>
+                                        <div class="small text-muted">@product.Revenue.ToString("C")</div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                                <p>No sales data available</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shop Performance and Alerts -->
+        <div class="row mb-4">
+            <!-- Shop Performance -->
+            <div class="col-xl-8 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Shop Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (DashboardData.ShopPerformances.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Shop</th>
+                                            <th>Today's Revenue</th>
+                                            <th>Transactions</th>
+                                            <th>AOV</th>
+                                            <th>Growth</th>
+                                            <th>Rating</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var shop in DashboardData.ShopPerformances)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="fw-semibold">@shop.ShopName</div>
+                                                    <div class="small text-muted">
+                                                        @shop.LowStockAlerts low stock, @shop.ExpiryAlerts expiring
+                                                    </div>
+                                                </td>
+                                                <td>@shop.TodayRevenue.ToString("C")</td>
+                                                <td>@shop.TodayTransactions</td>
+                                                <td>@shop.AverageOrderValue.ToString("C")</td>
+                                                <td>
+                                                    <span class="badge bg-@(shop.RevenueGrowthPercentage >= 0 ? "success" : "danger")">
+                                                        @shop.RevenueGrowthPercentage.ToString("F1")%
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-@GetRatingColor(shop.Rating)">
+                                                        @shop.Rating
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-store fa-2x mb-2"></i>
+                                <p>No shop data available</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Alerts -->
+            <div class="col-xl-4 mb-3">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Recent Alerts</h5>
+                        <a href="/notifications" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    <div class="card-body">
+                        @if (DashboardData.Alerts.Any())
+                        {
+                            @foreach (var alert in DashboardData.Alerts.Take(5))
+                            {
+                                <div class="alert alert-@GetAlertColor(alert.Priority) alert-dismissible fade show mb-2" role="alert">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas @GetAlertIcon(alert.Type)"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-2">
+                                            <div class="fw-semibold">@alert.Title</div>
+                                            <div class="small">@alert.Message</div>
+                                            @if (!string.IsNullOrEmpty(alert.ShopName))
+                                            {
+                                                <div class="small text-muted">@alert.ShopName</div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-bell fa-2x mb-2"></i>
+                                <p>No recent alerts</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Unable to load dashboard data. Please try refreshing the page.
+        </div>
+    }
+</div>
+
+@code {
+    private DashboardOverview? DashboardData;
+    private bool IsLoading = true;
+    private UserDto? CurrentUser;
+    private SalesChartType CurrentSalesChartType = SalesChartType.Hourly;
+    private DateFilterType CurrentDateFilter = DateFilterType.Today;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && DashboardData != null)
+        {
+            await RenderSalesChart();
+        }
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            IsLoading = true;
+            CurrentUser = await AuthService.GetCurrentUserAsync();
+            
+            if (CurrentUser?.BusinessId != null)
+            {
+                var filter = new DashboardFilter
+                {
+                    BusinessId = CurrentUser.BusinessId.Value,
+                    DateRange = GetDateRange(CurrentDateFilter)
+                };
+
+                DashboardData = await DashboardService.GetDashboardOverviewAsync(CurrentUser.BusinessId.Value, filter);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading dashboard data: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task RefreshData()
+    {
+        await LoadData();
+        if (DashboardData != null)
+        {
+            await RenderSalesChart();
+        }
+    }
+
+    private async Task SetDateFilter(DateFilterType filterType)
+    {
+        CurrentDateFilter = filterType;
+        await RefreshData();
+    }
+
+    private async Task SetSalesChartType(SalesChartType chartType)
+    {
+        CurrentSalesChartType = chartType;
+        await RenderSalesChart();
+    }
+
+    private async Task RenderSalesChart()
+    {
+        if (DashboardData == null) return;
+
+        var chartData = CurrentSalesChartType switch
+        {
+            SalesChartType.Hourly => DashboardData.RealTimeSales.HourlySales.Select(h => new { x = h.Hour.ToString("HH:mm"), y = h.Revenue }).ToArray(),
+            SalesChartType.Daily => DashboardData.RevenueTrends.DailyRevenues.Select(d => new { x = d.Date.ToString("MMM dd"), y = d.Revenue }).ToArray(),
+            SalesChartType.Monthly => DashboardData.RevenueTrends.MonthlyRevenues.Select(m => new { x = m.MonthName, y = m.Revenue }).ToArray(),
+            _ => Array.Empty<object>()
+        };
+
+        await JSRuntime.InvokeVoidAsync("renderSalesChart", chartData, CurrentSalesChartType.ToString());
+    }
+
+    private DateRange GetDateRange(DateFilterType filterType)
+    {
+        var now = DateTime.UtcNow;
+        return filterType switch
+        {
+            DateFilterType.Today => new DateRange { StartDate = now.Date, EndDate = now.Date.AddDays(1).AddTicks(-1) },
+            DateFilterType.Week => new DateRange { StartDate = now.Date.AddDays(-(int)now.DayOfWeek), EndDate = now.Date.AddDays(7 - (int)now.DayOfWeek).AddTicks(-1) },
+            DateFilterType.Month => new DateRange { StartDate = new DateTime(now.Year, now.Month, 1), EndDate = new DateTime(now.Year, now.Month, 1).AddMonths(1).AddTicks(-1) },
+            DateFilterType.Quarter => new DateRange { StartDate = new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1), EndDate = new DateTime(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1).AddMonths(3).AddTicks(-1) },
+            _ => new DateRange { StartDate = now.Date, EndDate = now.Date.AddDays(1).AddTicks(-1) }
+        };
+    }
+
+    private string GetRatingColor(PerformanceRating rating) => rating switch
+    {
+        PerformanceRating.Excellent => "success",
+        PerformanceRating.Good => "primary",
+        PerformanceRating.Average => "warning",
+        PerformanceRating.BelowAverage => "danger",
+        PerformanceRating.Poor => "dark",
+        _ => "secondary"
+    };
+
+    private string GetAlertColor(AlertPriority priority) => priority switch
+    {
+        AlertPriority.Critical => "danger",
+        AlertPriority.High => "warning",
+        AlertPriority.Medium => "info",
+        AlertPriority.Low => "light",
+        _ => "secondary"
+    };
+
+    private string GetAlertIcon(AlertType type) => type switch
+    {
+        AlertType.LowStock => "fa-box",
+        AlertType.OutOfStock => "fa-exclamation-triangle",
+        AlertType.ProductExpiry => "fa-calendar-times",
+        AlertType.HighSales => "fa-chart-line",
+        AlertType.LowSales => "fa-chart-line-down",
+        AlertType.SystemError => "fa-bug",
+        AlertType.SecurityAlert => "fa-shield-alt",
+        AlertType.SyncIssue => "fa-sync-alt",
+        _ => "fa-info-circle"
+    };
+
+    private enum SalesChartType
+    {
+        Hourly,
+        Daily,
+        Monthly
+    }
+
+    private enum DateFilterType
+    {
+        Today,
+        Week,
+        Month,
+        Quarter
+    }
+}
