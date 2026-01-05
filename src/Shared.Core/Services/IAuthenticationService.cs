@@ -105,7 +105,15 @@ public class UserPermissions
     public UserRole Role { get; set; }
     public Guid BusinessId { get; set; }
     public Guid? ShopId { get; set; }
-    public HashSet<string> Permissions { get; set; } = new();
+    private HashSet<string> _permissions = new(StringComparer.OrdinalIgnoreCase);
+
+    public HashSet<string> Permissions
+    {
+        get => _permissions;
+        set => _permissions = value is null
+            ? new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            : new HashSet<string>(value, StringComparer.OrdinalIgnoreCase);
+    }
     public Dictionary<string, object> CustomPermissions { get; set; } = new();
     
     /// <summary>
