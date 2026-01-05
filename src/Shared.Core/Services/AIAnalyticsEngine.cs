@@ -789,6 +789,8 @@ public class AIAnalyticsEngine : IAIAnalyticsEngine
             var category = categoryGroup.Key;
             var purchasedProducts = categoryGroup.Value;
             var avgPurchasePrice = purchasedProducts.Average(p => p.UnitPrice);
+            if (avgPurchasePrice <= 0m)
+                continue;
 
             // Find higher-priced products in the same category
             var premiumProducts = productList
