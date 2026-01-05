@@ -464,3 +464,121 @@ public class ShopDto
     public DateTime UpdatedAt { get; set; }
 }
 
+/// <summary>
+/// Business settings configuration
+/// </summary>
+public class BusinessSettings
+{
+    /// <summary>
+    /// Business hours configuration
+    /// </summary>
+    public BusinessHours BusinessHours { get; set; } = new();
+    
+    /// <summary>
+    /// Receipt settings
+    /// </summary>
+    public ReceiptSettings ReceiptSettings { get; set; } = new();
+    
+    /// <summary>
+    /// Notification settings
+    /// </summary>
+    public NotificationSettings NotificationSettings { get; set; } = new();
+    
+    /// <summary>
+    /// Security settings
+    /// </summary>
+    public SecuritySettings SecuritySettings { get; set; } = new();
+}
+
+/// <summary>
+/// Business hours configuration
+/// </summary>
+public class BusinessHours
+{
+    public TimeSpan OpenTime { get; set; } = new TimeSpan(9, 0, 0); // 9:00 AM
+    public TimeSpan CloseTime { get; set; } = new TimeSpan(18, 0, 0); // 6:00 PM
+    public List<DayOfWeek> OperatingDays { get; set; } = new() { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday };
+    public bool IsOpen24Hours { get; set; } = false;
+}
+
+/// <summary>
+/// Receipt settings configuration
+/// </summary>
+public class ReceiptSettings
+{
+    public bool PrintReceipts { get; set; } = true;
+    public bool EmailReceipts { get; set; } = false;
+    public string ReceiptHeader { get; set; } = string.Empty;
+    public string ReceiptFooter { get; set; } = string.Empty;
+    public bool ShowBusinessLogo { get; set; } = false;
+}
+
+/// <summary>
+/// Notification settings configuration
+/// </summary>
+public class NotificationSettings
+{
+    public bool EnableLowStockAlerts { get; set; } = true;
+    public bool EnableExpiryAlerts { get; set; } = true;
+    public bool EnableSalesNotifications { get; set; } = false;
+    public string NotificationEmail { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Security settings configuration
+/// </summary>
+public class SecuritySettings
+{
+    public bool RequireManagerApproval { get; set; } = false;
+    public bool EnableAuditLogging { get; set; } = true;
+    public int SessionTimeoutMinutes { get; set; } = 60;
+    public bool RequireStrongPasswords { get; set; } = false;
+}
+
+/// <summary>
+/// Tax settings configuration
+/// </summary>
+public class TaxSettings
+{
+    public bool EnableTax { get; set; } = true;
+    public decimal DefaultTaxRate { get; set; } = 0.0m;
+    public string TaxDisplayName { get; set; } = "Tax";
+    public bool TaxInclusivePricing { get; set; } = false;
+    public List<TaxBracket> TaxBrackets { get; set; } = new();
+}
+
+/// <summary>
+/// Tax bracket configuration
+/// </summary>
+public class TaxBracket
+{
+    public string Name { get; set; } = string.Empty;
+    public decimal Rate { get; set; }
+    public decimal MinAmount { get; set; }
+    public decimal MaxAmount { get; set; }
+}
+
+/// <summary>
+/// Currency settings configuration
+/// </summary>
+public class CurrencySettings
+{
+    public string CurrencyCode { get; set; } = "USD";
+    public string CurrencySymbol { get; set; } = "$";
+    public int DecimalPlaces { get; set; } = 2;
+    public string CurrencyFormat { get; set; } = "{0:C}";
+    public bool ShowCurrencySymbol { get; set; } = true;
+}
+
+/// <summary>
+/// Localization settings configuration
+/// </summary>
+public class LocalizationSettings
+{
+    public string Language { get; set; } = "en-US";
+    public string DateFormat { get; set; } = "MM/dd/yyyy";
+    public string TimeFormat { get; set; } = "HH:mm";
+    public string NumberFormat { get; set; } = "N2";
+    public string Timezone { get; set; } = "UTC";
+}
+
