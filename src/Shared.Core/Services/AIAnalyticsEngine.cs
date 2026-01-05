@@ -722,7 +722,7 @@ public class AIAnalyticsEngine : IAIAnalyticsEngine
         foreach (var association in productAssociations.OrderByDescending(a => a.Confidence).Take(10))
         {
             var targetProduct = productList.FirstOrDefault(p => p.Id == association.ProductB);
-            if (targetProduct == null) continue;
+            if (targetProduct == null || !targetProduct.IsActive) continue;
 
             var baseProduct = productList.FirstOrDefault(p => p.Id == association.ProductA);
             var baseProductName = baseProduct?.Name ?? "Unknown";
