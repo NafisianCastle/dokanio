@@ -577,7 +577,7 @@ namespace Shared.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Barcode")
+                    b.HasIndex("ShopId", "Barcode")
                         .IsUnique();
 
                     b.HasIndex("Category");
