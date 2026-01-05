@@ -562,15 +562,30 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
                         };
                     }
 
-                    // Aggregate by category
-                    if (marginsByCategory.ContainsKey(category))
+                    // In a suitable location before the loop over sales:
+                    var categoryMarginData = new Dictionary<string, (decimal sum, int count)>();
+
+                    // Inside the loop over sale items:
+                    var category = item.Product.Category ?? "Uncategorized";
+                    var sellingPrice = item.UnitPrice;
+                    var estimatedCost = sellingPrice * 0.7m;
+                    var profitMarginPercentage = sellingPrice > 0 ? ((sellingPrice - estimatedCost) / sellingPrice) * 100 : 0;
+
+                    if (categoryMarginData.ContainsKey(category))
                     {
-                        marginsByCategory[category] = (marginsByCategory[category] + profitMarginPercentage) / 2;
+                        var (sum, count) = categoryMarginData[category];
+                        categoryMarginData[category] = (sum + profitMarginPercentage, count + 1);
                     }
                     else
                     {
-                        marginsByCategory[category] = profitMarginPercentage;
+                        categoryMarginData[category] = (profitMarginPercentage, 1);
                     }
+
+                    // After the loops, to populate the final result:
+                    var marginsByCategory = categoryMarginData.ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value.count > 0 ? kvp.Value.sum / kvp.Value.count : 0
+                    );
                 }
             }
 
