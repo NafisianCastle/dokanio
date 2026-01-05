@@ -56,14 +56,16 @@ public class AuthorizationMiddleware
             
             if (!hasPermission)
             {
+                var safePath = context.Request.Path.ToString().Replace("\r", string.Empty).Replace("\n", string.Empty);
                 _logger.LogWarning("Authorization failed: User {UserId} lacks permission for {Path}", 
-                    userId, context.Request.Path);
+                    userId, safePath);
                 context.Response.StatusCode = 403;
                 await context.Response.WriteAsync("Access denied");
                 return;
             }
 
-            _logger.LogDebug("User {UserId} authorized for {Path}", userId, context.Request.Path);
+            var authorizedSafePath = context.Request.Path.ToString().Replace("\r", string.Empty).Replace("\n", string.Empty);
+            _logger.LogDebug("User {UserId} authorized for {Path}", userId, authorizedSafePath);
 
             await _next(context);
         }
