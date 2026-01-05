@@ -15,6 +15,7 @@ public class EnhancedSalesService : SaleService, IEnhancedSalesService
 {
     private readonly IBusinessManagementService _businessManagementService;
     private readonly IShopRepository _shopRepository;
+    private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<EnhancedSalesService> _logger;
 
     public EnhancedSalesService(
@@ -29,6 +30,7 @@ public class EnhancedSalesService : SaleService, IEnhancedSalesService
         ILicenseService licenseService,
         IBusinessManagementService businessManagementService,
         IShopRepository shopRepository,
+        ICurrentUserService currentUserService,
         ILogger<EnhancedSalesService> logger)
         : base(saleRepository, saleItemRepository, productService, inventoryService, 
                weightBasedPricingService, membershipService, discountService, 
@@ -36,6 +38,7 @@ public class EnhancedSalesService : SaleService, IEnhancedSalesService
     {
         _businessManagementService = businessManagementService;
         _shopRepository = shopRepository;
+        _currentUserService = currentUserService;
         _logger = logger;
     }
 
@@ -71,7 +74,7 @@ public class EnhancedSalesService : SaleService, IEnhancedSalesService
             PaymentMethod = PaymentMethod.Cash, // Default
             CreatedAt = DateTime.UtcNow,
             SyncStatus = SyncStatus.NotSynced,
-            DeviceId = deviceId
+            DeviceId = _currentUserService.GetDeviceId()
         };
 
         // Apply business type-specific initialization

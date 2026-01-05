@@ -709,8 +709,8 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
             var products = await _productRepository.GetProductsByShopAsync(shopId);
             var stocks = await _stockRepository.GetStockByShopAsync(shopId);
 
-            var shopRevenue = sales.Sum(s => (decimal)s.TotalAmount);
-            var shopTransactions = sales.Count;
+            var shopRevenue = sales.Sum(s => s.TotalAmount);
+            var shopTransactions = sales.Count();
             var shopProducts = ((IEnumerable<Product>)products).Count();
             var inventoryValue = stocks.Sum(s => (decimal)(s.Quantity * (s.Product?.UnitPrice ?? 0)));
 
@@ -847,8 +847,8 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
             var sales = await _saleRepository.GetSalesByShopAndDateRangeAsync(shopId, period.StartDate, period.EndDate);
             var products = await _productRepository.GetProductsByShopAsync(shopId);
 
-            var revenue = sales.Sum(s => (decimal)s.TotalAmount);
-            var transactions = sales.Count;
+            var revenue = sales.Sum(s => s.TotalAmount);
+            var transactions = sales.Count();
             var operatingHours = period.Duration.TotalHours; // Simplified
             var productCount = ((IEnumerable<Product>)products).Count();
 
@@ -1137,10 +1137,10 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
             currentSales.AddRange(currentShopSales);
             comparisonSales.AddRange(comparisonShopSales);
 
-            var currentRevenue = currentShopSales.Sum(s => (decimal)s.TotalAmount);
-            var comparisonRevenue = comparisonShopSales.Sum(s => (decimal)s.TotalAmount);
-            var currentTransactions = currentShopSales.Count;
-            var comparisonTransactions = comparisonShopSales.Count;
+            var currentRevenue = currentShopSales.Sum(s => s.TotalAmount);
+            var comparisonRevenue = comparisonShopSales.Sum(s => s.TotalAmount);
+            var currentTransactions = currentShopSales.Count();
+            var comparisonTransactions = comparisonShopSales.Count();
 
             var revenueChange = currentRevenue - comparisonRevenue;
             var revenueChangePercentage = comparisonRevenue > 0 ? (revenueChange / comparisonRevenue) * 100 : 0;
@@ -1222,8 +1222,8 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
             var stocks = await _stockRepository.GetStockByShopAsync(shopId);
 
             // Validate sales data
-            var totalSales = sales.Count;
-            var validSales = sales.Count(s => (decimal)s.TotalAmount > 0 && !string.IsNullOrEmpty(s.InvoiceNumber));
+            var totalSales = sales.Count();
+            var validSales = sales.Count(s => s.TotalAmount > 0 && !string.IsNullOrEmpty(s.InvoiceNumber));
             var invalidSales = totalSales - validSales;
 
             qualityMetrics["Sales"] = new DataQualityMetric
@@ -1414,11 +1414,11 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
             foreach (var shopId in shopIds)
             {
                 var daySales = await _saleRepository.GetSalesByShopAndDateRangeAsync(shopId, dayStart, dayEnd);
-                var shopRevenue = daySales.Sum(s => (decimal)s.TotalAmount);
+                var shopRevenue = daySales.Sum(s => s.TotalAmount);
                 
                 shopRevenues[shopId] = shopRevenue;
                 totalRevenue += shopRevenue;
-                totalTransactions += daySales.Count;
+                totalTransactions += daySales.Count();
             }
 
             dailySales.Add(new DailySalesData
