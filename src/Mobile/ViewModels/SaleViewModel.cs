@@ -273,6 +273,10 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
             item.DiscountPercentage = discount;
             await CalculateTotal();
         }
+        else
+        {
+            SetError("Invalid discount percentage");
+        }
     }
 
     private async Task PrintReceipt()
