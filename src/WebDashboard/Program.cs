@@ -29,13 +29,44 @@ builder.Services.AddHttpClient();
 // Add SignalR for real-time updates
 builder.Services.AddSignalR();
 
-// Add minimal stub services for demo purposes
+// Add shared core services for web dashboard
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? "Data Source=dashboard_pos.db";
+builder.Services.AddSharedCore(connectionString);
+
+// Add web dashboard specific services
 builder.Services.AddScoped<IDashboardApiService, DashboardApiService>();
 builder.Services.AddScoped<IBusinessApiService, BusinessApiService>();
 builder.Services.AddScoped<IUserApiService, UserApiService>();
 builder.Services.AddScoped<WebDashboard.Services.IAuthenticationService, WebDashboard.Services.AuthenticationService>();
 
 var app = builder.Build();
+
+// Initialize the web dashboard application
+try
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Initializing web dashboard with multi-business support");
+    
+    var startupService = app.Services.GetRequiredService<IMultiBusinessStartupService>();
+    var initResult = await startupService.InitializeSystemAsync();
+    
+    if (!initResult.IsSuccess)
+    {
+        logger.LogWarning("Web dashboard initialization had issues: {Errors}", string.Join(", ", initResult.Errors));
+        // Continue anyway for web dashboard
+    }
+    else
+    {
+        logger.LogInformation("Web dashboard initialized successfully in {Duration}ms", 
+            initResult.TotalInitializationTime.TotalMilliseconds);
+    }
+}
+catch (Exception ex)
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "Error during web dashboard initialization");
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
