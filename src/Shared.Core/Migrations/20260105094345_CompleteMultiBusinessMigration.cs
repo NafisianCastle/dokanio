@@ -394,7 +394,7 @@ namespace Shared.Core.Migrations
                         column: x => x.ShopId,
                         principalTable: "Shops",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Sales_Users_UserId",
                         column: x => x.UserId,
