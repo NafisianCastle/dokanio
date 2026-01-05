@@ -517,9 +517,15 @@ public class MultiTenantSyncService : IMultiTenantSyncService
 
     private async Task<SyncResult> SyncShopSpecificDataAsync(Shop shop)
     {
-        // This would use the existing sync engine but with shop-specific filtering
-        // For now, delegate to the existing sync engine
-        return await _syncEngine.SyncAllAsync();
+        // CRITICAL: Do not perform a global sync when the request is scoped to a shop.
+        // Implement shop-scoped sync in the sync engine before enabling this.
+        _logger.LogError("Shop-scoped sync is not implemented; refusing to run global sync for ShopId {ShopId}", shop.Id);
+
+        return new SyncResult
+        {
+            Success = false,
+            Message = "Shop-scoped synchronization is not implemented; refusing to run global sync."
+        };
     }
 
     private async Task<List<DataConflict>> DetectBusinessConflictsAsync(Guid businessId)
