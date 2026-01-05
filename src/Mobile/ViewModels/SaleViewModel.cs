@@ -355,7 +355,10 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
 
     private string GenerateInvoiceNumber()
     {
-        var shopPrefix = _userContextService.CurrentShop?.Name?.Substring(0, Math.Min(3, _userContextService.CurrentShop.Name.Length)).ToUpper() ?? "POS";
+        var shopName = _userContextService.CurrentShop?.Name?.Trim();
+        var shopPrefix = !string.IsNullOrEmpty(shopName)
+            ? shopName.Substring(0, Math.Min(3, shopName.Length)).ToUpperInvariant()
+            : "POS";
         return $"{shopPrefix}-{DateTime.Now:yyyyMMdd}-{DateTime.Now.Ticks % 10000:D4}";
     }
 
