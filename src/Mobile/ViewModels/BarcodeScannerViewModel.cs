@@ -206,18 +206,18 @@ public partial class BarcodeScannerViewModel : BaseViewModel
                     HasValidProduct = true;
                     ProductInfo = $"Product: {product.Name}\nPrice: ₹{product.UnitPrice:F2}";
                     ScannerStatus = "Product Found";
-                    
+
                     // Provide haptic feedback
+#if ANDROID || IOS
                     try
                     {
-#if ANDROID || IOS
-                        Microsoft.Maui.Authentication.WebAuthenticatorResult.HapticFeedback.Perform(Microsoft.Maui.Authentication.HapticFeedbackType.Click);
-#endif
+                        Microsoft.Maui.Devices.HapticFeedback.Default.Perform(Microsoft.Maui.Devices.HapticFeedbackType.Click);
                     }
                     catch
                     {
                         // Haptic feedback not available
                     }
+#endif
                 }
                 else
                 {

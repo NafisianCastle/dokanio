@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="80"
+             x:Class="Desktop.Controls.ValidationTextBox">
+  
+  <Grid RowDefinitions="Auto,Auto,Auto">
+    <!-- Label -->
+    <TextBlock Grid.Row="0" 
+               Text="{Binding Label}" 
+               FontWeight="Medium"
+               Margin="0,0,0,4"
+               IsVisible="{Binding Label, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+    
+    <!-- Input Container -->
+    <Border Grid.Row="1" 
+            BorderBrush="{Binding BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="4"
+            Background="White">
+      <Grid ColumnDefinitions="*,Auto">
+        <!-- Text Input -->
+        <TextBox Grid.Column="0"
+                 Text="{Binding Value, Mode=TwoWay}"
+                 Watermark="{Binding Placeholder}"
+                 BorderThickness="0"
+                 Background="Transparent"
+                 Padding="8,6"
+                 FontSize="14" />
+        
+        <!-- Validation Icon -->
+        <Border Grid.Column="1" 
+                Width="24" Height="24"
+                Margin="4"
+                IsVisible="{Binding ShowValidationIcon}">
+          <Path Fill="{Binding ValidationIconColor}"
+                Data="{Binding ValidationIconPath}"
+                Stretch="Uniform"
+                Width="16" Height="16" />
+        </Border>
+      </Grid>
+    </Border>
+    
+    <!-- Validation Message -->
+    <TextBlock Grid.Row="2"
+               Text="{Binding ValidationMessage}"
+               Foreground="{Binding ValidationMessageColor}"
+               FontSize="12"
+               Margin="0,4,0,0"
+               TextWrapping="Wrap"
+               IsVisible="{Binding ValidationMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+  </Grid>
+  
+</UserControl>
