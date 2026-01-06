@@ -858,8 +858,7 @@ public partial class MobileSaleTabViewModel : ObservableObject
         _logger = logger;
 
         // Create the mobile sale view model for this tab
-        // Note: In a real implementation, these services would be injected via DI
-        SaleViewModel = CreateSaleViewModelForTab(sessionData);
+        SaleViewModel = saleViewModelFactory();
         
         // Load session data into the view model
         LoadSessionDataIntoViewModel();

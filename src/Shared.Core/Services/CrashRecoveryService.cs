@@ -491,11 +491,38 @@ public class CrashRecoveryService : ICrashRecoveryService
     }
 
     // Database operations (simplified - using SaleSession as storage)
-    private IQueryable<ApplicationSession> GetApplicationSessionsAsync(Guid? userId, Guid? deviceId)
+    private async Task<List<ApplicationSession>> GetApplicationSessionsAsync(Guid? userId, Guid? deviceId)
     {
-        // In a real implementation, you'd have a dedicated ApplicationSession entity
-        // For now, we'll simulate this with a query that returns empty results
-        return new List<ApplicationSession>().AsQueryable();
+        var query = _context.SaleSessions.AsNoTracking()
+            .Where(ss => ss.TabName.StartsWith("AppSession_") && ss.SessionData != null);
+
+        if (userId.HasValue)
+        {
+            query = query.Where(ss => ss.UserId == userId.Value);
+        }
+
+        if (deviceId.HasValue)
+        {
+            query = query.Where(ss => ss.DeviceId == deviceId.Value);
+        }
+
+        var saleSessions = await query.ToListAsync();
+
+        return saleSessions
+            .Select(ss =>
+            {
+                try
+                {
+                    return JsonSerializer.Deserialize<ApplicationSession>(ss.SessionData!);
+                }
+                catch
+                {
+                    return null;
+                }
+            })
+            .Where(s => s != null)
+            .Cast<ApplicationSession>()
+            .ToList();
     }
 
     private async Task StoreApplicationSessionAsync(ApplicationSession session)
