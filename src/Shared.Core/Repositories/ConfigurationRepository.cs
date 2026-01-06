@@ -372,7 +372,8 @@ public class ConfigurationRepository : Repository<Configuration>, IConfiguration
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error setting user configuration User={UserId}, Key={Key}, Value={Value}", userId, key, value);
+            var logValue = value.Replace("\r", string.Empty).Replace("\n", string.Empty);
+            _logger.LogError(ex, "Error setting user configuration User={UserId}, Key={Key}, Value={Value}", userId, key, logValue);
             throw;
         }
     }
