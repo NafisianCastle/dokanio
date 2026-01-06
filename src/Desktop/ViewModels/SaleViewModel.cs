@@ -186,7 +186,17 @@ public partial class SaleViewModel : BaseViewModel
     {
         if (!string.IsNullOrWhiteSpace(value) && value.Length >= 10)
         {
-            _ = LookupCustomerAsync();
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await LookupCustomerAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogWarning(ex, "Failed to lookup customer");
+                }
+            });
         }
         else
         {
@@ -473,14 +483,24 @@ public partial class SaleViewModel : BaseViewModel
                 Items = SaleItems.ToList()
             };
 
-            // Update customer after purchase if available
+            // Update customer after purchase if available (fire-and-forget)
             if (_currentCustomer != null && _customerLookupService != null)
             {
-                _ = _customerLookupService.UpdateCustomerAfterPurchaseAsync(_currentCustomer.Id, Total);
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _customerLookupService.UpdateCustomerAfterPurchaseAsync(_currentCustomer.Id, Total);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.LogWarning(ex, "Failed to update customer after purchase");
+                    }
+                });
             }
             
             // Reset the form
-            ResetSale();
+            await ResetSale();
             
             // Show success message (in real app, might show receipt dialog)
             ErrorMessage = $"Sale completed successfully! Invoice: {sale.InvoiceNumber}";

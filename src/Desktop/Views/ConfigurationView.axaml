@@ -16,7 +16,7 @@
     </Grid.RowDefinitions>
 
     <!-- Header -->
-    <Border Grid.Row="0" Background="{DynamicResource SystemAccentColor}" Padding="16">
+    <Border Grid.Row="0" Background="{DynamicResource SystemAccentColor}" Padding="16,16">
       <StackPanel Orientation="Horizontal">
         <TextBlock Text="⚙️" FontSize="24" VerticalAlignment="Center" Margin="0,0,8,0" />
         <TextBlock Text="Configuration &amp; Settings" 
@@ -28,10 +28,10 @@
     </Border>
 
     <!-- Main Content -->
-    <TabView Grid.Row="1" Margin="16" SelectedIndex="{Binding SelectedTabIndex}">
+    <TabControl Grid.Row="1" Margin="16" SelectedIndex="{Binding SelectedTabIndex}">
       
       <!-- Shop Settings Tab -->
-      <TabViewItem Header="Shop Settings">
+      <TabItem Header="Shop Settings">
         <ScrollViewer>
           <StackPanel Spacing="16" Margin="16">
             
@@ -103,10 +103,10 @@
             </Expander>
           </StackPanel>
         </ScrollViewer>
-      </TabViewItem>
+      </TabItem>
 
       <!-- User Preferences Tab -->
-      <TabViewItem Header="User Preferences">
+      <TabItem Header="User Preferences">
         <ScrollViewer>
           <StackPanel Spacing="16" Margin="16">
             
@@ -172,10 +172,10 @@
             </Expander>
           </StackPanel>
         </ScrollViewer>
-      </TabViewItem>
+      </TabItem>
 
       <!-- Barcode Scanner Tab -->
-      <TabViewItem Header="Barcode Scanner">
+      <TabItem Header="Barcode Scanner">
         <ScrollViewer>
           <StackPanel Spacing="16" Margin="16">
             
@@ -226,10 +226,10 @@
             </Expander>
           </StackPanel>
         </ScrollViewer>
-      </TabViewItem>
+      </TabItem>
 
       <!-- Performance Tab -->
-      <TabViewItem Header="Performance">
+      <TabItem Header="Performance">
         <ScrollViewer>
           <StackPanel Spacing="16" Margin="16">
             
@@ -297,8 +297,8 @@
             </Expander>
           </StackPanel>
         </ScrollViewer>
-      </TabViewItem>
-    </TabView>
+      </TabItem>
+    </TabControl>
 
     <!-- Status Bar -->
     <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Padding="16,8">
@@ -318,7 +318,7 @@
             IsVisible="{Binding IsLoading}"
             ZIndex="1000">
       <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <ProgressRing IsActive="True" Width="50" Height="50" />
+        <ProgressBar IsIndeterminate="True" Width="50" Height="50" />
         <TextBlock Text="Loading..." 
                    Foreground="White" 
                    HorizontalAlignment="Center" 
