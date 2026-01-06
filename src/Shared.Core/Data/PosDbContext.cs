@@ -17,6 +17,7 @@ public class PosDbContext : DbContext
     public DbSet<Product> Products { get; set; } = null!;
     public DbSet<Sale> Sales { get; set; } = null!;
     public DbSet<SaleItem> SaleItems { get; set; } = null!;
+    public DbSet<SaleSession> SaleSessions { get; set; } = null!;
     public DbSet<Stock> Stock { get; set; } = null!;
     public DbSet<Customer> Customers { get; set; } = null!;
     public DbSet<Discount> Discounts { get; set; } = null!;
@@ -235,6 +236,53 @@ public class PosDbContext : DbContext
                   .WithMany(p => p.SaleItems)
                   .HasForeignKey(e => e.ProductId)
                   .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // SaleSession configuration
+        modelBuilder.Entity<SaleSession>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.ShopId);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.DeviceId);
+            entity.HasIndex(e => e.TabName);
+            entity.HasIndex(e => e.State);
+            entity.HasIndex(e => e.IsActive);
+            entity.HasIndex(e => e.CreatedAt);
+            entity.HasIndex(e => e.LastModified);
+            entity.HasIndex(e => e.CustomerId);
+            entity.HasIndex(e => e.SaleId);
+            
+            entity.Property(e => e.TabName).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.SessionData).HasMaxLength(4000);
+            
+            // Convert enums to integers for SQLite
+            entity.Property(e => e.PaymentMethod).HasConversion<int>();
+            entity.Property(e => e.State).HasConversion<int>();
+            
+            // Foreign key relationship with Shop
+            entity.HasOne(e => e.Shop)
+                  .WithMany()
+                  .HasForeignKey(e => e.ShopId)
+                  .OnDelete(DeleteBehavior.Cascade);
+                  
+            // Foreign key relationship with User
+            entity.HasOne(e => e.User)
+                  .WithMany()
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            
+            // Foreign key relationship with Customer (optional)
+            entity.HasOne(e => e.Customer)
+                  .WithMany()
+                  .HasForeignKey(e => e.CustomerId)
+                  .OnDelete(DeleteBehavior.SetNull);
+                  
+            // Foreign key relationship with Sale (optional)
+            entity.HasOne(e => e.Sale)
+                  .WithMany()
+                  .HasForeignKey(e => e.SaleId)
+                  .OnDelete(DeleteBehavior.SetNull);
         });
 
         // Stock configuration

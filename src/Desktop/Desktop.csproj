@@ -11,6 +11,8 @@
     <UseWindowsForms>false</UseWindowsForms>
     <ApplicationTitle>Offline POS Desktop</ApplicationTitle>
     <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+    <AssemblyName>Dokanio.Desktop</AssemblyName>
+    <AssemblyTitle>Dokanio Desktop v1.0</AssemblyTitle>
   </PropertyGroup>
 
   <ItemGroup>
