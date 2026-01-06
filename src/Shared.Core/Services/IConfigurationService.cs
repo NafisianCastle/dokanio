@@ -79,4 +79,119 @@ public interface IConfigurationService
     /// </summary>
     /// <returns>Task</returns>
     Task InitializeDefaultConfigurationsAsync();
+    
+    /// <summary>
+    /// Gets shop-level pricing settings
+    /// </summary>
+    /// <param name="shopId">Shop identifier</param>
+    /// <returns>Shop pricing settings</returns>
+    Task<ShopPricingSettings> GetShopPricingSettingsAsync(Guid shopId);
+    
+    /// <summary>
+    /// Sets shop-level pricing settings
+    /// </summary>
+    /// <param name="shopId">Shop identifier</param>
+    /// <param name="settings">Pricing settings</param>
+    /// <returns>Task</returns>
+    Task SetShopPricingSettingsAsync(Guid shopId, ShopPricingSettings settings);
+    
+    /// <summary>
+    /// Gets shop-level tax settings
+    /// </summary>
+    /// <param name="shopId">Shop identifier</param>
+    /// <returns>Shop tax settings</returns>
+    Task<ShopTaxSettings> GetShopTaxSettingsAsync(Guid shopId);
+    
+    /// <summary>
+    /// Sets shop-level tax settings
+    /// </summary>
+    /// <param name="shopId">Shop identifier</param>
+    /// <param name="settings">Tax settings</param>
+    /// <returns>Task</returns>
+    Task SetShopTaxSettingsAsync(Guid shopId, ShopTaxSettings settings);
+    
+    /// <summary>
+    /// Gets user preferences for UI customization
+    /// </summary>
+    /// <param name="userId">User identifier</param>
+    /// <returns>User preferences</returns>
+    Task<UserPreferences> GetUserPreferencesAsync(Guid userId);
+    
+    /// <summary>
+    /// Sets user preferences for UI customization
+    /// </summary>
+    /// <param name="userId">User identifier</param>
+    /// <param name="preferences">User preferences</param>
+    /// <returns>Task</returns>
+    Task SetUserPreferencesAsync(Guid userId, UserPreferences preferences);
+    
+    /// <summary>
+    /// Gets barcode scanner configuration
+    /// </summary>
+    /// <param name="deviceId">Device identifier (optional, uses current device if null)</param>
+    /// <returns>Barcode scanner settings</returns>
+    Task<BarcodeScannerSettings> GetBarcodeScannerSettingsAsync(Guid? deviceId = null);
+    
+    /// <summary>
+    /// Sets barcode scanner configuration
+    /// </summary>
+    /// <param name="settings">Barcode scanner settings</param>
+    /// <param name="deviceId">Device identifier (optional, uses current device if null)</param>
+    /// <returns>Task</returns>
+    Task SetBarcodeScannerSettingsAsync(BarcodeScannerSettings settings, Guid? deviceId = null);
+    
+    /// <summary>
+    /// Gets performance tuning settings
+    /// </summary>
+    /// <returns>Performance settings</returns>
+    Task<PerformanceSettings> GetPerformanceSettingsAsync();
+    
+    /// <summary>
+    /// Sets performance tuning settings
+    /// </summary>
+    /// <param name="settings">Performance settings</param>
+    /// <returns>Task</returns>
+    Task SetPerformanceSettingsAsync(PerformanceSettings settings);
+    
+    /// <summary>
+    /// Gets configuration by shop and key
+    /// </summary>
+    /// <typeparam name="T">Type to convert the value to</typeparam>
+    /// <param name="shopId">Shop identifier</param>
+    /// <param name="key">Configuration key</param>
+    /// <param name="defaultValue">Default value if configuration not found</param>
+    /// <returns>Configuration value or default</returns>
+    Task<T> GetShopConfigurationAsync<T>(Guid shopId, string key, T defaultValue = default!);
+    
+    /// <summary>
+    /// Sets configuration by shop and key
+    /// </summary>
+    /// <typeparam name="T">Type of the value</typeparam>
+    /// <param name="shopId">Shop identifier</param>
+    /// <param name="key">Configuration key</param>
+    /// <param name="value">Configuration value</param>
+    /// <param name="description">Optional description</param>
+    /// <returns>Task</returns>
+    Task SetShopConfigurationAsync<T>(Guid shopId, string key, T value, string? description = null);
+    
+    /// <summary>
+    /// Gets configuration by user and key
+    /// </summary>
+    /// <typeparam name="T">Type to convert the value to</typeparam>
+    /// <param name="userId">User identifier</param>
+    /// <param name="key">Configuration key</param>
+    /// <param name="defaultValue">Default value if configuration not found</param>
+    /// <returns>Configuration value or default</returns>
+    Task<T> GetUserConfigurationAsync<T>(Guid userId, string key, T defaultValue = default!);
+    
+    /// <summary>
+    /// Sets configuration by user and key
+    /// </summary>
+    /// <typeparam name="T">Type of the value</typeparam>
+    /// <param name="userId">User identifier</param>
+    /// <param name="key">Configuration key</param>
+    /// <param name="value">Configuration value</param>
+    /// <param name="description">Optional description</param>
+    /// <returns>Task</returns>
+    Task SetUserConfigurationAsync<T>(Guid userId, string key, T value, string? description = null);
 }

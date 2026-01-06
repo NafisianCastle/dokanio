@@ -1,0 +1,329 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Desktop.ViewModels"
+             x:Class="Desktop.Views.ConfigurationView"
+             x:DataType="vm:ConfigurationViewModel">
+
+  <Design.DataContext>
+    <vm:ConfigurationViewModel />
+  </Design.DataContext>
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <!-- Header -->
+    <Border Grid.Row="0" Background="{DynamicResource SystemAccentColor}" Padding="16">
+      <StackPanel Orientation="Horizontal">
+        <TextBlock Text="⚙️" FontSize="24" VerticalAlignment="Center" Margin="0,0,8,0" />
+        <TextBlock Text="Configuration &amp; Settings" 
+                   FontSize="20" 
+                   FontWeight="Bold" 
+                   Foreground="White"
+                   VerticalAlignment="Center" />
+      </StackPanel>
+    </Border>
+
+    <!-- Main Content -->
+    <TabView Grid.Row="1" Margin="16" SelectedIndex="{Binding SelectedTabIndex}">
+      
+      <!-- Shop Settings Tab -->
+      <TabViewItem Header="Shop Settings">
+        <ScrollViewer>
+          <StackPanel Spacing="16" Margin="16">
+            
+            <!-- Pricing Settings -->
+            <Expander Header="Pricing Settings" IsExpanded="True">
+              <StackPanel Spacing="12" Margin="16">
+                <CheckBox Content="Enable Weight-Based Pricing" 
+                          IsChecked="{Binding ShopPricingSettings.WeightBasedPricingEnabled}" />
+                <CheckBox Content="Enable Bulk Discounts" 
+                          IsChecked="{Binding ShopPricingSettings.BulkDiscountEnabled}" />
+                
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,8">
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="Bulk Discount Threshold:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                  <NumericUpDown Grid.Row="0" Grid.Column="1" Value="{Binding ShopPricingSettings.BulkDiscountThreshold}" 
+                                 Minimum="1" Maximum="1000" Increment="1" />
+                  
+                  <TextBlock Grid.Row="1" Grid.Column="0" Text="Bulk Discount %:" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding ShopPricingSettings.BulkDiscountPercentage}" 
+                                 Minimum="0" Maximum="100" Increment="0.1" Margin="0,8,0,0" />
+                  
+                  <TextBlock Grid.Row="2" Grid.Column="0" Text="Min Profit Margin %:" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding ShopPricingSettings.MinimumProfitMargin}" 
+                                 Minimum="0" Maximum="100" Increment="0.1" Margin="0,8,0,0" />
+                  
+                  <TextBlock Grid.Row="3" Grid.Column="0" Text="Rounding Precision:" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding ShopPricingSettings.RoundingPrecision}" 
+                                 Minimum="0.01" Maximum="1" Increment="0.01" Margin="0,8,0,0" />
+                </Grid>
+                
+                <CheckBox Content="Enable Membership Pricing" 
+                          IsChecked="{Binding ShopPricingSettings.MembershipPricingEnabled}" />
+                <CheckBox Content="Enable Dynamic Pricing" 
+                          IsChecked="{Binding ShopPricingSettings.DynamicPricingEnabled}" />
+                <CheckBox Content="Enable Price Rounding" 
+                          IsChecked="{Binding ShopPricingSettings.RoundingEnabled}" />
+                
+                <Button Content="Save Pricing Settings" 
+                        Command="{Binding SaveShopPricingCommand}"
+                        HorizontalAlignment="Left" />
+              </StackPanel>
+            </Expander>
+
+            <!-- Tax Settings -->
+            <Expander Header="Tax Settings" IsExpanded="True">
+              <StackPanel Spacing="12" Margin="16">
+                <CheckBox Content="Enable Tax Calculation" 
+                          IsChecked="{Binding ShopTaxSettings.TaxEnabled}" />
+                
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" Margin="0,8">
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="Default Tax Rate %:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                  <NumericUpDown Grid.Row="0" Grid.Column="1" Value="{Binding ShopTaxSettings.DefaultTaxRate}" 
+                                 Minimum="0" Maximum="100" Increment="0.1" />
+                  
+                  <TextBlock Grid.Row="1" Grid.Column="0" Text="Tax Name:" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ShopTaxSettings.TaxName}" Margin="0,8,0,0" />
+                </Grid>
+                
+                <CheckBox Content="Tax Included in Price" 
+                          IsChecked="{Binding ShopTaxSettings.TaxIncludedInPrice}" />
+                <CheckBox Content="Show Tax on Receipt" 
+                          IsChecked="{Binding ShopTaxSettings.ShowTaxOnReceipt}" />
+                <CheckBox Content="Enable Compound Tax" 
+                          IsChecked="{Binding ShopTaxSettings.CompoundTaxEnabled}" />
+                
+                <Button Content="Save Tax Settings" 
+                        Command="{Binding SaveShopTaxCommand}"
+                        HorizontalAlignment="Left" />
+              </StackPanel>
+            </Expander>
+          </StackPanel>
+        </ScrollViewer>
+      </TabViewItem>
+
+      <!-- User Preferences Tab -->
+      <TabViewItem Header="User Preferences">
+        <ScrollViewer>
+          <StackPanel Spacing="16" Margin="16">
+            
+            <!-- Appearance Settings -->
+            <Expander Header="Appearance" IsExpanded="True">
+              <StackPanel Spacing="12" Margin="16">
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,8">
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="Theme:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                  <ComboBox Grid.Row="0" Grid.Column="1" 
+                            ItemsSource="{Binding AvailableThemes}"
+                            SelectedItem="{Binding UserPreferences.Theme}" />
+                  
+                  <TextBlock Grid.Row="1" Grid.Column="0" Text="Accent Color:" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding UserPreferences.AccentColor}" Margin="0,8,0,0" />
+                  
+                  <TextBlock Grid.Row="2" Grid.Column="0" Text="Font Family:" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <ComboBox Grid.Row="2" Grid.Column="1" 
+                            ItemsSource="{Binding AvailableFontFamilies}"
+                            SelectedItem="{Binding UserPreferences.FontFamily}" Margin="0,8,0,0" />
+                  
+                  <TextBlock Grid.Row="3" Grid.Column="0" Text="Font Size:" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding UserPreferences.FontSize}" 
+                                 Minimum="8" Maximum="24" Increment="1" Margin="0,8,0,0" />
+                </Grid>
+                
+                <CheckBox Content="High Contrast Mode" 
+                          IsChecked="{Binding UserPreferences.HighContrastMode}" />
+                <CheckBox Content="Reduced Motion" 
+                          IsChecked="{Binding UserPreferences.ReducedMotion}" />
+              </StackPanel>
+            </Expander>
+
+            <!-- Behavior Settings -->
+            <Expander Header="Behavior" IsExpanded="True">
+              <StackPanel Spacing="12" Margin="16">
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" Margin="0,8">
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="Default View:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                  <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding UserPreferences.DefaultView}" />
+                  
+                  <TextBlock Grid.Row="1" Grid.Column="0" Text="Auto-Save Interval (sec):" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding UserPreferences.AutoSaveInterval}" 
+                                 Minimum="10" Maximum="300" Increment="5" Margin="0,8,0,0" />
+                  
+                  <TextBlock Grid.Row="2" Grid.Column="0" Text="Language:" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <ComboBox Grid.Row="2" Grid.Column="1" 
+                            ItemsSource="{Binding AvailableLanguages}"
+                            SelectedItem="{Binding UserPreferences.Language}" Margin="0,8,0,0" />
+                </Grid>
+                
+                <CheckBox Content="Show Tooltips" 
+                          IsChecked="{Binding UserPreferences.ShowTooltips}" />
+                <CheckBox Content="Enable Auto-Save" 
+                          IsChecked="{Binding UserPreferences.AutoSaveEnabled}" />
+                <CheckBox Content="Enable Sound Effects" 
+                          IsChecked="{Binding UserPreferences.SoundEnabled}" />
+                <CheckBox Content="Enable Haptic Feedback" 
+                          IsChecked="{Binding UserPreferences.HapticFeedbackEnabled}" />
+                
+                <Button Content="Save User Preferences" 
+                        Command="{Binding SaveUserPreferencesCommand}"
+                        HorizontalAlignment="Left" />
+              </StackPanel>
+            </Expander>
+          </StackPanel>
+        </ScrollViewer>
+      </TabViewItem>
+
+      <!-- Barcode Scanner Tab -->
+      <TabViewItem Header="Barcode Scanner">
+        <ScrollViewer>
+          <StackPanel Spacing="16" Margin="16">
+            
+            <!-- Scanner Configuration -->
+            <Expander Header="Scanner Configuration" IsExpanded="True">
+              <StackPanel Spacing="12" Margin="16">
+                <CheckBox Content="Enable Barcode Scanner" 
+                          IsChecked="{Binding BarcodeScannerSettings.ScannerEnabled}" />
+                
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,8">
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="Scanner Type:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                  <ComboBox Grid.Row="0" Grid.Column="1" 
+                            ItemsSource="{Binding AvailableScannerTypes}"
+                            SelectedItem="{Binding BarcodeScannerSettings.ScannerType}" />
+                  
+                  <TextBlock Grid.Row="1" Grid.Column="0" Text="Scan Timeout (sec):" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding BarcodeScannerSettings.ScanTimeoutSeconds}" 
+                                 Minimum="1" Maximum="60" Increment="1" Margin="0,8,0,0" />
+                  
+                  <TextBlock Grid.Row="2" Grid.Column="0" Text="Scan Region:" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <ComboBox Grid.Row="2" Grid.Column="1" 
+                            ItemsSource="{Binding AvailableScanRegions}"
+                            SelectedItem="{Binding BarcodeScannerSettings.ScanRegion}" Margin="0,8,0,0" />
+                  
+                  <TextBlock Grid.Row="3" Grid.Column="0" Text="Overlay Color:" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding BarcodeScannerSettings.OverlayColor}" Margin="0,8,0,0" />
+                </Grid>
+                
+                <CheckBox Content="Enable Auto Focus" 
+                          IsChecked="{Binding BarcodeScannerSettings.AutoFocusEnabled}" />
+                <CheckBox Content="Enable Flashlight" 
+                          IsChecked="{Binding BarcodeScannerSettings.FlashlightEnabled}" />
+                <CheckBox Content="Beep on Scan" 
+                          IsChecked="{Binding BarcodeScannerSettings.BeepOnScanEnabled}" />
+                <CheckBox Content="Vibrate on Scan" 
+                          IsChecked="{Binding BarcodeScannerSettings.VibrateOnScanEnabled}" />
+                <CheckBox Content="Continuous Scan Mode" 
+                          IsChecked="{Binding BarcodeScannerSettings.ContinuousScanMode}" />
+                <CheckBox Content="Show Scan Overlay" 
+                          IsChecked="{Binding BarcodeScannerSettings.ShowScanOverlay}" />
+                <CheckBox Content="Validate Checksum" 
+                          IsChecked="{Binding BarcodeScannerSettings.ValidateChecksum}" />
+                
+                <Button Content="Save Scanner Settings" 
+                        Command="{Binding SaveBarcodeScannerCommand}"
+                        HorizontalAlignment="Left" />
+              </StackPanel>
+            </Expander>
+          </StackPanel>
+        </ScrollViewer>
+      </TabViewItem>
+
+      <!-- Performance Tab -->
+      <TabViewItem Header="Performance">
+        <ScrollViewer>
+          <StackPanel Spacing="16" Margin="16">
+            
+            <!-- Database Settings -->
+            <Expander Header="Database Settings" IsExpanded="True">
+              <StackPanel Spacing="12" Margin="16">
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" Margin="0,8">
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="Connection Pool Size:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                  <NumericUpDown Grid.Row="0" Grid.Column="1" Value="{Binding PerformanceSettings.DatabaseConnectionPoolSize}" 
+                                 Minimum="1" Maximum="100" Increment="1" />
+                  
+                  <TextBlock Grid.Row="1" Grid.Column="0" Text="Command Timeout (sec):" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding PerformanceSettings.DatabaseCommandTimeoutSeconds}" 
+                                 Minimum="5" Maximum="300" Increment="5" Margin="0,8,0,0" />
+                  
+                  <TextBlock Grid.Row="2" Grid.Column="0" Text="Page Size:" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding PerformanceSettings.PageSize}" 
+                                 Minimum="10" Maximum="1000" Increment="10" Margin="0,8,0,0" />
+                </Grid>
+                
+                <CheckBox Content="Enable Query Caching" 
+                          IsChecked="{Binding PerformanceSettings.DatabaseQueryCachingEnabled}" />
+                <CheckBox Content="Enable Lazy Loading" 
+                          IsChecked="{Binding PerformanceSettings.LazyLoadingEnabled}" />
+              </StackPanel>
+            </Expander>
+
+            <!-- Cache Settings -->
+            <Expander Header="Cache Settings" IsExpanded="True">
+              <StackPanel Spacing="12" Margin="16">
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" Margin="0,8">
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="Cache Expiration (min):" VerticalAlignment="Center" Margin="0,0,8,0" />
+                  <NumericUpDown Grid.Row="0" Grid.Column="1" Value="{Binding PerformanceSettings.CacheExpirationMinutes}" 
+                                 Minimum="1" Maximum="1440" Increment="1" />
+                  
+                  <TextBlock Grid.Row="1" Grid.Column="0" Text="Max Cache Size (MB):" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding PerformanceSettings.MaxCacheSize}" 
+                                 Minimum="10" Maximum="1000" Increment="10" Margin="0,8,0,0" />
+                </Grid>
+              </StackPanel>
+            </Expander>
+
+            <!-- Memory Settings -->
+            <Expander Header="Memory Settings" IsExpanded="True">
+              <StackPanel Spacing="12" Margin="16">
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" Margin="0,8">
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="GC Threshold (MB):" VerticalAlignment="Center" Margin="0,0,8,0" />
+                  <NumericUpDown Grid.Row="0" Grid.Column="1" Value="{Binding PerformanceSettings.GarbageCollectionThresholdMB}" 
+                                 Minimum="10" Maximum="1000" Increment="10" />
+                  
+                  <TextBlock Grid.Row="1" Grid.Column="0" Text="UI Update Throttle (ms):" VerticalAlignment="Center" Margin="0,8,8,0" />
+                  <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding PerformanceSettings.UIUpdateThrottleMs}" 
+                                 Minimum="50" Maximum="1000" Increment="50" Margin="0,8,0,0" />
+                </Grid>
+                
+                <CheckBox Content="Enable Memory Optimization" 
+                          IsChecked="{Binding PerformanceSettings.MemoryOptimizationEnabled}" />
+                <CheckBox Content="Preload Critical Data" 
+                          IsChecked="{Binding PerformanceSettings.PreloadCriticalData}" />
+                
+                <Button Content="Save Performance Settings" 
+                        Command="{Binding SavePerformanceCommand}"
+                        HorizontalAlignment="Left" />
+              </StackPanel>
+            </Expander>
+          </StackPanel>
+        </ScrollViewer>
+      </TabViewItem>
+    </TabView>
+
+    <!-- Status Bar -->
+    <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}" Padding="16,8">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" VerticalAlignment="Center" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+          <Button Content="Reset to Defaults" Command="{Binding ResetToDefaultsCommand}" />
+          <Button Content="Initialize Defaults" Command="{Binding InitializeDefaultsCommand}" />
+          <Button Content="Reload" Command="{Binding LoadConfigurationsCommand}" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- Loading Overlay -->
+    <Border Grid.RowSpan="3" 
+            Background="#80000000" 
+            IsVisible="{Binding IsLoading}"
+            ZIndex="1000">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+        <ProgressRing IsActive="True" Width="50" Height="50" />
+        <TextBlock Text="Loading..." 
+                   Foreground="White" 
+                   HorizontalAlignment="Center" 
+                   Margin="0,8,0,0" />
+      </StackPanel>
+    </Border>
+  </Grid>
+</UserControl>

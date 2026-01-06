@@ -45,6 +45,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICustomerLookupService, CustomerLookupService>();
         services.AddScoped<IValidationService, ValidationService>();
         services.AddScoped<IConfigurationService, ConfigurationService>();
+        services.AddScoped<IConfigurationManagementService, ConfigurationManagementService>();
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IIntegratedPosService, IntegratedPosService>();
         services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
@@ -249,6 +250,7 @@ public static class ServiceCollectionExtensions
         // Register additional services for testing
         services.AddScoped<IDiscountManagementService, DiscountManagementService>();
         services.AddScoped<IConfigurationService, ConfigurationService>();
+        services.AddScoped<IConfigurationManagementService, ConfigurationManagementService>();
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IIntegratedPosService, IntegratedPosService>();
         services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
