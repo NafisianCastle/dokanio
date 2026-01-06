@@ -33,6 +33,7 @@ public static class ServiceCollectionExtensions
         // Register business logic services
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IEnhancedSalesService, EnhancedSalesService>();
+        services.AddScoped<IMultiTabSalesManager, MultiTabSalesManager>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IEnhancedInventoryService, EnhancedInventoryService>();
         services.AddScoped<IProductService, ProductService>();
@@ -58,6 +59,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ISaleRepository, SaleRepository>();
         services.AddScoped<ISaleItemRepository, SaleItemRepository>();
+        services.AddScoped<ISaleSessionRepository, SaleSessionRepository>();
         services.AddScoped<IStockRepository, StockRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
@@ -195,6 +197,7 @@ public static class ServiceCollectionExtensions
         // Register business logic services
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IEnhancedSalesService, EnhancedSalesService>();
+        services.AddScoped<IMultiTabSalesManager, MultiTabSalesManager>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IEnhancedInventoryService, EnhancedInventoryService>();
         services.AddScoped<IProductService, ProductService>();
@@ -209,6 +212,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ISaleRepository, SaleRepository>();
         services.AddScoped<ISaleItemRepository, SaleItemRepository>();
+        services.AddScoped<ISaleSessionRepository, SaleSessionRepository>();
         services.AddScoped<IStockRepository, StockRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IDiscountRepository, DiscountRepository>();
