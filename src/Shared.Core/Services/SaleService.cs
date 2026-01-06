@@ -421,7 +421,7 @@ public class SaleService : ISaleService
             }
 
             // Add new applied discounts
-            foreach (var appliedDiscount in discountResult.AppliedDiscounts)
+            foreach (var appliedDiscount in discountResult.AppliedDiscounts ?? Enumerable.Empty<AppliedDiscount>())
             {
                 var saleDiscount = new SaleDiscount
                 {
