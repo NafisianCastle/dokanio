@@ -31,7 +31,7 @@ public static class MauiProgram
         // Register Mobile-specific services
         builder.Services.AddSingleton<BackgroundSyncService>();
         builder.Services.AddSingleton<IUserContextService, UserContextService>();
-        builder.Services.AddScoped<GlobalExceptionHandlerService>();
+        builder.Services.AddSingleton<GlobalExceptionHandlerService>();
 
         // Register ViewModels
         builder.Services.AddTransient<MainViewModel>();
