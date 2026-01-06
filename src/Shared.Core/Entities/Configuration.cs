@@ -48,6 +48,16 @@ public class Configuration : ISoftDeletable
     public Guid DeviceId { get; set; }
     
     /// <summary>
+    /// Shop that owns this configuration (null for system-level configs)
+    /// </summary>
+    public Guid? ShopId { get; set; }
+    
+    /// <summary>
+    /// User that owns this configuration (null for system/shop-level configs)
+    /// </summary>
+    public Guid? UserId { get; set; }
+    
+    /// <summary>
     /// Last time this configuration was synced to server
     /// </summary>
     public DateTime? ServerSyncedAt { get; set; }
