@@ -121,7 +121,7 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
             // Provide haptic feedback
             TriggerHapticFeedback();
 
-            _logger.LogInformation("Created new mobile sale tab: {TabName}", tabName);
+            _logger.LogInformation("Created new mobile sale tab.");
         }
         catch (Exception ex)
         {

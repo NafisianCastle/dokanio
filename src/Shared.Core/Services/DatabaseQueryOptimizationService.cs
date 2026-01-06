@@ -498,8 +498,12 @@ public class DatabaseQueryOptimizationService : IDatabaseQueryOptimizationServic
                     })
                     .ToListAsync();
 
-                _logger.LogDebug("Customer mobile lookup completed: {Count} customers found for {MobileNumber}", 
-                    customers.Count, mobileNumber);
+
+
+
+
+                _logger.LogDebug("Customer mobile lookup completed: {Count} customers found",
+                    customers.Count);
 
                 return customers;
             }, TimeSpan.FromMinutes(10));

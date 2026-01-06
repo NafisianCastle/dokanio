@@ -175,7 +175,7 @@ public partial class ValidationTextBox : UserControl
         _validationTimer.AutoReset = false;
 
         // Subscribe to value changes
-        ValueProperty.Changed.AddClassHandler<ValidationTextBox>(OnValueChanged);
+        this.GetObservable(ValueProperty).Subscribe(OnValueChanged);
     }
 
     private void OnValueChanged(ValidationTextBox sender, AvaloniaPropertyChangedEventArgs e)
