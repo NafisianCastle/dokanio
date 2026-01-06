@@ -8,6 +8,8 @@ using Shared.Core.DTOs;
 using Mobile.Services;
 using System.Globalization;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Media;
+using CommunityToolkit.Maui.Media;
 
 namespace Mobile.ViewModels;
 
@@ -99,7 +101,7 @@ public partial class EnhancedMobileSaleViewModel : SaleViewModel
             Id = "voice_search",
             Title = "Voice",
             Icon = "mic_icon",
-            Command = VoiceSearchCommand,
+            Command = VoiceSearchEnhancedCommand,
             IsEnabled = EnableVoiceInput
         });
 
@@ -132,7 +134,7 @@ public partial class EnhancedMobileSaleViewModel : SaleViewModel
     }
 
     [RelayCommand]
-    private async Task VoiceSearch()
+    private async Task VoiceSearchEnhanced()
     {
         if (!EnableVoiceInput)
         {
@@ -146,8 +148,8 @@ public partial class EnhancedMobileSaleViewModel : SaleViewModel
             VoiceInputStatus = "Listening...";
             TriggerHapticFeedback(HapticFeedbackType.Click);
 
-            var isAvailable = await SpeechToText.Default.GetAvailabilityAsync();
-            if (isAvailable != SpeechToTextAuthorizationStatus.Authorized)
+            var isAvailable = await Microsoft.Maui.ApplicationModel.Permissions.RequestAsync<Microsoft.Maui.ApplicationModel.Permissions.Microphone>();
+            if (isAvailable != PermissionStatus.Granted)
             {
                 SetError("Voice input permission not granted");
                 VoiceInputStatus = "Permission denied";
@@ -259,15 +261,15 @@ public partial class EnhancedMobileSaleViewModel : SaleViewModel
         return string.Join(" ", productWords);
     }
 
-    private async Task SearchAndAddProduct(string searchTerm)
+    private new async Task SearchAndAddProduct(string searchTerm)
     {
         try
         {
-            var products = await _productService.SearchProductsAsync(searchTerm, 5);
+            var products = await _productService.SearchProductsAsync(searchTerm);
             
             if (products.Any())
             {
-                if (products.Count == 1)
+                if (products.Count() == 1)
                 {
                     await AddProduct(products.First());
                     VoiceInputStatus = $"Added: {products.First().Name}";
@@ -418,7 +420,7 @@ public partial class EnhancedMobileSaleViewModel : SaleViewModel
                 await LookupCustomer();
                 break;
             case "Voice Search":
-                await VoiceSearch();
+                await VoiceSearchEnhanced();
                 break;
         }
     }
@@ -476,7 +478,7 @@ public partial class EnhancedMobileSaleViewModel : SaleViewModel
         }
     }
 
-    private async Task ShowMobileSettings()
+    private new async Task ShowMobileSettings()
     {
         var settings = new[]
         {
@@ -542,8 +544,7 @@ public partial class EnhancedMobileSaleViewModel : SaleViewModel
         await Shell.Current.DisplayAlert("Help", helpText, "OK");
     }
 
-    [RelayCommand]
-    private async Task ToggleOneHandedMode()
+    private new async Task ToggleOneHandedMode()
     {
         IsOneHandedMode = !IsOneHandedMode;
         TriggerHapticFeedback(HapticFeedbackType.Click);
@@ -620,7 +621,7 @@ public partial class EnhancedMobileSaleViewModel : SaleViewModel
         _lastInteraction = DateTime.UtcNow;
     }
 
-    public override void Dispose()
+    public new void Dispose()
     {
         StopAutoSave();
         base.Dispose();

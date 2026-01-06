@@ -1008,7 +1008,7 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
             {
                 TrendName = "Strong Growth",
                 Description = $"Sales have shown strong growth of {trendStrength:F1}% over the analysis period",
-                Direction = TrendDirection.Increasing,
+                Direction = Shared.Core.DTOs.TrendDirection.Increasing,
                 Strength = trendStrength,
                 ImpactValue = trendPoints.Last().Revenue - trendPoints.First().Revenue,
                 Factors = new List<string> { "Increased customer demand", "Effective marketing", "Product popularity" }
@@ -1190,7 +1190,7 @@ public class DashboardDataAggregationService : IDashboardDataAggregationService
             {
                 Title = totalRevenueChangePercentage > 0 ? "Significant Revenue Growth" : "Revenue Decline",
                 Description = $"Revenue has {(totalRevenueChangePercentage > 0 ? "increased" : "decreased")} by {Math.Abs(totalRevenueChangePercentage):F1}% compared to the previous period",
-                Type = totalRevenueChangePercentage > 0 ? InsightType.Performance : InsightType.Risk,
+                Type = totalRevenueChangePercentage > 0 ? Shared.Core.DTOs.InsightType.Performance : Shared.Core.DTOs.InsightType.Risk,
                 ImpactValue = Math.Abs(totalRevenueChange)
             });
         }

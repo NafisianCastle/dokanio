@@ -67,7 +67,7 @@ public class DiscountService : IDiscountService
 
                 if (discountAmount > 0)
                 {
-                    var appliedDiscount = new AppliedDiscount
+                    var appliedDiscount = new Shared.Core.DTOs.AppliedDiscount
                     {
                         DiscountId = discount.Id,
                         DiscountName = discount.Name,
@@ -79,7 +79,7 @@ public class DiscountService : IDiscountService
 
                     result.AppliedDiscounts.Add(appliedDiscount);
                     result.TotalDiscountAmount += discountAmount;
-                    result.DiscountReasons.Add(appliedDiscount.Reason);
+                    result.DiscountReasons.Add(GenerateDiscountReason(discount, saleItem, customer));
                 }
             }
         }

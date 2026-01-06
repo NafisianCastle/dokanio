@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using Shared.Core.Enums;
 
 namespace Shared.Core.Services;
 
@@ -143,15 +144,17 @@ public class SystemHealthMonitoringService : ISystemHealthMonitoringService, IDi
             return new SystemHealthResult
             {
                 IsHealthy = false,
-                Issues = new List<HealthIssue>
+                Issues = new List<SystemHealthIssue>
                 {
-                    new HealthIssue
+                    new SystemHealthIssue
                     {
+                        Type = "SystemFailure",
                         Category = "System",
                         Description = $"Health check failed: {ex.Message}",
                         Severity = HealthSeverity.Critical
                     }
-                }
+                },
+                CheckTimestamp = DateTime.UtcNow
             };
         }
     }
@@ -240,7 +243,15 @@ public class SystemHealthMonitoringService : ISystemHealthMonitoringService, IDi
                 Configuration = GetSystemConfiguration(),
                 RecentErrors = await GetRecentErrorsAsync(),
                 PerformanceMetrics = await GetPerformanceMetricsAsync(),
-                CurrentIssues = (await GetCurrentHealthStatusAsync()).Issues
+                CurrentIssues = (await GetCurrentHealthStatusAsync()).Issues.Select(issue => new HealthIssue
+                {
+                    IssueType = issue.Type,
+                    Component = issue.Category,
+                    Description = issue.Description,
+                    Severity = ConvertHealthSeverityToIssueSeverity(issue.Severity),
+                    DetectedAt = DateTime.UtcNow,
+                    RecommendedAction = "Review and address this issue"
+                }).ToList()
             };
 
             // Add additional diagnostic information
@@ -259,6 +270,18 @@ public class SystemHealthMonitoringService : ISystemHealthMonitoringService, IDi
                 RecentErrors = new List<string> { $"Diagnostic collection failed: {ex.Message}" }
             };
         }
+    }
+
+    private static IssueSeverity ConvertHealthSeverityToIssueSeverity(HealthSeverity healthSeverity)
+    {
+        return healthSeverity switch
+        {
+            HealthSeverity.Low => IssueSeverity.Low,
+            HealthSeverity.Medium => IssueSeverity.Medium,
+            HealthSeverity.High => IssueSeverity.High,
+            HealthSeverity.Critical => IssueSeverity.Critical,
+            _ => IssueSeverity.Medium
+        };
     }
 
     /// <summary>
@@ -298,7 +321,15 @@ public class SystemHealthMonitoringService : ISystemHealthMonitoringService, IDi
             {
                 CriticalHealthIssueDetected?.Invoke(this, new CriticalHealthIssueEventArgs
                 {
-                    Issue = issue,
+                    Issue = new HealthIssue
+                    {
+                        IssueType = issue.Type,
+                        Component = issue.Category,
+                        Description = issue.Description,
+                        Severity = ConvertHealthSeverityToIssueSeverity(issue.Severity),
+                        DetectedAt = DateTime.UtcNow,
+                        RecommendedAction = "Immediate attention required"
+                    },
                     RequiresImmediateAttention = true
                 });
             }

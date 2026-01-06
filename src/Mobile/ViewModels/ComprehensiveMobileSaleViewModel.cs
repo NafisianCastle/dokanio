@@ -163,7 +163,7 @@ public partial class ComprehensiveMobileSaleViewModel : SaleViewModel
     private void InitializeMobileFeatures()
     {
         // Detect device characteristics
-        var deviceInfo = DeviceInfo.Current;
+        var deviceInfo = Microsoft.Maui.Devices.DeviceInfo.Current;
         var displayInfo = DeviceDisplay.Current.MainDisplayInfo;
         
         // Enable one-handed mode for smaller screens
@@ -196,58 +196,56 @@ public partial class ComprehensiveMobileSaleViewModel : SaleViewModel
         StartSyncTimer();
     }
 
-    [RelayCommand]
-    private async Task HandleSwipeLeft()
+    private async Task HandleSettingToggle(string? selectedSetting)
     {
-        if (!EnableSwipeGestures) return;
-        
-        TriggerHapticFeedback(HapticFeedbackType.Click);
-        
-        // Swipe left to show quick actions or next tab
-        await ShowQuickActionsMenu();
-    }
+        if (string.IsNullOrEmpty(selectedSetting)) return;
 
-    [RelayCommand]
-    private async Task HandleSwipeRight()
-    {
-        if (!EnableSwipeGestures) return;
-        
-        TriggerHapticFeedback(HapticFeedbackType.Click);
-        
-        // Swipe right to show customer lookup
-        if (IsCustomerLookupEnabled)
+        if (selectedSetting.Contains("Haptic Feedback"))
         {
-            await LookupCustomer();
+            await ToggleHapticFeedback();
         }
-    }
-
-    [RelayCommand]
-    private async Task HandleSwipeUp()
-    {
-        if (!EnableSwipeGestures) return;
-        
-        TriggerHapticFeedback(HapticFeedbackType.Click);
-        
-        // Swipe up to complete sale if possible
-        if (CanCompleteSale)
+        else if (selectedSetting.Contains("Voice Input"))
         {
-            await CompleteSale();
+            EnableVoiceInput = !EnableVoiceInput;
+            UpdateQuickActionState("voice_search", EnableVoiceInput);
+            TriggerHapticFeedback(HapticFeedbackType.Click);
         }
-        else
+        else if (selectedSetting.Contains("Gesture Navigation"))
         {
-            await ShowQuickActionsMenu();
+            EnableGestureNavigation = !EnableGestureNavigation;
+            TriggerHapticFeedback(HapticFeedbackType.Click);
         }
-    }
-
-    [RelayCommand]
-    private async Task HandleSwipeDown()
-    {
-        if (!EnableSwipeGestures) return;
-        
-        TriggerHapticFeedback(HapticFeedbackType.Click);
-        
-        // Swipe down to refresh or minimize
-        await RefreshData();
+        else if (selectedSetting.Contains("One-Handed Mode"))
+        {
+            await ToggleOneHandedModeComprehensive();
+        }
+        else if (selectedSetting.Contains("Compact Mode"))
+        {
+            await ToggleCompactMode();
+        }
+        else if (selectedSetting.Contains("Auto Save"))
+        {
+            EnableAutoSave = !EnableAutoSave;
+            if (EnableAutoSave)
+            {
+                StartAutoSave();
+            }
+            else
+            {
+                StopAutoSave();
+            }
+            TriggerHapticFeedback(HapticFeedbackType.Click);
+        }
+        else if (selectedSetting.Contains("Shake to Refresh"))
+        {
+            EnableShakeToRefresh = !EnableShakeToRefresh;
+            TriggerHapticFeedback(HapticFeedbackType.Click);
+        }
+        else if (selectedSetting.Contains("Pinch to Zoom"))
+        {
+            EnablePinchToZoom = !EnablePinchToZoom;
+            TriggerHapticFeedback(HapticFeedbackType.Click);
+        }
     }
 
     [RelayCommand]
@@ -302,7 +300,7 @@ public partial class ComprehensiveMobileSaleViewModel : SaleViewModel
     }
 
     [RelayCommand]
-    private async Task ToggleOneHandedMode()
+    private async Task ToggleOneHandedModeComprehensive()
     {
         IsOneHandedMode = !IsOneHandedMode;
         TriggerHapticFeedback(HapticFeedbackType.Click);
@@ -329,82 +327,6 @@ public partial class ComprehensiveMobileSaleViewModel : SaleViewModel
             "Compact Mode", 
             IsCompactMode ? "Compact mode enabled" : "Compact mode disabled", 
             "OK");
-    }
-
-    [RelayCommand]
-    private async Task ShowMobileSettings()
-    {
-        var settings = new[]
-        {
-            $"Haptic Feedback: {(EnableHapticFeedback ? "On" : "Off")}",
-            $"Voice Input: {(EnableVoiceInput ? "On" : "Off")}",
-            $"Gesture Navigation: {(EnableGestureNavigation ? "On" : "Off")}",
-            $"One-Handed Mode: {(IsOneHandedMode ? "On" : "Off")}",
-            $"Compact Mode: {(IsCompactMode ? "On" : "Off")}",
-            $"Auto Save: {(EnableAutoSave ? "On" : "Off")}",
-            $"Shake to Refresh: {(EnableShakeToRefresh ? "On" : "Off")}",
-            $"Pinch to Zoom: {(EnablePinchToZoom ? "On" : "Off")}"
-        };
-
-        var selectedSetting = await Shell.Current.DisplayActionSheet(
-            "Mobile Settings", 
-            "Cancel", 
-            null, 
-            settings);
-
-        await HandleSettingToggle(selectedSetting);
-    }
-
-    private async Task HandleSettingToggle(string? selectedSetting)
-    {
-        if (string.IsNullOrEmpty(selectedSetting)) return;
-
-        if (selectedSetting.Contains("Haptic Feedback"))
-        {
-            await ToggleHapticFeedback();
-        }
-        else if (selectedSetting.Contains("Voice Input"))
-        {
-            EnableVoiceInput = !EnableVoiceInput;
-            UpdateQuickActionState("voice_search", EnableVoiceInput);
-            TriggerHapticFeedback(HapticFeedbackType.Click);
-        }
-        else if (selectedSetting.Contains("Gesture Navigation"))
-        {
-            EnableGestureNavigation = !EnableGestureNavigation;
-            TriggerHapticFeedback(HapticFeedbackType.Click);
-        }
-        else if (selectedSetting.Contains("One-Handed Mode"))
-        {
-            await ToggleOneHandedMode();
-        }
-        else if (selectedSetting.Contains("Compact Mode"))
-        {
-            await ToggleCompactMode();
-        }
-        else if (selectedSetting.Contains("Auto Save"))
-        {
-            EnableAutoSave = !EnableAutoSave;
-            if (EnableAutoSave)
-            {
-                StartAutoSave();
-            }
-            else
-            {
-                StopAutoSave();
-            }
-            TriggerHapticFeedback(HapticFeedbackType.Click);
-        }
-        else if (selectedSetting.Contains("Shake to Refresh"))
-        {
-            EnableShakeToRefresh = !EnableShakeToRefresh;
-            TriggerHapticFeedback(HapticFeedbackType.Click);
-        }
-        else if (selectedSetting.Contains("Pinch to Zoom"))
-        {
-            EnablePinchToZoom = !EnablePinchToZoom;
-            TriggerHapticFeedback(HapticFeedbackType.Click);
-        }
     }
 
     private async Task ShowQuickActionsMenu()
@@ -699,7 +621,7 @@ public partial class ComprehensiveMobileSaleViewModel : SaleViewModel
         _syncTimer = null;
     }
 
-    private void OnConnectivityChanged(object? sender, ConnectivityChangedEventArgs e)
+    private void OnConnectivityChanged(object? sender, Shared.Core.Services.ConnectivityChangedEventArgs e)
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
@@ -730,12 +652,11 @@ public partial class ComprehensiveMobileSaleViewModel : SaleViewModel
     {
         if (IsOfflineMode || !_pendingActions.Any()) return;
 
-        List<PendingAction> actionsToSync;
+        var actionsToSync = _pendingActions.ToList();
+        _pendingActions.Clear();
+
         try
         {
-            actionsToSync = _pendingActions.ToList();
-            _pendingActions.Clear();
-
             foreach (var action in actionsToSync)
             {
                 await ProcessPendingAction(action);
@@ -765,7 +686,10 @@ public partial class ComprehensiveMobileSaleViewModel : SaleViewModel
             switch (action.Type)
             {
                 case PendingActionType.SaveSession:
-                    await _multiTabSalesManager.SaveSessionStateAsync(action.SessionId, action.Data);
+                    if (action.Data is SaleSessionDto sessionDto)
+                    {
+                        await _multiTabSalesManager.SaveSessionStateAsync(action.SessionId, sessionDto);
+                    }
                     break;
                 case PendingActionType.CompleteSale:
                     // Process completed sale
@@ -783,7 +707,7 @@ public partial class ComprehensiveMobileSaleViewModel : SaleViewModel
     }
 
     // Override methods to add offline support
-    public override async Task SaveToSession()
+    public new async Task SaveToSession()
     {
         try
         {
@@ -813,15 +737,38 @@ public partial class ComprehensiveMobileSaleViewModel : SaleViewModel
         }
     }
 
-    private object GetCurrentSessionData()
+    private SaleSessionDto GetCurrentSessionData()
     {
         // Create session data from current state
-        return new
+        return new SaleSessionDto
         {
-            Items = SaleItems.ToList(),
-            Customer = CurrentCustomer,
+            Id = CurrentSessionId ?? Guid.NewGuid(),
+            TabName = SessionTabName ?? "Sale",
+            ShopId = _userContextService.CurrentShop?.Id ?? Guid.Empty,
+            UserId = _currentUserService.CurrentUser?.Id ?? Guid.Empty,
+            CustomerId = CurrentCustomer?.Id,
             PaymentMethod = SelectedPaymentMethod,
-            Totals = new { Subtotal, DiscountAmount, TaxAmount, TotalAmount }
+            Items = SaleItems.Select(item => new SaleSessionItemDto
+            {
+                Id = Guid.NewGuid(),
+                ProductId = item.ProductId,
+                ProductName = item.ProductName,
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice,
+                LineTotal = item.LineTotal,
+                DiscountAmount = item.DiscountAmount,
+                BatchNumber = item.BatchNumber,
+                Weight = item.Weight,
+                IsWeightBased = item.IsWeightBased
+            }).ToList(),
+            Calculation = new SaleSessionCalculationDto
+            {
+                Subtotal = Subtotal,
+                TotalDiscount = DiscountAmount,
+                TotalTax = TaxAmount,
+                FinalTotal = TotalAmount,
+                CalculatedAt = DateTime.UtcNow
+            }
         };
     }
 
@@ -838,7 +785,7 @@ public partial class ComprehensiveMobileSaleViewModel : SaleViewModel
         }
     }
 
-    public override void Dispose()
+    public new void Dispose()
     {
         StopAutoSave();
         StopSyncTimer();

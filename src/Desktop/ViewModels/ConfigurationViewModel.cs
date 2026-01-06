@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Shared.Core.DTOs;
 using Shared.Core.Services;
+using Shared.Core.Entities;
 
 namespace Desktop.ViewModels;
 
@@ -177,8 +178,8 @@ public class ConfigurationViewModel : BaseViewModel
             IsLoading = true;
             StatusMessage = "Loading configurations...";
 
-            var currentUser = await _currentUserService.GetCurrentUserAsync();
-            var currentShop = await _currentUserService.GetCurrentShopAsync();
+            var currentUser = _currentUserService.CurrentUser;
+            var currentShop = currentUser?.ShopId != null ? new Shop { Id = currentUser.ShopId.Value } : null;
 
             if (currentShop != null)
             {
@@ -219,7 +220,7 @@ public class ConfigurationViewModel : BaseViewModel
             IsLoading = true;
             StatusMessage = "Saving shop pricing settings...";
 
-            var currentShop = await _currentUserService.GetCurrentShopAsync();
+            var currentShop = _currentUserService.CurrentUser?.ShopId != null ? new Shop { Id = _currentUserService.CurrentUser.ShopId.Value } : null;
             if (currentShop == null)
             {
                 StatusMessage = "No current shop selected";
@@ -246,7 +247,7 @@ public class ConfigurationViewModel : BaseViewModel
             IsLoading = true;
             StatusMessage = "Saving shop tax settings...";
 
-            var currentShop = await _currentUserService.GetCurrentShopAsync();
+            var currentShop = _currentUserService.CurrentUser?.ShopId != null ? new Shop { Id = _currentUserService.CurrentUser.ShopId.Value } : null;
             if (currentShop == null)
             {
                 StatusMessage = "No current shop selected";
@@ -273,7 +274,7 @@ public class ConfigurationViewModel : BaseViewModel
             IsLoading = true;
             StatusMessage = "Saving user preferences...";
 
-            var currentUser = await _currentUserService.GetCurrentUserAsync();
+            var currentUser = _currentUserService.CurrentUser;
             if (currentUser == null)
             {
                 StatusMessage = "No current user";

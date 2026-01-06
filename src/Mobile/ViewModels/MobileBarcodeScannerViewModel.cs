@@ -73,7 +73,7 @@ public partial class MobileBarcodeScannerViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task InitializeScanner()
+    public async Task InitializeScanner()
     {
         try
         {
@@ -151,7 +151,7 @@ public partial class MobileBarcodeScannerViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task StopScanning()
+    public async Task StopScanning()
     {
         IsScannerActive = false;
         ScanStatus = "Scanner stopped";

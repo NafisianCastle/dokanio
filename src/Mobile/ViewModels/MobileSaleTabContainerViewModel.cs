@@ -64,20 +64,24 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
         IUserContextService userContextService,
         ICustomerLookupService customerLookupService,
         IBarcodeIntegrationService barcodeIntegrationService,
-        ILogger<MobileSaleTabContainerViewModel> logger)
+        IProductService productService,
+        ILoggerFactory loggerFactory)
     {
         _multiTabSalesManager = multiTabSalesManager;
         _currentUserService = currentUserService;
         _userContextService = userContextService;
         _customerLookupService = customerLookupService;
         _barcodeIntegrationService = barcodeIntegrationService;
-        _logger = logger;
+        _logger = loggerFactory.CreateLogger<MobileSaleTabContainerViewModel>();
         
         Title = "Sales";
         
-        // Initialize mobile-specific ViewModels
-        CustomerLookupViewModel = new MobileCustomerLookupViewModel(_customerLookupService, logger);
-        BarcodeScannerViewModel = new MobileBarcodeScannerViewModel(_barcodeIntegrationService, null!, logger);
+        // Initialize mobile-specific ViewModels with proper logger types
+        var customerLogger = loggerFactory.CreateLogger<MobileCustomerLookupViewModel>();
+        var barcodeLogger = loggerFactory.CreateLogger<MobileBarcodeScannerViewModel>();
+        
+        CustomerLookupViewModel = new MobileCustomerLookupViewModel(_customerLookupService, customerLogger);
+        BarcodeScannerViewModel = new MobileBarcodeScannerViewModel(_barcodeIntegrationService, productService, barcodeLogger);
         
         // Subscribe to events
         CustomerLookupViewModel.CustomerSelected += OnCustomerSelected;
@@ -142,7 +146,14 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
             }
 
             // Create tab view model
-            var tabViewModel = new MobileSaleTabViewModel(result.Session!, _multiTabSalesManager, _logger)
+            var tabViewModel = new MobileSaleTabViewModel(
+                result.Session!, 
+                _multiTabSalesManager, 
+                _currentUserService,
+                _userContextService,
+                _customerLookupService,
+                _barcodeIntegrationService,
+                _logger)
             {
                 IsActive = false,
                 CanClose = SaleTabs.Count > 0 // First tab cannot be closed
@@ -282,7 +293,14 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
 
             foreach (var session in sessions)
             {
-                var tabViewModel = new MobileSaleTabViewModel(session, _multiTabSalesManager, _logger)
+                var tabViewModel = new MobileSaleTabViewModel(
+                    session, 
+                    _multiTabSalesManager, 
+                    _currentUserService,
+                    _userContextService,
+                    _customerLookupService,
+                    _barcodeIntegrationService,
+                    _logger)
                 {
                     IsActive = false,
                     CanClose = sessions.Count > 1
@@ -559,7 +577,14 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
                 }
 
                 // Create tab view model
-                var tabViewModel = new MobileSaleTabViewModel(result.Session, _multiTabSalesManager, _logger)
+                var tabViewModel = new MobileSaleTabViewModel(
+                    result.Session, 
+                    _multiTabSalesManager, 
+                    _currentUserService,
+                    _userContextService,
+                    _customerLookupService,
+                    _barcodeIntegrationService,
+                    _logger)
                 {
                     IsActive = false,
                     CanClose = true
@@ -843,7 +868,14 @@ public partial class MobileSaleTabViewModel : ObservableObject
     public Guid SessionId { get; }
     public SaleSessionDto SessionData { get; private set; }
 
-    public MobileSaleTabViewModel(SaleSessionDto sessionData, IMultiTabSalesManager multiTabSalesManager, ILogger logger)
+    public MobileSaleTabViewModel(
+        SaleSessionDto sessionData, 
+        IMultiTabSalesManager multiTabSalesManager, 
+        ICurrentUserService currentUserService,
+        IUserContextService userContextService,
+        ICustomerLookupService customerLookupService,
+        IBarcodeIntegrationService barcodeIntegrationService,
+        ILogger logger)
     {
         SessionData = sessionData;
         SessionId = sessionData.Id;
@@ -852,7 +884,7 @@ public partial class MobileSaleTabViewModel : ObservableObject
         _logger = logger;
 
         // Create the mobile sale view model for this tab
-        SaleViewModel = CreateSaleViewModelForTab(SessionData);
+        SaleViewModel = CreateSaleViewModelForTab(SessionData, currentUserService, userContextService, customerLookupService, barcodeIntegrationService);
 
         // Load session data into the view model
         LoadSessionDataIntoViewModel();
@@ -861,21 +893,26 @@ public partial class MobileSaleTabViewModel : ObservableObject
         SaleViewModel.PropertyChanged += (s, e) => HasUnsavedChanges = true;
     }
 
-    private SaleViewModel CreateSaleViewModelForTab(SaleSessionDto sessionData)
+    private SaleViewModel CreateSaleViewModelForTab(
+        SaleSessionDto sessionData,
+        ICurrentUserService currentUserService,
+        IUserContextService userContextService,
+        ICustomerLookupService customerLookupService,
+        IBarcodeIntegrationService barcodeIntegrationService)
     {
         // This is a simplified version - in a real implementation, 
         // services would be injected through dependency injection
         var saleViewModel = new SaleViewModel(
             null!, // IEnhancedSalesService - would be injected
             null!, // IProductService - would be injected
-    // Create the mobile sale view model for this tab
-    SaleViewModel = CreateSaleViewModelForTab(sessionData);
-
-    // Load session data into the view model
-    LoadSessionDataIntoViewModel();
-
-    // Subscribe to changes
-            null!  // IBarcodeIntegrationService - would be injected
+            null!, // IPrinterService - would be injected
+            null!, // IReceiptService - would be injected
+            currentUserService,
+            userContextService,
+            null!, // IBusinessManagementService - would be injected
+            _multiTabSalesManager,
+            customerLookupService,
+            barcodeIntegrationService
         );
 
         // Initialize for this session

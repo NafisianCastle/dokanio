@@ -760,4 +760,129 @@ public class ComprehensiveMonitoringService : IComprehensiveMonitoringService
         
         return totalOccurrences > 0 ? (double)resolvableErrors / totalOccurrences * 100 : 0;
     }
+
+    /// <summary>
+    /// Gets system insights for the specified business and time period
+    /// </summary>
+    public async Task<SystemInsights> GetSystemInsightsAsync(Guid businessId, TimeSpan period)
+    {
+        try
+        {
+            var insights = new List<SystemInsight>();
+            
+            // Generate performance insights
+            var performanceMetrics = await _performanceMonitoring.GetCurrentMetricsAsync();
+            if (performanceMetrics.ResponseTimeMs > 1000)
+            {
+                insights.Add(new SystemInsight
+                {
+                    Title = "High Response Time",
+                    Description = $"Average response time is {performanceMetrics.ResponseTimeMs}ms",
+                    Type = InsightType.Performance,
+                    ImpactScore = 7.5,
+                    Recommendations = new List<string>
+                    {
+                        "Optimize database queries",
+                        "Implement caching",
+                        "Review resource utilization"
+                    }
+                });
+            }
+
+            // Generate error insights
+            var errorStats = await _errorTracking.GetErrorStatisticsAsync(period, businessId);
+            if (errorStats.ErrorRate > 5)
+            {
+                insights.Add(new SystemInsight
+                {
+                    Title = "High Error Rate",
+                    Description = $"Error rate is {errorStats.ErrorRate:F1}%",
+                    Type = InsightType.Error,
+                    ImpactScore = 8.0,
+                    Recommendations = new List<string>
+                    {
+                        "Review error logs",
+                        "Implement better error handling",
+                        "Monitor error patterns"
+                    }
+                });
+            }
+
+            var healthSummary = new SystemHealthSummary
+            {
+                OverallHealth = insights.Any(i => i.ImpactScore > 8) ? HealthStatus.Critical : HealthStatus.Healthy,
+                TotalIssues = insights.Count,
+                CriticalIssues = insights.Count(i => i.ImpactScore > 8),
+                HealthScore = Math.Max(0, 100 - (insights.Sum(i => i.ImpactScore) * 2))
+            };
+
+            return new SystemInsights
+            {
+                BusinessId = businessId,
+                Period = period,
+                Insights = insights,
+                HealthSummary = healthSummary,
+                PerformanceSummary = new PerformanceSummary
+                {
+                    AverageResponseTime = performanceMetrics.ResponseTimeMs,
+                    Period = period
+                }
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting system insights for business {BusinessId}", businessId);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Gets optimization recommendations for the specified business
+    /// </summary>
+    public async Task<List<OptimizationRecommendation>> GetOptimizationRecommendationsAsync(Guid businessId)
+    {
+        try
+        {
+            var recommendations = new List<OptimizationRecommendation>();
+
+            // Get current metrics
+            var performanceMetrics = await _performanceMonitoring.GetCurrentMetricsAsync();
+            var errorStats = await _errorTracking.GetErrorStatisticsAsync(TimeSpan.FromDays(7), businessId);
+
+            // Performance recommendations
+            if (performanceMetrics.ResponseTimeMs > 1000)
+            {
+                recommendations.Add(new OptimizationRecommendation
+                {
+                    Category = "Performance",
+                    Title = "Optimize Response Times",
+                    Description = "System response times are higher than optimal",
+                    Priority = OptimizationPriority.High,
+                    EstimatedImpact = 25.0,
+                    Implementation = "Profile slow operations, implement database query optimization, add caching layers, consider resource scaling"
+                });
+            }
+
+            // Error handling recommendations
+            if (errorStats.ErrorRate > 3)
+            {
+                recommendations.Add(new OptimizationRecommendation
+                {
+                    Category = "Reliability",
+                    Title = "Improve Error Handling",
+                    Description = "Error rate is above acceptable threshold",
+                    Priority = OptimizationPriority.Medium,
+                    EstimatedImpact = 15.0,
+                    Implementation = "Analyze error patterns, implement better exception handling, add retry mechanisms, improve input validation"
+                });
+            }
+
+            return recommendations;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting optimization recommendations for business {BusinessId}", businessId);
+            return new List<OptimizationRecommendation>();
+        }
+    }
 }

@@ -161,7 +161,7 @@ public class RealTimeCalculationEngine : IRealTimeCalculationEngine
 
                     if (discountAmount > 0)
                     {
-                        var appliedDiscount = new AppliedDiscount
+                        var appliedDiscount = new Shared.Core.DTOs.AppliedDiscount
                         {
                             DiscountId = discount.Id,
                             DiscountName = discount.Name,
@@ -173,7 +173,8 @@ public class RealTimeCalculationEngine : IRealTimeCalculationEngine
 
                         result.AppliedDiscounts.Add(appliedDiscount);
                         result.TotalDiscountAmount += discountAmount;
-                        result.DiscountReasons.Add(appliedDiscount.Reason);
+                        // Note: OrderTotalCalculation doesn't have DiscountReasons, so we skip this
+                        // result.DiscountReasons.Add(GenerateDiscountReason(discount, item, customer));
                     }
                 }
             }

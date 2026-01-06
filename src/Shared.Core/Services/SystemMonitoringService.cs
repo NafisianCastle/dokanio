@@ -212,11 +212,11 @@ namespace Shared.Core.Services
                 {
                     var alert = new SystemAlert
                     {
-                        Id = Guid.NewGuid().ToString(),
+                        Id = Guid.NewGuid(),
                         Title = systemEvent.EventType,
-                        Description = systemEvent.Message,
-                        Severity = systemEvent.Severity,
-                        Status = "Active",
+                        Message = systemEvent.Message,
+                        Severity = systemEvent.Severity == "Critical" ? AlertSeverity.Critical : AlertSeverity.High,
+                        Status = AlertStatus.Active,
                         CreatedAt = systemEvent.Timestamp,
                         BusinessId = systemEvent.BusinessId
                     };
@@ -241,7 +241,7 @@ namespace Shared.Core.Services
                 // Remove resolved alerts older than 7 days
                 _activeAlerts.RemoveAll(a => a.ResolvedAt.HasValue && a.ResolvedAt < DateTime.UtcNow.AddDays(-7));
                 
-                return await Task.FromResult(_activeAlerts.Where(a => a.Status == "Active"));
+                return await Task.FromResult(_activeAlerts.Where(a => a.Status == AlertStatus.Active));
             }
             catch (Exception ex)
             {

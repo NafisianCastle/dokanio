@@ -5,6 +5,7 @@ using Shared.Core.Entities;
 using Shared.Core.Services;
 using System.Diagnostics;
 using System.Text.Json;
+using System.Linq;
 
 namespace Shared.Core.Services;
 
@@ -35,9 +36,10 @@ public class CrashRecoveryService : ICrashRecoveryService
         try
         {
             // Look for application sessions that didn't end cleanly
-            var uncleanSessions = await GetApplicationSessionsAsync(userId, deviceId)
+            var sessions = await GetApplicationSessionsAsync(userId, deviceId);
+            var uncleanSessions = sessions
                 .Where(s => !s.CleanShutdown && s.EndedAt == null)
-                .ToListAsync();
+                .ToList();
 
             var crashDetected = uncleanSessions.Any();
 
@@ -343,9 +345,10 @@ public class CrashRecoveryService : ICrashRecoveryService
             };
 
             // Get crash data from application sessions
-            var sessions = await GetApplicationSessionsAsync(null, null)
+            var allSessions = await GetApplicationSessionsAsync(null, null);
+            var sessions = allSessions
                 .Where(s => s.StartedAt >= fromDate && s.StartedAt <= toDate)
-                .ToListAsync();
+                .ToList();
 
             statistics.TotalCrashes = sessions.Count(s => !s.CleanShutdown);
             statistics.LastCrashDate = sessions
@@ -379,9 +382,10 @@ public class CrashRecoveryService : ICrashRecoveryService
             var cleanedCount = 0;
 
             // Clean up old application sessions
-            var oldSessions = await GetApplicationSessionsAsync(null, null)
+            var allSessions = await GetApplicationSessionsAsync(null, null);
+            var oldSessions = allSessions
                 .Where(s => s.StartedAt < cutoffDate)
-                .ToListAsync();
+                .ToList();
 
             foreach (var session in oldSessions)
             {

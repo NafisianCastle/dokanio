@@ -449,7 +449,7 @@ public class AIAnalyticsEngine : IAIAnalyticsEngine
                 Revenue = dailySales.Sum(s => s.TotalAmount),
                 TransactionCount = dailySales.Count,
                 AverageOrderValue = dailySales.Count > 0 ? dailySales.Sum(s => s.TotalAmount) / dailySales.Count : 0,
-                Direction = TrendDirection.Stable, // Simplified - would calculate based on previous periods
+                Direction = Shared.Core.DTOs.TrendDirection.Stable, // Simplified - would calculate based on previous periods
                 ConfidenceScore = 0.8 // Placeholder
             };
             trends.Add(trend);
@@ -487,7 +487,7 @@ public class AIAnalyticsEngine : IAIAnalyticsEngine
                 Revenue = items.Sum(i => i.TotalPrice),
                 ProfitMargin = 0.2m, // Placeholder
                 PerformanceScore = (double)items.Sum(i => i.TotalPrice), // Simplified scoring
-                Trend = TrendDirection.Stable
+                Trend = Shared.Core.DTOs.TrendDirection.Stable
             };
             insights.Add(insight);
         }
@@ -1154,7 +1154,7 @@ public class AIAnalyticsEngine : IAIAnalyticsEngine
                 TotalQuantitySold = items.Sum(i => i.Quantity),
                 AveragePrice = items.Any() ? items.Average(i => i.UnitPrice) : 0,
                 MarketShare = 0.1, // Placeholder
-                Trend = TrendDirection.Stable
+                Trend = Shared.Core.DTOs.TrendDirection.Stable
             };
             categoryPerformance.Add(performance);
         }

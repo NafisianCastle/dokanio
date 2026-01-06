@@ -70,10 +70,12 @@ public class EnhancedSalesGridEngine : IEnhancedSalesGridEngine
             }
 
             // Check for an existing item with the same product directly from the repository
-            var existingItem = saleSession.SaleId.HasValue
-                ? await _saleItemRepository.FirstOrDefaultAsync(si =>
+            var existingItems = saleSession.SaleId.HasValue
+                ? await _saleItemRepository.FindAsync(si =>
                     si.SaleId == saleSession.SaleId.Value && si.ProductId == product.Id && !si.IsDeleted)
                 : null;
+            
+            var existingItem = existingItems?.FirstOrDefault();
 
             if (existingItem != null)
             {
@@ -553,7 +555,7 @@ public class EnhancedSalesGridEngine : IEnhancedSalesGridEngine
                 TotalTax = totalTax,
                 FinalTotal = subtotal - totalDiscount + totalTax,
                 LineItemCalculations = lineCalculations,
-                AppliedDiscounts = new List<AppliedDiscount>() // TODO: Get actual applied discounts
+                AppliedDiscounts = new List<Shared.Core.DTOs.AppliedDiscount>() // TODO: Get actual applied discounts
             };
 
             return result;

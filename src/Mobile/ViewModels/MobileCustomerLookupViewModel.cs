@@ -130,7 +130,7 @@ public partial class MobileCustomerLookupViewModel : BaseViewModel
                 
                 if (shouldCreate)
                 {
-                    await ShowCreateCustomerForm();
+                    await ShowCreateCustomerFormDialog();
                 }
                 else
                 {
@@ -240,7 +240,7 @@ public partial class MobileCustomerLookupViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task ShowCreateCustomerForm()
+    private async Task ShowCreateCustomerFormDialog()
     {
         ShowCreateCustomerForm = true;
         NewCustomerName = string.Empty;
