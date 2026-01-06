@@ -105,6 +105,12 @@ public class ConfigurationManagementService : IConfigurationManagementService
         {
             _logger.LogInformation("Importing configuration for shop {ShopId}", shopId);
 
+            if (export == null)
+                throw new ArgumentNullException(nameof(export));
+
+            if (export.ShopId != shopId)
+                throw new ArgumentException("Export does not belong to the specified shop.", nameof(export));
+
             if (export.PricingSettings != null)
             {
                 await _configurationService.SetShopPricingSettingsAsync(shopId, export.PricingSettings);
