@@ -785,7 +785,7 @@ public class ConfigurationService : IConfigurationService
         {
             var stringValue = ConvertToString(value);
             var configurationType = DetectConfigurationType<T>();
-            
+
             var validationResult = await ValidateConfigurationAsync(key, value, configurationType);
             if (!validationResult.IsValid)
             {
@@ -793,12 +793,21 @@ public class ConfigurationService : IConfigurationService
             }
 
             await _configurationRepository.SetUserConfigurationAsync(userId, key, stringValue, configurationType, description);
-            
-            _logger.LogInformation("User configuration {UserId}:{Key} set to {Value}", userId, key, stringValue);
+
+            // Sanitize value before logging to prevent log forging via control characters
+            var stringValueForLog = stringValue
+                .Replace("\r", string.Empty)
+                .Replace("\n", string.Empty);
+
+            _logger.LogInformation("User configuration {UserId}:{Key} set to {Value}", userId, key, stringValueForLog);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error setting user configuration {UserId}:{Key} = {Value}", userId, key, value);
+            var safeValueForLog = ConvertToString(value)
+                .Replace("\r", string.Empty)
+                .Replace("\n", string.Empty);
+
+            _logger.LogError(ex, "Error setting user configuration {UserId}:{Key} = {Value}", userId, key, safeValueForLog);
             throw;
         }
     }
