@@ -758,7 +758,9 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
                     BatchNumber = item.BatchNumber,
                     Weight = item.Weight,
                     IsWeightBased = item.IsWeightBased,
-                    DiscountPercentage = item.DiscountAmount > 0 ? (item.DiscountAmount / item.LineTotal) * 100 : 0
+                    DiscountPercentage = (item.DiscountAmount > 0 && item.LineTotal > 0)
+                        ? (item.DiscountAmount / item.LineTotal) * 100
+                        : 0
                 };
                 
                 SaleItems.Add(saleItemViewModel);
@@ -1104,18 +1106,25 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
         }, token);
     }
 
-    private void StopAutoSave()
+    private async Task StopAutoSaveAsync()
     {
-        _autoSaveCts?.Cancel();
-        _autoSaveCts?.Dispose();
+        var cts = _autoSaveCts;
+        var task = _autoSaveTask;
+
         _autoSaveCts = null;
         _autoSaveTask = null;
-    }
 
-    private void StopAutoSave()
-    {
-        _autoSaveTimer?.Dispose();
-        _autoSaveTimer = null;
+        if (cts != null)
+        {
+            cts.Cancel();
+            cts.Dispose();
+        }
+
+        if (task != null)
+        {
+            try { await task; }
+            catch (OperationCanceledException) { /* expected on stop */ }
+        }
     }
 
     [RelayCommand]
