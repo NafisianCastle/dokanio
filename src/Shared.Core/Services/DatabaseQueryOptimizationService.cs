@@ -498,8 +498,12 @@ public class DatabaseQueryOptimizationService : IDatabaseQueryOptimizationServic
                     })
                     .ToListAsync();
 
+                var maskedMobileNumber = string.IsNullOrEmpty(mobileNumber)
+                    ? "[redacted]"
+                    : new string('*', Math.Max(0, mobileNumber.Length - 3)) + mobileNumber[^Math.Min(3, mobileNumber.Length)..];
+
                 _logger.LogDebug("Customer mobile lookup completed: {Count} customers found for {MobileNumber}", 
-                    customers.Count, mobileNumber);
+                    customers.Count, maskedMobileNumber);
 
                 return customers;
             }, TimeSpan.FromMinutes(10));
