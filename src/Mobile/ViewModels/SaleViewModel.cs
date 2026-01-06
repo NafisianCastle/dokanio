@@ -1065,29 +1065,51 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
     private string connectionStatus = "Online";
 
     // Auto-save functionality for mobile
-    private Timer? _autoSaveTimer;
+    private CancellationTokenSource? _autoSaveCts;
+    private Task? _autoSaveTask;
     private DateTime _lastInteraction = DateTime.UtcNow;
 
     private void StartAutoSave()
     {
         if (!EnableAutoSave) return;
-        
-        _autoSaveTimer?.Dispose();
-        _autoSaveTimer = new Timer(async _ =>
+
+        StopAutoSave();
+
+        _autoSaveCts = new CancellationTokenSource();
+        var token = _autoSaveCts.Token;
+
+        _autoSaveTask = Task.Run(async () =>
         {
             try
             {
-                // Only auto-save if there's been recent activity
-                if (DateTime.UtcNow - _lastInteraction < TimeSpan.FromMinutes(5))
+                using var timer = new PeriodicTimer(AutoSaveInterval);
+
+                while (await timer.WaitForNextTickAsync(token))
                 {
-                    await SaveToSession();
+                    // Only auto-save if there's been recent activity
+                    if (DateTime.UtcNow - _lastInteraction < TimeSpan.FromMinutes(5))
+                    {
+                        await SaveToSession();
+                    }
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                // expected on stop
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Auto-save failed: {ex.Message}");
             }
-        }, null, AutoSaveInterval, AutoSaveInterval);
+        }, token);
+    }
+
+    private void StopAutoSave()
+    {
+        _autoSaveCts?.Cancel();
+        _autoSaveCts?.Dispose();
+        _autoSaveCts = null;
+        _autoSaveTask = null;
     }
 
     private void StopAutoSave()
@@ -1449,20 +1471,38 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
         }
     }
 
+    private bool _connectivitySubscribed;
+
     private void InitializeMobileFeatures()
     {
         // Enable one-handed mode for smaller screens
         var screenHeight = DeviceDisplay.Current.MainDisplayInfo.Height;
         var screenDensity = DeviceDisplay.Current.MainDisplayInfo.Density;
         var physicalHeight = screenHeight / screenDensity;
-        
-        IsOneHandedMode = physicalHeight < 6.0; // Enable for screens smaller than 6 inches
-        
-        // Check connectivity status
+
+        IsOneHandedMode = physicalHeight < 6.0;
+
         UpdateConnectionStatus();
-        
-        // Subscribe to connectivity changes
-        Connectivity.ConnectivityChanged += OnConnectivityChanged;
+
+        if (!_connectivitySubscribed)
+        {
+            Connectivity.ConnectivityChanged += OnConnectivityChanged;
+            _connectivitySubscribed = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        StopAutoSave();
+
+        _barcodeIntegrationService.BarcodeProcessed -= OnBarcodeProcessed;
+        _barcodeIntegrationService.ScanError -= OnBarcodeScanError;
+
+        if (_connectivitySubscribed)
+        {
+            Connectivity.ConnectivityChanged -= OnConnectivityChanged;
+            _connectivitySubscribed = false;
+        }
     }
 
     private void UpdateConnectionStatus()
