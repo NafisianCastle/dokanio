@@ -31,6 +31,7 @@ public static class MauiProgram
         // Register Mobile-specific services
         builder.Services.AddSingleton<BackgroundSyncService>();
         builder.Services.AddSingleton<IUserContextService, UserContextService>();
+        builder.Services.AddSingleton<GlobalExceptionHandlerService>();
 
         // Register ViewModels
         builder.Services.AddTransient<MainViewModel>();
@@ -54,6 +55,9 @@ public static class MauiProgram
 
         var app = builder.Build();
         
+        // Set up global exception handling for mobile
+        SetupGlobalExceptionHandling(app.Services);
+        
         // Initialize the mobile application asynchronously
         _ = Task.Run(async () =>
         {
@@ -71,10 +75,51 @@ public static class MauiProgram
             {
                 var logger = app.Services.GetRequiredService<ILogger<MauiProgram>>();
                 logger.LogError(ex, "Error during mobile application initialization");
+                
+                // Handle initialization exception
+                var exceptionHandler = app.Services.GetRequiredService<GlobalExceptionHandlerService>();
+                await exceptionHandler.HandleUnhandledExceptionAsync(ex, "Mobile Application Initialization");
             }
         });
 
         return app;
+    }
+    
+    private static void SetupGlobalExceptionHandling(IServiceProvider serviceProvider)
+    {
+        // Handle unhandled exceptions in the current AppDomain
+        AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+        {
+            if (e.ExceptionObject is Exception exception)
+            {
+                try
+                {
+                    var exceptionHandler = serviceProvider.GetRequiredService<GlobalExceptionHandlerService>();
+                    exceptionHandler.HandleUnhandledExceptionAsync(exception, "AppDomain Unhandled Exception").GetAwaiter().GetResult();
+                }
+                catch
+                {
+                    // Last resort logging
+                    System.Diagnostics.Debug.WriteLine($"Critical error in exception handler: {exception}");
+                }
+            }
+        };
+
+        // Handle unhandled exceptions in tasks
+        TaskScheduler.UnobservedTaskException += (sender, e) =>
+        {
+            try
+            {
+                var exceptionHandler = serviceProvider.GetRequiredService<GlobalExceptionHandlerService>();
+                exceptionHandler.HandleUnhandledExceptionAsync(e.Exception, "Task Unobserved Exception").GetAwaiter().GetResult();
+            }
+            catch
+            {
+                // Last resort logging
+                System.Diagnostics.Debug.WriteLine($"Critical error in task exception handler: {e.Exception}");
+            }
+            e.SetObserved(); // Prevent the process from terminating
+        };
     }
     
     /// <summary>

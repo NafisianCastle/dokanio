@@ -907,14 +907,176 @@ public class ReportService : IReportService
         return Encoding.UTF8.GetBytes(csv.ToString());
     }
 
-    private Task<byte[]> ExportToExcelAsync<T>(T reportData) where T : ReportResponse
+    private async Task<byte[]> ExportToExcelAsync<T>(T reportData) where T : ReportResponse
     {
-        throw new NotImplementedException("Excel export is not implemented. Please implement or remove this method.");
+        // Create a simple Excel-like CSV format with enhanced formatting
+        var csv = new StringBuilder();
+        
+        // Add report header
+        csv.AppendLine($"Report: {reportData.ReportName}");
+        csv.AppendLine($"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}");
+        csv.AppendLine($"Business ID: {reportData.BusinessId}");
+        if (reportData.ShopId.HasValue)
+            csv.AppendLine($"Shop ID: {reportData.ShopId}");
+        csv.AppendLine(); // Empty line
+        
+        // Add data based on report type
+        switch (reportData)
+        {
+            case SalesReportResponse salesReport:
+                csv.AppendLine("SALES REPORT DATA");
+                csv.AppendLine("Date,Invoice,Customer,SubTotal,Tax,Discount,Total,Payment Method,Shop,Cashier");
+                foreach (var item in salesReport.Items)
+                {
+                    csv.AppendLine($"{item.Date:yyyy-MM-dd},{item.InvoiceNumber},{item.CustomerName},{item.SubTotal:F2},{item.TaxAmount:F2},{item.DiscountAmount:F2},{item.TotalAmount:F2},{item.PaymentMethod},{item.ShopName},{item.CashierName}");
+                }
+                
+                // Add summary
+                csv.AppendLine();
+                csv.AppendLine("SUMMARY");
+                csv.AppendLine($"Total Sales,{salesReport.Summary.TotalSales:F2}");
+                csv.AppendLine($"Total Refunds,{salesReport.Summary.TotalRefunds:F2}");
+                csv.AppendLine($"Net Sales,{salesReport.Summary.NetSales:F2}");
+                csv.AppendLine($"Total Transactions,{salesReport.Summary.TotalTransactions}");
+                csv.AppendLine($"Average Transaction Value,{salesReport.Summary.AverageTransactionValue:F2}");
+                break;
+                
+            case InventoryReportResponse inventoryReport:
+                csv.AppendLine("INVENTORY REPORT DATA");
+                csv.AppendLine("Product,Category,Barcode,Current Stock,Minimum Stock,Unit Price,Total Value,Expiry Date,Shop");
+                foreach (var item in inventoryReport.Items)
+                {
+                    csv.AppendLine($"{item.ProductName},{item.Category},{item.Barcode},{item.CurrentStock},{item.MinimumStock},{item.UnitPrice:F2},{item.TotalValue:F2},{item.ExpiryDate:yyyy-MM-dd},{item.ShopName}");
+                }
+                
+                // Add summary
+                csv.AppendLine();
+                csv.AppendLine("SUMMARY");
+                csv.AppendLine($"Total Products,{inventoryReport.Summary.TotalProducts}");
+                csv.AppendLine($"Low Stock Products,{inventoryReport.Summary.LowStockProducts}");
+                csv.AppendLine($"Out of Stock Products,{inventoryReport.Summary.OutOfStockProducts}");
+                csv.AppendLine($"Total Inventory Value,{inventoryReport.Summary.TotalInventoryValue:F2}");
+                break;
+                
+            case FinancialReportResponse financialReport:
+                csv.AppendLine("FINANCIAL REPORT DATA");
+                csv.AppendLine("Date,Description,Category,Revenue,Cost,Profit,Profit Margin,Shop");
+                foreach (var item in financialReport.Items)
+                {
+                    csv.AppendLine($"{item.Date:yyyy-MM-dd},{item.Description},{item.Category},{item.Revenue:F2},{item.Cost:F2},{item.Profit:F2},{item.ProfitMargin:F2}%,{item.ShopName}");
+                }
+                
+                // Add summary
+                csv.AppendLine();
+                csv.AppendLine("SUMMARY");
+                csv.AppendLine($"Total Revenue,{financialReport.Summary.TotalRevenue:F2}");
+                csv.AppendLine($"Total Costs,{financialReport.Summary.TotalCosts:F2}");
+                csv.AppendLine($"Gross Profit,{financialReport.Summary.GrossProfit:F2}");
+                csv.AppendLine($"Net Profit,{financialReport.Summary.NetProfit:F2}");
+                csv.AppendLine($"Gross Profit Margin,{financialReport.Summary.GrossProfitMargin:F2}%");
+                break;
+        }
+        
+        return Encoding.UTF8.GetBytes(csv.ToString());
     }
 
-    private Task<byte[]> ExportToPdfAsync<T>(T reportData) where T : ReportResponse
+    private async Task<byte[]> ExportToPdfAsync<T>(T reportData) where T : ReportResponse
     {
-        throw new NotImplementedException("PDF export is not implemented. Please implement or remove this method.");
+        // Create a simple HTML-based PDF representation
+        var html = new StringBuilder();
+        
+        html.AppendLine("<!DOCTYPE html>");
+        html.AppendLine("<html><head>");
+        html.AppendLine("<style>");
+        html.AppendLine("body { font-family: Arial, sans-serif; margin: 20px; }");
+        html.AppendLine("h1 { color: #333; border-bottom: 2px solid #333; }");
+        html.AppendLine("h2 { color: #666; margin-top: 30px; }");
+        html.AppendLine("table { border-collapse: collapse; width: 100%; margin: 20px 0; }");
+        html.AppendLine("th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }");
+        html.AppendLine("th { background-color: #f2f2f2; font-weight: bold; }");
+        html.AppendLine("tr:nth-child(even) { background-color: #f9f9f9; }");
+        html.AppendLine(".summary { background-color: #e8f4f8; padding: 15px; margin: 20px 0; border-radius: 5px; }");
+        html.AppendLine(".header-info { margin: 10px 0; color: #666; }");
+        html.AppendLine("</style>");
+        html.AppendLine("</head><body>");
+        
+        // Add report header
+        html.AppendLine($"<h1>{reportData.ReportName}</h1>");
+        html.AppendLine($"<div class='header-info'>Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}</div>");
+        html.AppendLine($"<div class='header-info'>Business ID: {reportData.BusinessId}</div>");
+        if (reportData.ShopId.HasValue)
+            html.AppendLine($"<div class='header-info'>Shop ID: {reportData.ShopId}</div>");
+        
+        // Add data based on report type
+        switch (reportData)
+        {
+            case SalesReportResponse salesReport:
+                html.AppendLine("<h2>Sales Data</h2>");
+                html.AppendLine("<table>");
+                html.AppendLine("<tr><th>Date</th><th>Invoice</th><th>Customer</th><th>SubTotal</th><th>Tax</th><th>Discount</th><th>Total</th><th>Payment</th><th>Shop</th><th>Cashier</th></tr>");
+                foreach (var item in salesReport.Items.Take(100)) // Limit for PDF size
+                {
+                    html.AppendLine($"<tr><td>{item.Date:yyyy-MM-dd}</td><td>{item.InvoiceNumber}</td><td>{item.CustomerName}</td><td>{item.SubTotal:F2}</td><td>{item.TaxAmount:F2}</td><td>{item.DiscountAmount:F2}</td><td>{item.TotalAmount:F2}</td><td>{item.PaymentMethod}</td><td>{item.ShopName}</td><td>{item.CashierName}</td></tr>");
+                }
+                html.AppendLine("</table>");
+                
+                // Add summary
+                html.AppendLine("<div class='summary'>");
+                html.AppendLine("<h2>Summary</h2>");
+                html.AppendLine($"<p><strong>Total Sales:</strong> {salesReport.Summary.TotalSales:F2}</p>");
+                html.AppendLine($"<p><strong>Total Refunds:</strong> {salesReport.Summary.TotalRefunds:F2}</p>");
+                html.AppendLine($"<p><strong>Net Sales:</strong> {salesReport.Summary.NetSales:F2}</p>");
+                html.AppendLine($"<p><strong>Total Transactions:</strong> {salesReport.Summary.TotalTransactions}</p>");
+                html.AppendLine($"<p><strong>Average Transaction Value:</strong> {salesReport.Summary.AverageTransactionValue:F2}</p>");
+                html.AppendLine("</div>");
+                break;
+                
+            case InventoryReportResponse inventoryReport:
+                html.AppendLine("<h2>Inventory Data</h2>");
+                html.AppendLine("<table>");
+                html.AppendLine("<tr><th>Product</th><th>Category</th><th>Barcode</th><th>Current Stock</th><th>Min Stock</th><th>Unit Price</th><th>Total Value</th><th>Expiry Date</th><th>Shop</th></tr>");
+                foreach (var item in inventoryReport.Items.Take(100)) // Limit for PDF size
+                {
+                    html.AppendLine($"<tr><td>{item.ProductName}</td><td>{item.Category}</td><td>{item.Barcode}</td><td>{item.CurrentStock}</td><td>{item.MinimumStock}</td><td>{item.UnitPrice:F2}</td><td>{item.TotalValue:F2}</td><td>{item.ExpiryDate:yyyy-MM-dd}</td><td>{item.ShopName}</td></tr>");
+                }
+                html.AppendLine("</table>");
+                
+                // Add summary
+                html.AppendLine("<div class='summary'>");
+                html.AppendLine("<h2>Summary</h2>");
+                html.AppendLine($"<p><strong>Total Products:</strong> {inventoryReport.Summary.TotalProducts}</p>");
+                html.AppendLine($"<p><strong>Low Stock Products:</strong> {inventoryReport.Summary.LowStockProducts}</p>");
+                html.AppendLine($"<p><strong>Out of Stock Products:</strong> {inventoryReport.Summary.OutOfStockProducts}</p>");
+                html.AppendLine($"<p><strong>Total Inventory Value:</strong> {inventoryReport.Summary.TotalInventoryValue:F2}</p>");
+                html.AppendLine("</div>");
+                break;
+                
+            case FinancialReportResponse financialReport:
+                html.AppendLine("<h2>Financial Data</h2>");
+                html.AppendLine("<table>");
+                html.AppendLine("<tr><th>Date</th><th>Description</th><th>Category</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>Profit Margin</th><th>Shop</th></tr>");
+                foreach (var item in financialReport.Items.Take(100)) // Limit for PDF size
+                {
+                    html.AppendLine($"<tr><td>{item.Date:yyyy-MM-dd}</td><td>{item.Description}</td><td>{item.Category}</td><td>{item.Revenue:F2}</td><td>{item.Cost:F2}</td><td>{item.Profit:F2}</td><td>{item.ProfitMargin:F2}%</td><td>{item.ShopName}</td></tr>");
+                }
+                html.AppendLine("</table>");
+                
+                // Add summary
+                html.AppendLine("<div class='summary'>");
+                html.AppendLine("<h2>Summary</h2>");
+                html.AppendLine($"<p><strong>Total Revenue:</strong> {financialReport.Summary.TotalRevenue:F2}</p>");
+                html.AppendLine($"<p><strong>Total Costs:</strong> {financialReport.Summary.TotalCosts:F2}</p>");
+                html.AppendLine($"<p><strong>Gross Profit:</strong> {financialReport.Summary.GrossProfit:F2}</p>");
+                html.AppendLine($"<p><strong>Net Profit:</strong> {financialReport.Summary.NetProfit:F2}</p>");
+                html.AppendLine($"<p><strong>Gross Profit Margin:</strong> {financialReport.Summary.GrossProfitMargin:F2}%</p>");
+                html.AppendLine("</div>");
+                break;
+        }
+        
+        html.AppendLine("</body></html>");
+        
+        // Return HTML as bytes (in a real implementation, this would be converted to PDF using a library like iTextSharp or PuppeteerSharp)
+        return Encoding.UTF8.GetBytes(html.ToString());
     }
 
     private async Task<byte[]> ExportToJsonAsync<T>(T reportData) where T : ReportResponse

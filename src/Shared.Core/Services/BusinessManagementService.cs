@@ -15,17 +15,20 @@ public class BusinessManagementService : IBusinessManagementService
     private readonly IBusinessRepository _businessRepository;
     private readonly IShopRepository _shopRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IDeviceContextService _deviceContextService;
     private readonly ILogger<BusinessManagementService> _logger;
 
     public BusinessManagementService(
         IBusinessRepository businessRepository,
         IShopRepository shopRepository,
         IUserRepository userRepository,
+        IDeviceContextService deviceContextService,
         ILogger<BusinessManagementService> logger)
     {
         _businessRepository = businessRepository;
         _shopRepository = shopRepository;
         _userRepository = userRepository;
+        _deviceContextService = deviceContextService;
         _logger = logger;
     }
 
@@ -66,7 +69,7 @@ public class BusinessManagementService : IBusinessManagementService
             IsActive = true,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            DeviceId = Guid.NewGuid(), // TODO: Get from current device context
+            DeviceId = _deviceContextService.GetCurrentDeviceId(),
             SyncStatus = SyncStatus.NotSynced
         };
 
@@ -207,7 +210,7 @@ public class BusinessManagementService : IBusinessManagementService
             IsActive = true,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            DeviceId = Guid.NewGuid(), // TODO: Get from current device context
+            DeviceId = _deviceContextService.GetCurrentDeviceId(),
             SyncStatus = SyncStatus.NotSynced
         };
 

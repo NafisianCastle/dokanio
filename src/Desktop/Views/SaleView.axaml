@@ -2,242 +2,504 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Desktop.ViewModels"
              x:Class="Desktop.Views.SaleView"
-             x:DataType="vm:SaleViewModel">
+             x:DataType="vm:SaleViewModel"
+             Background="{StaticResource BackgroundBrush}">
     
+    <!-- Loading Overlay -->
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        
-        <!-- Left Panel - Product Search and Sale Items -->
-        <Grid Grid.Column="0" Margin="0,0,10,0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <!-- Main Content -->
+        <Grid IsEnabled="{Binding !IsBusy}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
             
-            <!-- Search Section -->
-            <Border Grid.Row="0" Classes="card" Margin="0,0,0,10">
-                <StackPanel Spacing="10">
-                    <TextBlock Text="Add Products" FontWeight="Bold" FontSize="16"/>
-                    
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+            <!-- Left Panel - Product Search and Sale Items -->
+            <Grid Grid.Column="0" Margin="0,0,8,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Product Search Section -->
+                <Border Grid.Row="0" Classes="card-elevated" Margin="0,0,0,16">
+                    <StackPanel Spacing="{StaticResource SpacingMD}">
+                        <TextBlock Text="Add Products" Classes="heading-3"/>
                         
-                        <TextBox Grid.Column="0" 
-                                 Text="{Binding SearchText}" 
-                                 Watermark="Search products or scan barcode..."
-                                 Margin="0,0,10,0"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBox Grid.Column="0" 
+                                     Text="{Binding SearchText}" 
+                                     Watermark="Search products or scan barcode..."
+                                     Classes="input-primary"
+                                     Margin="0,0,8,0"
+                                     KeyDown="OnSearchKeyDown"
+                                     TabIndex="1"
+                                     Name="SearchBox"/>
+                            
+                            <Button Grid.Column="1" 
+                                    Content="🔍 Search" 
+                                    Command="{Binding SearchProductsCommand}"
+                                    Classes="btn-outline btn-small"
+                                    IsEnabled="{Binding !IsScanning}"
+                                    Margin="0,0,8,0"
+                                    TabIndex="2"/>
+                            
+                            <Button Grid.Column="2" 
+                                    Content="📷 Scan" 
+                                    Command="{Binding StartBarcodeScanCommand}"
+                                    Classes="btn-primary btn-small"
+                                    IsEnabled="{Binding !IsScanning}"
+                                    TabIndex="3">
+                                <Button.IsVisible>
+                                    <Binding Path="!IsScanning"/>
+                                </Button.IsVisible>
+                            </Button>
+                            
+                            <!-- Scanning Indicator -->
+                            <StackPanel Grid.Column="2" 
+                                        Orientation="Horizontal" 
+                                        Spacing="8"
+                                        IsVisible="{Binding IsScanning}">
+                                <ProgressBar Classes="loading-circular" IsIndeterminate="True"/>
+                                <TextBlock Text="Scanning..." Classes="body-2" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
                         
-                        <Button Grid.Column="1" 
-                                Content="Scan Barcode" 
-                                Command="{Binding StartBarcodeScanCommand}"
-                                IsEnabled="{Binding !IsScanning}"/>
-                    </Grid>
-                    
-                    <!-- Search Results -->
-                    <ListBox ItemsSource="{Binding SearchResults}" 
-                             MaxHeight="150"
-                             IsVisible="{Binding SearchResults.Count}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border Classes="listitem" Cursor="Hand" 
-                                        Tapped="OnProductTapped">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                                            <TextBlock Text="{Binding Barcode}" FontSize="12" Opacity="0.7"/>
-                                        </StackPanel>
-                                        
-                                        <TextBlock Grid.Column="1" 
-                                                   Text="{Binding UnitPrice, StringFormat='₹{0:N2}'}" 
-                                                   FontWeight="Bold"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </StackPanel>
-            </Border>
-            
-            <!-- Customer Info -->
-            <Border Grid.Row="1" Classes="card" Margin="0,0,0,10">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                        <TextBlock Text="Customer Name" FontWeight="Bold" Margin="0,0,0,5"/>
-                        <TextBox Text="{Binding CustomerName}" Watermark="Optional"/>
+                        <!-- Search Results -->
+                        <Border IsVisible="{Binding SearchResults.Count, Converter={StaticResource CountToVisibilityConverter}}"
+                                Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource RadiusSM}"
+                                MaxHeight="200">
+                            <ScrollViewer>
+                                <ItemsControl ItemsSource="{Binding SearchResults}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Classes="list-item" 
+                                                    Tapped="OnProductTapped"
+                                                    KeyDown="OnProductKeyDown"
+                                                    Focusable="True"
+                                                    TabIndex="4">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="{Binding Name}" Classes="body-1" FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{Binding Barcode}" Classes="body-2"/>
+                                                        <TextBlock Text="{Binding Category}" Classes="caption"/>
+                                                    </StackPanel>
+                                                    
+                                                    <StackPanel Grid.Column="1" HorizontalAlignment="Right" Margin="8,0">
+                                                        <TextBlock Text="{Binding UnitPrice, StringFormat=₹\{0:N2\}}" 
+                                                                   Classes="body-1" 
+                                                                   FontWeight="Bold"
+                                                                   Foreground="{StaticResource SecondaryBrush}"/>
+                                                        <TextBlock Text="{Binding StockQuantity, StringFormat=Stock: \{0\}}" 
+                                                                   Classes="caption"
+                                                                   HorizontalAlignment="Right"/>
+                                                    </StackPanel>
+                                                    
+                                                    <Button Grid.Column="2"
+                                                            Content="+"
+                                                            Classes="btn-primary btn-small"
+                                                            Command="{Binding $parent[UserControl].((vm:SaleViewModel)DataContext).AddProductCommand}"
+                                                            CommandParameter="{Binding}"
+                                                            Margin="8,0,0,0"
+                                                            Width="32"
+                                                            Height="32"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Border>
+                        
+                        <!-- Search Status -->
+                        <Border IsVisible="{Binding IsSearching, FallbackValue=False}" Classes="status-warning">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ProgressBar Classes="loading-circular" IsIndeterminate="True" Width="16" Height="16"/>
+                                <TextBlock Text="Searching products..." Classes="body-2"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <Border IsVisible="{Binding HasSearched, FallbackValue=False}" Classes="status-success">
+                            <TextBlock Text="{Binding SearchResults.Count, StringFormat=\{0\} products found}" Classes="body-2"/>
+                        </Border>
                     </StackPanel>
-                    
-                    <StackPanel Grid.Column="1">
-                        <TextBlock Text="Phone Number" FontWeight="Bold" Margin="0,0,0,5"/>
-                        <TextBox Text="{Binding CustomerPhone}" Watermark="Optional"/>
+                </Border>
+                
+                <!-- Customer Information Section -->
+                <Border Grid.Row="1" Classes="card" Margin="0,0,0,16">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Text="Customer Name" Classes="label"/>
+                                <TextBox Text="{Binding CustomerName}" 
+                                         Watermark="Enter customer name (optional)"
+                                         Classes="input-primary"
+                                         TabIndex="5"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="1" Margin="8,0">
+                                <TextBlock Text="Phone Number" Classes="label"/>
+                                <TextBox Text="{Binding CustomerPhone}" 
+                                         Watermark="Enter phone number"
+                                         Classes="input-primary"
+                                         TabIndex="6"
+                                         LostFocus="OnPhoneNumberLostFocus"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
+                                <Button Content="🔍 Lookup" 
+                                        Command="{Binding LookupCustomerCommand}"
+                                        Classes="btn-outline btn-small"
+                                        IsEnabled="{Binding CustomerPhone, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                        TabIndex="7"/>
+                            </StackPanel>
+                        </Grid>
+                        
+                        <!-- Customer Lookup Status -->
+                        <StackPanel Margin="0,8,0,0" IsVisible="{Binding IsLookingUpCustomer, FallbackValue=False}">
+                            <Border Classes="status-warning">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <ProgressBar Classes="loading-circular" IsIndeterminate="True" Width="16" Height="16"/>
+                                    <TextBlock Text="Looking up customer..." Classes="body-2"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                        
+                        <StackPanel Margin="0,8,0,0" IsVisible="{Binding CustomerFound, FallbackValue=False}">
+                            <Border Classes="status-success">
+                                <StackPanel>
+                                    <TextBlock Text="Customer found!" Classes="body-2" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding CustomerMembershipInfo, FallbackValue='Member details loaded'}" Classes="caption"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
-                </Grid>
-            </Border>
-            
-            <!-- Sale Items -->
-            <Border Grid.Row="2" Classes="card">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    
-                    <TextBlock Grid.Row="0" Text="Sale Items" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
-                    
-                    <DataGrid Grid.Row="1" 
-                              ItemsSource="{Binding SaleItems}"
-                              AutoGenerateColumns="False"
-                              CanUserReorderColumns="False"
-                              CanUserResizeColumns="True"
-                              GridLinesVisibility="Horizontal">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*"/>
-                            <DataGridTextColumn Header="Price" Binding="{Binding UnitPrice, StringFormat='₹{0:N2}'}" Width="80"/>
-                            <DataGridTemplateColumn Header="Qty" Width="80">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <NumericUpDown Value="{Binding Quantity}" 
-                                                       Minimum="1" 
-                                                       Maximum="999"
-                                                       Increment="1"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat='₹{0:N2}'}" Width="100"/>
-                            <DataGridTemplateColumn Header="Action" Width="80">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Button Content="Remove" 
-                                                Command="{Binding $parent[UserControl].((vm:SaleViewModel)DataContext).RemoveItemCommand}"
-                                                CommandParameter="{Binding}"
-                                                Classes="danger"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
-            </Border>
-        </Grid>
-        
-        <!-- Right Panel - Payment and Totals -->
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            
-            <!-- Totals -->
-            <Border Grid.Row="0" Classes="card" Margin="0,0,0,10">
-                <StackPanel Spacing="10">
-                    <TextBlock Text="Order Summary" FontWeight="Bold" FontSize="16"/>
-                    
+                </Border>
+                
+                <!-- Sale Items Section -->
+                <Border Grid.Row="2" Classes="card-elevated">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Subtotal:"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Subtotal, StringFormat='₹{0:N2}'}"/>
-                        
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Tax (10%):"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Tax, StringFormat='₹{0:N2}'}"/>
-                        
-                        <Separator Grid.Row="2" Grid.ColumnSpan="2" Margin="0,5"/>
-                    </Grid>
-                    
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <TextBlock Grid.Column="0" Text="Total:" FontWeight="Bold" FontSize="18"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Total, StringFormat='₹{0:N2}'}" 
-                                   FontWeight="Bold" FontSize="18" Foreground="#4CAF50"/>
-                    </Grid>
-                </StackPanel>
-            </Border>
-            
-            <!-- Payment -->
-            <Border Grid.Row="1" Classes="card" Margin="0,0,0,10">
-                <StackPanel Spacing="10">
-                    <TextBlock Text="Payment" FontWeight="Bold" FontSize="16"/>
-                    
-                    <StackPanel>
-                        <TextBlock Text="Payment Method" FontWeight="Bold" Margin="0,0,0,5"/>
-                        <ComboBox ItemsSource="{Binding PaymentMethods}" 
-                                  SelectedItem="{Binding SelectedPaymentMethod}"
-                                  HorizontalAlignment="Stretch"/>
-                    </StackPanel>
-                    
-                    <StackPanel>
-                        <TextBlock Text="Amount Received" FontWeight="Bold" Margin="0,0,0,5"/>
-                        <NumericUpDown Value="{Binding AmountReceived}" 
-                                       Minimum="0" 
-                                       Maximum="999999"
-                                       Increment="1"
-                                       FormatString="₹{0:N2}"/>
-                        
-                        <Grid Margin="0,10,0,0">
+                        <Grid Grid.Row="0" Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             
-                            <TextBlock Grid.Column="0" Text="Change:" FontWeight="Bold"/>
-                            <TextBlock Grid.Column="1" Text="{Binding ChangeAmount, StringFormat='₹{0:N2}'}" 
-                                       FontWeight="Bold" Foreground="#FF9800"/>
+                            <TextBlock Grid.Column="0" Text="Sale Items" Classes="heading-3"/>
+                            
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{Binding SaleItems.Count, StringFormat=\{0\} items}" 
+                                           Classes="body-2" 
+                                           VerticalAlignment="Center"/>
+                                <Button Content="🗑️ Clear All" 
+                                        Command="{Binding ClearAllItemsCommand}"
+                                        Classes="btn-danger btn-small"
+                                        IsVisible="{Binding SaleItems.Count, Converter={StaticResource CountToVisibilityConverter}}"
+                                        TabIndex="8"/>
+                            </StackPanel>
                         </Grid>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
+                        
+                        <!-- Empty State -->
+                        <StackPanel Grid.Row="1" 
+                                    HorizontalAlignment="Center" 
+                                    VerticalAlignment="Center"
+                                    IsVisible="{Binding SaleItems.Count, Converter={StaticResource InverseBoolConverter}}"
+                                    Spacing="16">
+                            <TextBlock Text="🛒" FontSize="48" HorizontalAlignment="Center" Opacity="0.3"/>
+                            <TextBlock Text="No items in cart" Classes="heading-4" HorizontalAlignment="Center" Opacity="0.7"/>
+                            <TextBlock Text="Search for products above or scan barcodes to add items" 
+                                       Classes="body-2" 
+                                       HorizontalAlignment="Center" 
+                                       Opacity="0.5"
+                                       TextAlignment="Center"/>
+                        </StackPanel>
+                        
+                        <!-- Sale Items Grid -->
+                        <DataGrid Grid.Row="1" 
+                                  ItemsSource="{Binding SaleItems}"
+                                  Classes="grid-primary"
+                                  IsVisible="{Binding SaleItems.Count, Converter={StaticResource CountToVisibilityConverter}}"
+                                  TabIndex="9">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*" MinWidth="150"/>
+                                <DataGridTextColumn Header="Price" Binding="{Binding UnitPrice, StringFormat=₹\{0:N2\}}" Width="80"/>
+                                <DataGridTemplateColumn Header="Qty" Width="100">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <NumericUpDown Value="{Binding Quantity}" 
+                                                           Minimum="1" 
+                                                           Maximum="999"
+                                                           Increment="1"
+                                                           Classes="input-primary"
+                                                           ValueChanged="OnQuantityChanged"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat=₹\{0:N2\}}" Width="100"/>
+                                <DataGridTemplateColumn Header="Action" Width="80">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="🗑️" 
+                                                    Command="{Binding $parent[UserControl].((vm:SaleViewModel)DataContext).RemoveItemCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Classes="btn-danger btn-small"
+                                                    ToolTip.Tip="Remove item from cart"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        
+                        <!-- Quick Actions -->
+                        <StackPanel Grid.Row="2" 
+                                    Orientation="Horizontal" 
+                                    Spacing="8" 
+                                    Margin="0,12,0,0"
+                                    IsVisible="{Binding SaleItems.Count, Converter={StaticResource CountToVisibilityConverter}}">
+                            <Button Content="💾 Save Draft" 
+                                    Command="{Binding SaveDraftCommand}"
+                                    Classes="btn-outline btn-small"
+                                    TabIndex="10"/>
+                            <Button Content="📋 Load Draft" 
+                                    Command="{Binding LoadDraftCommand}"
+                                    Classes="btn-outline btn-small"
+                                    TabIndex="11"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
             
-            <!-- Actions -->
-            <Border Grid.Row="2" Classes="card">
-                <StackPanel Spacing="10">
-                    <Button Content="Complete Sale" 
-                            Command="{Binding CompleteSaleCommand}"
-                            IsEnabled="{Binding !IsBusy}"
-                            Classes="accent"
-                            HorizontalAlignment="Stretch"
-                            Height="50"
-                            FontSize="16"
-                            FontWeight="Bold"/>
-                    
-                    <Button Content="Reset Sale" 
-                            Command="{Binding ResetSaleCommand}"
-                            HorizontalAlignment="Stretch"/>
-                    
-                    <TextBlock Text="{Binding ErrorMessage}" 
-                               Foreground="Red" 
-                               IsVisible="{Binding HasError}"
-                               TextWrapping="Wrap"/>
+            <!-- Right Panel - Payment and Totals -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Order Summary -->
+                <Border Grid.Row="0" Classes="card-elevated" Margin="0,0,0,16">
+                    <StackPanel Spacing="{StaticResource SpacingMD}">
+                        <TextBlock Text="Order Summary" Classes="heading-3"/>
+                        
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Subtotal:" Classes="body-1"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Subtotal, StringFormat=₹\{0:N2\}}" Classes="body-1"/>
+                            
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Discount:" Classes="body-1"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TotalDiscount, StringFormat=-₹\{0:N2\}, FallbackValue=₹0.00}" 
+                                       Classes="body-1" Foreground="{StaticResource AccentBrush}"/>
+                            
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Tax (10%):" Classes="body-1"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Tax, StringFormat=₹\{0:N2\}}" Classes="body-1"/>
+                            
+                            <Rectangle Grid.Row="3" Grid.ColumnSpan="2" Height="1" Fill="{StaticResource DividerBrush}" Margin="0,8"/>
+                            
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Total:" Classes="heading-4"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Total, StringFormat=₹\{0:N2\}}" 
+                                       Classes="heading-4" Foreground="{StaticResource SecondaryBrush}"/>
+                        </Grid>
+                        
+                        <!-- Calculation Progress -->
+                        <ProgressBar IsVisible="{Binding IsCalculating, FallbackValue=False}" 
+                                     Classes="loading-primary" 
+                                     IsIndeterminate="True"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Payment Section -->
+                <Border Grid.Row="1" Classes="card" Margin="0,0,0,16">
+                    <StackPanel Spacing="{StaticResource SpacingMD}">
+                        <TextBlock Text="Payment" Classes="heading-3"/>
+                        
+                        <StackPanel>
+                            <TextBlock Text="Payment Method" Classes="label"/>
+                            <ComboBox ItemsSource="{Binding PaymentMethods}" 
+                                      SelectedItem="{Binding SelectedPaymentMethod}"
+                                      Classes="input-primary"
+                                      HorizontalAlignment="Stretch"
+                                      TabIndex="12"/>
+                        </StackPanel>
+                        
+                        <StackPanel>
+                            <TextBlock Text="Amount Received" Classes="label"/>
+                            <NumericUpDown Value="{Binding AmountReceived}" 
+                                           Minimum="0" 
+                                           Maximum="999999"
+                                           Increment="1"
+                                           FormatString="₹{0:N2}"
+                                           Classes="input-primary"
+                                           TabIndex="13"/>
+                            
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <TextBlock Grid.Column="0" Text="Change:" Classes="body-1" FontWeight="SemiBold"/>
+                                <TextBlock Grid.Column="1" Text="{Binding ChangeAmount, StringFormat=₹\{0:N2\}}" 
+                                           Classes="body-1" 
+                                           FontWeight="Bold" 
+                                           Foreground="{Binding ChangeAmount, Converter={StaticResource ChangeAmountColorConverter}, FallbackValue={StaticResource SecondaryBrush}}"/>
+                            </Grid>
+                        </StackPanel>
+                        
+                        <!-- Quick Amount Buttons -->
+                        <StackPanel>
+                            <TextBlock Text="Quick Amount" Classes="label"/>
+                            <UniformGrid Columns="3" Rows="2">
+                                <Button Content="₹100" Command="{Binding SetAmountCommand}" CommandParameter="100" Classes="btn-outline btn-small" Margin="2"/>
+                                <Button Content="₹200" Command="{Binding SetAmountCommand}" CommandParameter="200" Classes="btn-outline btn-small" Margin="2"/>
+                                <Button Content="₹500" Command="{Binding SetAmountCommand}" CommandParameter="500" Classes="btn-outline btn-small" Margin="2"/>
+                                <Button Content="₹1000" Command="{Binding SetAmountCommand}" CommandParameter="1000" Classes="btn-outline btn-small" Margin="2"/>
+                                <Button Content="₹2000" Command="{Binding SetAmountCommand}" CommandParameter="2000" Classes="btn-outline btn-small" Margin="2"/>
+                                <Button Content="Exact" Command="{Binding SetExactAmountCommand}" Classes="btn-outline btn-small" Margin="2"/>
+                            </UniformGrid>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Actions Section -->
+                <Border Grid.Row="2" Classes="card-elevated">
+                    <StackPanel Spacing="{StaticResource SpacingMD}">
+                        <TextBlock Text="Actions" Classes="heading-4"/>
+                        
+                        <!-- Complete Sale Button -->
+                        <Button Content="💳 Complete Sale" 
+                                Command="{Binding CompleteSaleCommand}"
+                                IsEnabled="{Binding CanCompleteSale, FallbackValue=True}"
+                                Classes="btn-primary btn-large"
+                                HorizontalAlignment="Stretch"
+                                TabIndex="14">
+                            <Button.IsVisible>
+                                <Binding Path="IsProcessingSale" Converter="{StaticResource InverseBoolConverter}" FallbackValue="True"/>
+                            </Button.IsVisible>
+                        </Button>
+                        
+                        <!-- Processing Sale Indicator -->
+                        <Border IsVisible="{Binding IsProcessingSale, FallbackValue=False}" Classes="status-warning">
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <ProgressBar Classes="loading-circular" IsIndeterminate="True"/>
+                                <TextBlock Text="Processing sale..." Classes="body-1" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Secondary Actions -->
+                        <StackPanel Spacing="8">
+                            <Button Content="🔄 Reset Sale" 
+                                    Command="{Binding ResetSaleCommand}"
+                                    Classes="btn-outline"
+                                    HorizontalAlignment="Stretch"
+                                    TabIndex="15"/>
+                            
+                            <Button Content="🖨️ Print Receipt" 
+                                    Command="{Binding PrintReceiptCommand}"
+                                    Classes="btn-outline"
+                                    HorizontalAlignment="Stretch"
+                                    IsEnabled="{Binding CanPrintReceipt, FallbackValue=False}"
+                                    TabIndex="16"/>
+                            
+                            <Button Content="📧 Email Receipt" 
+                                    Command="{Binding EmailReceiptCommand}"
+                                    Classes="btn-outline"
+                                    HorizontalAlignment="Stretch"
+                                    IsEnabled="{Binding CanEmailReceipt, FallbackValue=False}"
+                                    TabIndex="17"/>
+                        </StackPanel>
+                        
+                        <!-- Keyboard Shortcuts Info -->
+                        <Border Classes="card-compact" Background="{StaticResource BackgroundBrush}">
+                            <StackPanel>
+                                <TextBlock Text="Keyboard Shortcuts" Classes="caption" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBlock Text="F1: Search Products" Classes="caption"/>
+                                <TextBlock Text="F2: Scan Barcode" Classes="caption"/>
+                                <TextBlock Text="F9: Complete Sale" Classes="caption"/>
+                                <TextBlock Text="Esc: Reset Sale" Classes="caption"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+        
+        <!-- Global Loading Overlay -->
+        <Border IsVisible="{Binding IsBusy, FallbackValue=False}" 
+                Background="#80000000" 
+                ZIndex="1000">
+            <StackPanel HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        Spacing="16">
+                <ProgressBar Classes="loading-circular" 
+                             IsIndeterminate="True" 
+                             Width="48" 
+                             Height="48"/>
+                <TextBlock Text="{Binding BusyMessage, FallbackValue='Loading...'}" 
+                           Classes="heading-4" 
+                           Foreground="White" 
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Error/Success Messages -->
+        <Border IsVisible="{Binding HasMessage, FallbackValue=False}" 
+                VerticalAlignment="Top" 
+                HorizontalAlignment="Center" 
+                Margin="0,16,0,0"
+                ZIndex="999">
+            <Border Classes="status-success"
+                    MaxWidth="400">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="{Binding MessageIcon, FallbackValue='ℹ️'}" FontSize="16" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Message, FallbackValue='Message'}" Classes="body-1" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                    <Button Content="✕" 
+                            Command="{Binding DismissMessageCommand}"
+                            Classes="btn-small"
+                            Background="Transparent"
+                            Foreground="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=BorderBrush}"
+                            VerticalAlignment="Top"/>
                 </StackPanel>
             </Border>
-        </Grid>
+        </Border>
     </Grid>
 </UserControl>

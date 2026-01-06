@@ -1,0 +1,378 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Color Resources -->
+    <Styles.Resources>
+        <!-- Primary Colors -->
+        <SolidColorBrush x:Key="PrimaryBrush">#2196F3</SolidColorBrush>
+        <SolidColorBrush x:Key="PrimaryDarkBrush">#1976D2</SolidColorBrush>
+        <SolidColorBrush x:Key="PrimaryLightBrush">#BBDEFB</SolidColorBrush>
+        
+        <!-- Secondary Colors -->
+        <SolidColorBrush x:Key="SecondaryBrush">#4CAF50</SolidColorBrush>
+        <SolidColorBrush x:Key="SecondaryDarkBrush">#388E3C</SolidColorBrush>
+        <SolidColorBrush x:Key="SecondaryLightBrush">#C8E6C9</SolidColorBrush>
+        
+        <!-- Accent Colors -->
+        <SolidColorBrush x:Key="AccentBrush">#FF9800</SolidColorBrush>
+        <SolidColorBrush x:Key="AccentDarkBrush">#F57C00</SolidColorBrush>
+        <SolidColorBrush x:Key="AccentLightBrush">#FFE0B2</SolidColorBrush>
+        
+        <!-- Error Colors -->
+        <SolidColorBrush x:Key="ErrorBrush">#F44336</SolidColorBrush>
+        <SolidColorBrush x:Key="ErrorDarkBrush">#D32F2F</SolidColorBrush>
+        <SolidColorBrush x:Key="ErrorLightBrush">#FFCDD2</SolidColorBrush>
+        
+        <!-- Warning Colors -->
+        <SolidColorBrush x:Key="WarningBrush">#FF9800</SolidColorBrush>
+        <SolidColorBrush x:Key="WarningDarkBrush">#F57C00</SolidColorBrush>
+        <SolidColorBrush x:Key="WarningLightBrush">#FFE0B2</SolidColorBrush>
+        
+        <!-- Neutral Colors -->
+        <SolidColorBrush x:Key="SurfaceBrush">#FFFFFF</SolidColorBrush>
+        <SolidColorBrush x:Key="BackgroundBrush">#FAFAFA</SolidColorBrush>
+        <SolidColorBrush x:Key="BorderBrush">#E0E0E0</SolidColorBrush>
+        <SolidColorBrush x:Key="DividerBrush">#EEEEEE</SolidColorBrush>
+        
+        <!-- Text Colors -->
+        <SolidColorBrush x:Key="TextPrimaryBrush">#212121</SolidColorBrush>
+        <SolidColorBrush x:Key="TextSecondaryBrush">#757575</SolidColorBrush>
+        <SolidColorBrush x:Key="TextDisabledBrush">#BDBDBD</SolidColorBrush>
+        <SolidColorBrush x:Key="TextOnPrimaryBrush">#FFFFFF</SolidColorBrush>
+        
+        <!-- Shadow Colors -->
+        <SolidColorBrush x:Key="ShadowBrush">#1A000000</SolidColorBrush>
+        <SolidColorBrush x:Key="ShadowLightBrush">#0D000000</SolidColorBrush>
+        
+        <!-- Spacing Values -->
+        <x:Double x:Key="SpacingXS">4</x:Double>
+        <x:Double x:Key="SpacingSM">8</x:Double>
+        <x:Double x:Key="SpacingMD">16</x:Double>
+        <x:Double x:Key="SpacingLG">24</x:Double>
+        <x:Double x:Key="SpacingXL">32</x:Double>
+        
+        <!-- Border Radius Values -->
+        <CornerRadius x:Key="RadiusXS">2</CornerRadius>
+        <CornerRadius x:Key="RadiusSM">4</CornerRadius>
+        <CornerRadius x:Key="RadiusMD">8</CornerRadius>
+        <CornerRadius x:Key="RadiusLG">12</CornerRadius>
+        <CornerRadius x:Key="RadiusXL">16</CornerRadius>
+    </Styles.Resources>
+
+    <!-- Card Styles -->
+    <Style Selector="Border.card">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMD}"/>
+        <Setter Property="Padding" Value="{StaticResource SpacingMD}"/>
+        <Setter Property="Margin" Value="{StaticResource SpacingSM}"/>
+        <Setter Property="BoxShadow" Value="0 2 8 0 #1A000000"/>
+    </Style>
+    
+    <Style Selector="Border.card-elevated">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMD}"/>
+        <Setter Property="Padding" Value="{StaticResource SpacingLG}"/>
+        <Setter Property="Margin" Value="{StaticResource SpacingSM}"/>
+        <Setter Property="BoxShadow" Value="0 4 16 0 #26000000"/>
+    </Style>
+    
+    <Style Selector="Border.card-compact">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
+        <Setter Property="Padding" Value="{StaticResource SpacingSM}"/>
+        <Setter Property="Margin" Value="{StaticResource SpacingXS}"/>
+        <Setter Property="BoxShadow" Value="0 1 4 0 #0D000000"/>
+    </Style>
+
+    <!-- Button Styles -->
+    <Style Selector="Button.btn-primary">
+        <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextOnPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
+        <Setter Property="Padding" Value="16,8"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    
+    <Style Selector="Button.btn-primary:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource PrimaryDarkBrush}"/>
+    </Style>
+    
+    <Style Selector="Button.btn-primary:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource PrimaryDarkBrush}"/>
+        <Setter Property="RenderTransform" Value="scale(0.98)"/>
+    </Style>
+    
+    <Style Selector="Button.btn-secondary">
+        <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextOnPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource SecondaryBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
+        <Setter Property="Padding" Value="16,8"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    
+    <Style Selector="Button.btn-secondary:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource SecondaryDarkBrush}"/>
+    </Style>
+    
+    <Style Selector="Button.btn-danger">
+        <Setter Property="Background" Value="{StaticResource ErrorBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextOnPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource ErrorBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
+        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    
+    <Style Selector="Button.btn-danger:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource ErrorDarkBrush}"/>
+    </Style>
+    
+    <Style Selector="Button.btn-outline">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
+        <Setter Property="Padding" Value="16,8"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    
+    <Style Selector="Button.btn-outline:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
+    </Style>
+    
+    <Style Selector="Button.btn-large">
+        <Setter Property="Padding" Value="24,12"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="MinHeight" Value="48"/>
+    </Style>
+    
+    <Style Selector="Button.btn-small">
+        <Setter Property="Padding" Value="8,4"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="MinHeight" Value="28"/>
+    </Style>
+
+    <!-- Input Styles -->
+    <Style Selector="TextBox.input-primary">
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+    </Style>
+    
+    <Style Selector="TextBox.input-primary:focus">
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="BorderThickness" Value="2"/>
+    </Style>
+    
+    <Style Selector="ComboBox.input-primary">
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+    </Style>
+    
+    <Style Selector="NumericUpDown.input-primary">
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+    </Style>
+
+    <!-- Typography Styles -->
+    <Style Selector="TextBlock.heading-1">
+        <Setter Property="FontSize" Value="32"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="Margin" Value="0,0,0,16"/>
+    </Style>
+    
+    <Style Selector="TextBlock.heading-2">
+        <Setter Property="FontSize" Value="24"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="Margin" Value="0,0,0,12"/>
+    </Style>
+    
+    <Style Selector="TextBlock.heading-3">
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="Margin" Value="0,0,0,8"/>
+    </Style>
+    
+    <Style Selector="TextBlock.heading-4">
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="Margin" Value="0,0,0,8"/>
+    </Style>
+    
+    <Style Selector="TextBlock.body-1">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="LineHeight" Value="20"/>
+    </Style>
+    
+    <Style Selector="TextBlock.body-2">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+        <Setter Property="LineHeight" Value="16"/>
+    </Style>
+    
+    <Style Selector="TextBlock.caption">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+        <Setter Property="LineHeight" Value="14"/>
+    </Style>
+    
+    <Style Selector="TextBlock.label">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="Margin" Value="0,0,0,4"/>
+    </Style>
+
+    <!-- List Item Styles -->
+    <Style Selector="Border.list-item">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
+        <Setter Property="Padding" Value="{StaticResource SpacingSM}"/>
+        <Setter Property="Margin" Value="2"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                <BrushTransition Property="BorderBrush" Duration="0:0:0.2"/>
+            </Transitions>
+        </Setter>
+    </Style>
+    
+    <Style Selector="Border.list-item:pointerover">
+        <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+    </Style>
+    
+    <Style Selector="Border.list-item:pressed">
+        <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+    </Style>
+
+    <!-- Status Styles -->
+    <Style Selector="Border.status-success">
+        <Setter Property="Background" Value="{StaticResource SecondaryLightBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource SecondaryBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
+        <Setter Property="Padding" Value="8,4"/>
+    </Style>
+    
+    <Style Selector="Border.status-warning">
+        <Setter Property="Background" Value="{StaticResource WarningLightBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource WarningBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
+        <Setter Property="Padding" Value="8,4"/>
+    </Style>
+    
+    <Style Selector="Border.status-error">
+        <Setter Property="Background" Value="{StaticResource ErrorLightBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource ErrorBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
+        <Setter Property="Padding" Value="8,4"/>
+    </Style>
+
+    <!-- Loading Styles -->
+    <Style Selector="ProgressBar.loading-primary">
+        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusXS}"/>
+        <Setter Property="Height" Value="4"/>
+    </Style>
+    
+    <Style Selector="ProgressBar.loading-circular">
+        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="24"/>
+    </Style>
+
+    <!-- DataGrid Styles -->
+    <Style Selector="DataGrid.grid-primary">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
+        <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="CanUserReorderColumns" Value="False"/>
+        <Setter Property="CanUserResizeColumns" Value="True"/>
+        <Setter Property="CanUserSortColumns" Value="True"/>
+    </Style>
+    
+    <Style Selector="DataGridColumnHeader">
+        <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+    </Style>
+    
+    <Style Selector="DataGridRow">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+    </Style>
+    
+    <Style Selector="DataGridRow:nth-child(even)">
+        <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+    </Style>
+    
+    <Style Selector="DataGridRow:pointerover">
+        <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
+    </Style>
+    
+    <Style Selector="DataGridCell">
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,1,0"/>
+    </Style>
+
+    <!-- Accessibility Styles -->
+    <Style Selector="TextBox:focus">
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="BorderThickness" Value="2"/>
+    </Style>
+    
+    <Style Selector="Button:focus">
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryDarkBrush}"/>
+    </Style>
+
+</Styles>
