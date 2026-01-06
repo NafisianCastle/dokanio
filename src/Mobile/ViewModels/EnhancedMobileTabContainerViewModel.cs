@@ -911,8 +911,10 @@ public partial class EnhancedMobileTabContainerViewModel : BaseViewModel
     private Guid GenerateDeviceId()
     {
         var deviceInfo = DeviceInfo.Current;
-        var deviceString = $"{deviceInfo.Platform}-{deviceInfo.Model}-{deviceInfo.Manufacturer}";
-        return new Guid(deviceString.GetHashCode(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        var deviceString = $"{deviceInfo.Platform}-{deviceInfo.Manufacturer}-{deviceInfo.Model}";
+
+        var hash = System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(deviceString));
+        return new Guid(hash.AsSpan(0, 16));
     }
 
     private void StartAutoSync()

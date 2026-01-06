@@ -95,9 +95,12 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
         if (currentUser != null)
         {
             _currentUserId = currentUser.Id;
-            _currentDeviceId = Microsoft.Maui.Devices.DeviceInfo.Current.Idiom == DeviceIdiom.Phone 
-                ? new Guid(Microsoft.Maui.Devices.DeviceInfo.Current.Model.GetHashCode(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                : Guid.NewGuid();
+            var storedDeviceId = Microsoft.Maui.Storage.Preferences.Default.Get("device_id", string.Empty);
+            if (!Guid.TryParse(storedDeviceId, out _currentDeviceId))
+            {
+                _currentDeviceId = Guid.NewGuid();
+                Microsoft.Maui.Storage.Preferences.Default.Set("device_id", _currentDeviceId.ToString());
+            }
             _currentShopId = currentShop?.Id ?? currentUser.ShopId ?? Guid.NewGuid();
         }
     }
@@ -472,24 +475,15 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
     {
         // Handle pinch gesture for zooming UI elements
         TriggerHapticFeedback();
-        
+
         // Toggle between compact and expanded view
         var isCompactView = await Shell.Current.DisplayAlert(
-            "View Mode", 
-            "Switch to compact view for more tabs?", 
-            "Compact", 
+            "View Mode",
+            "Switch to compact view for more tabs?",
+            "Compact",
             "Expanded");
-        
-        // This would adjust the UI layout - implementation depends on the UI framework
-        // For now, just provide feedback
-        if (isCompactView)
-        {
-            MaxTabs = 5; // Allow more tabs in compact mode
-        }
-        else
-        {
-            MaxTabs = 3; // Fewer tabs in expanded mode
-        }
+
+        MaxTabs = isCompactView ? 5 : 3;
     }
 
     [RelayCommand]
@@ -874,13 +868,13 @@ public partial class MobileSaleTabViewModel : ObservableObject
         var saleViewModel = new SaleViewModel(
             null!, // IEnhancedSalesService - would be injected
             null!, // IProductService - would be injected
-            null!, // IPrinterService - would be injected
-            null!, // IReceiptService - would be injected
-            null!, // ICurrentUserService - would be injected
-            null!, // IUserContextService - would be injected
-            null!, // IBusinessManagementService - would be injected
-            null!, // IMultiTabSalesManager - would be injected
-            null!, // ICustomerLookupService - would be injected
+    // Create the mobile sale view model for this tab
+    SaleViewModel = CreateSaleViewModelForTab(sessionData);
+
+    // Load session data into the view model
+    LoadSessionDataIntoViewModel();
+
+    // Subscribe to changes
             null!  // IBarcodeIntegrationService - would be injected
         );
 
