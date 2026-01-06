@@ -852,11 +852,11 @@ public partial class MobileSaleTabViewModel : ObservableObject
         _logger = logger;
 
         // Create the mobile sale view model for this tab
-        SaleViewModel = saleViewModelFactory();
-        
+        SaleViewModel = CreateSaleViewModelForTab(SessionData);
+
         // Load session data into the view model
         LoadSessionDataIntoViewModel();
-        
+
         // Subscribe to changes
         SaleViewModel.PropertyChanged += (s, e) => HasUnsavedChanges = true;
     }
@@ -902,7 +902,9 @@ public partial class MobileSaleTabViewModel : ObservableObject
                     BatchNumber = item.BatchNumber,
                     Weight = item.Weight,
                     IsWeightBased = item.IsWeightBased,
-                    DiscountPercentage = item.DiscountAmount > 0 ? (item.DiscountAmount / item.LineTotal) * 100 : 0
+                    DiscountPercentage = (item.DiscountAmount > 0 && item.LineTotal > 0)
+                        ? (item.DiscountAmount / item.LineTotal) * 100
+                        : 0
                 };
                 
                 SaleViewModel.SaleItems.Add(saleItemViewModel);

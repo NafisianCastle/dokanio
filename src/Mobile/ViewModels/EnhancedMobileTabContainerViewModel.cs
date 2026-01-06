@@ -236,7 +236,7 @@ public partial class EnhancedMobileTabContainerViewModel : BaseViewModel
             // Switch to new tab
             await SwitchToTab(tabViewModel);
 
-            _logger.LogInformation("Created new enhanced mobile sale tab: {TabName}", tabName);
+            _logger.LogInformation("Created new enhanced mobile sale tab.");
         }
         catch (Exception ex)
         {
@@ -910,11 +910,22 @@ public partial class EnhancedMobileTabContainerViewModel : BaseViewModel
 
     private Guid GenerateDeviceId()
     {
+        var cached = Preferences.Default.Get("pos_device_id", string.Empty);
+        if (Guid.TryParse(cached, out var existing))
+        {
+            return existing;
+        }
+
         var deviceInfo = DeviceInfo.Current;
-        var deviceString = $"{deviceInfo.Platform}-{deviceInfo.Manufacturer}-{deviceInfo.Model}";
+        var manufacturer = string.IsNullOrWhiteSpace(deviceInfo.Manufacturer) ? "unknown" : deviceInfo.Manufacturer;
+        var model = string.IsNullOrWhiteSpace(deviceInfo.Model) ? "unknown" : deviceInfo.Model;
+        var deviceString = $"{deviceInfo.Platform}-{manufacturer}-{model}-{AppInfo.Current.VersionString}";
 
         var hash = System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(deviceString));
-        return new Guid(hash.AsSpan(0, 16));
+        var generated = new Guid(hash.AsSpan(0, 16));
+
+        Preferences.Default.Set("pos_device_id", generated.ToString());
+        return generated;
     }
 
     private void StartAutoSync()
