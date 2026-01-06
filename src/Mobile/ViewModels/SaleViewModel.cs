@@ -1071,11 +1071,11 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
     private Task? _autoSaveTask;
     private DateTime _lastInteraction = DateTime.UtcNow;
 
-    private void StartAutoSave()
+    private async Task StartAutoSaveAsync()
     {
         if (!EnableAutoSave) return;
 
-        StopAutoSave();
+        await StopAutoSaveAsync();
 
         _autoSaveCts = new CancellationTokenSource();
         var token = _autoSaveCts.Token;
@@ -1106,60 +1106,20 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
         }, token);
     }
 
-    private async Task StopAutoSaveAsync()
-    {
-        var cts = _autoSaveCts;
-        var task = _autoSaveTask;
-
-        _autoSaveCts = null;
-        _autoSaveTask = null;
-
-        if (cts != null)
-        {
-            cts.Cancel();
-            cts.Dispose();
-        }
-
-        if (task != null)
-        {
-            try { await task; }
-            catch (OperationCanceledException) { /* expected on stop */ }
-        }
-    }
-
-    [RelayCommand]
-    private async Task ToggleOneHandedMode()
-    {
-        IsOneHandedMode = !IsOneHandedMode;
-        TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.Click);
-        
-        await Shell.Current.DisplayAlert(
-            "One-Handed Mode", 
-            IsOneHandedMode ? "One-handed mode enabled" : "One-handed mode disabled", 
-            "OK");
-    }
-
-    [RelayCommand]
-    private async Task ToggleVoiceInput()
-    {
-        EnableVoiceInput = !EnableVoiceInput;
-        TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.Click);
-    }
-
     [RelayCommand]
     private async Task ToggleAutoSave()
     {
         EnableAutoSave = !EnableAutoSave;
-        
+
         if (EnableAutoSave)
         {
-            StartAutoSave();
+            await StartAutoSaveAsync();
         }
         else
         {
-            StopAutoSave();
+            await StopAutoSaveAsync();
         }
-        
+
         TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.Click);
     }
 
