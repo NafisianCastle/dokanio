@@ -129,6 +129,8 @@ public partial class MainViewModel : BaseViewModel
         _multiTenantSyncService = null!;
         
         Title = "Multi-Business POS Desktop";
+        
+        // Create enhanced SaleViewModel with null services for design-time
         SaleViewModel = new SaleViewModel();
         SupplierViewModel = new SupplierViewModel();
         PurchaseViewModel = new PurchaseViewModel();
