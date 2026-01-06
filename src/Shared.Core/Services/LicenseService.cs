@@ -107,19 +107,19 @@ public class LicenseService : ILicenseService
             var license = await _licenseRepository.GetByLicenseKeyAsync(licenseKey);
             if (license == null)
             {
-                _logger.LogWarning("License key not found: {LicenseKey}", licenseKey);
+                _logger.LogWarning("License key not found: {LicenseKey}", MaskLicenseKey(licenseKey));
                 return false;
             }
 
             if (license.Status != LicenseStatus.Active)
             {
-                _logger.LogWarning("License is not active: {LicenseKey}, Status: {Status}", licenseKey, license.Status);
+                _logger.LogWarning("License is not active: {LicenseKey}, Status: {Status}", MaskLicenseKey(licenseKey), license.Status);
                 return false;
             }
 
             if (license.ExpiryDate < DateTime.UtcNow)
             {
-                _logger.LogWarning("License has expired: {LicenseKey}, ExpiryDate: {ExpiryDate}", licenseKey, license.ExpiryDate);
+                _logger.LogWarning("License has expired: {LicenseKey}, ExpiryDate: {ExpiryDate}", MaskLicenseKey(licenseKey), license.ExpiryDate);
                 return false;
             }
 
@@ -130,12 +130,12 @@ public class LicenseService : ILicenseService
             await _licenseRepository.UpdateAsync(license);
             await _licenseRepository.SaveChangesAsync();
 
-            _logger.LogInformation("License activated successfully: {LicenseKey} for device {DeviceId}", licenseKey, deviceId);
+            _logger.LogInformation("License activated successfully: {LicenseKey} for device {DeviceId}", MaskLicenseKey(licenseKey), deviceId);
             return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error activating license: {LicenseKey}", licenseKey);
+            _logger.LogError(ex, "Error activating license: {LicenseKey}", MaskLicenseKey(licenseKey));
             return false;
         }
     }
