@@ -475,33 +475,16 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
     {
         // Handle pinch gesture for zooming UI elements
         TriggerHapticFeedback();
-        
+
         // Toggle between compact and expanded view
         var isCompactView = await Shell.Current.DisplayAlert(
-            "View Mode", 
-            "Switch to compact view for more tabs?", 
-            "Compact", 
+            "View Mode",
+            "Switch to compact view for more tabs?",
+            "Compact",
             "Expanded");
-        
-        if (item.Quantity <= 0 || item.Quantity % 1 != 0 || item.Quantity > int.MaxValue)
-        {
-            _logger.LogWarning("Invalid quantity {Quantity} for product {ProductId} in tab {TabName}", item.Quantity, item.ProductId, TabName);
-            continue;
-        }
 
-        var saleItemViewModel = new SaleItemViewModel
-        {
-            ProductId = item.ProductId,
-            ProductName = item.ProductName,
-            Quantity = checked((int)item.Quantity),
-            UnitPrice = item.UnitPrice,
-            BatchNumber = item.BatchNumber,
-            Weight = item.Weight,
-            IsWeightBased = item.IsWeightBased,
-            DiscountPercentage = (item.DiscountAmount > 0 && item.LineTotal > 0)
-                ? (item.DiscountAmount / item.LineTotal) * 100
-                : 0
-        };
+        MaxTabs = isCompactView ? 5 : 3;
+    }
 
     [RelayCommand]
     private async Task ShakeToRefresh()
