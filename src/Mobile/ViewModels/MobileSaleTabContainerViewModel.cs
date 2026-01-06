@@ -852,11 +852,11 @@ public partial class MobileSaleTabViewModel : ObservableObject
         _logger = logger;
 
         // Create the mobile sale view model for this tab
-        SaleViewModel = saleViewModelFactory();
-        
+        SaleViewModel = CreateSaleViewModelForTab(SessionData);
+
         // Load session data into the view model
         LoadSessionDataIntoViewModel();
-        
+
         // Subscribe to changes
         SaleViewModel.PropertyChanged += (s, e) => HasUnsavedChanges = true;
     }
