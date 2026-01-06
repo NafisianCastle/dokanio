@@ -758,7 +758,9 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
                     BatchNumber = item.BatchNumber,
                     Weight = item.Weight,
                     IsWeightBased = item.IsWeightBased,
-                    DiscountPercentage = item.DiscountAmount > 0 ? (item.DiscountAmount / item.LineTotal) * 100 : 0
+                    DiscountPercentage = (item.DiscountAmount > 0 && item.LineTotal > 0)
+                        ? (item.DiscountAmount / item.LineTotal) * 100
+                        : 0
                 };
                 
                 SaleItems.Add(saleItemViewModel);
