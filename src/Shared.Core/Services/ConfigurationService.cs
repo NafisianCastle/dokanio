@@ -316,6 +316,9 @@ public class ConfigurationService : IConfigurationService
         if (string.IsNullOrWhiteSpace(key))
             throw new ArgumentException("Configuration key cannot be null or empty", nameof(key));
 
+        // Sanitize user-provided key before logging to prevent log forging
+        var safeKey = key.Replace("\r", string.Empty).Replace("\n", string.Empty);
+
         try
         {
             if (_defaultConfigurations.TryGetValue(key, out var defaultConfig))
@@ -323,17 +326,17 @@ public class ConfigurationService : IConfigurationService
                 var stringValue = ConvertToString(defaultConfig.defaultValue);
                 await _configurationRepository.SetConfigurationAsync(key, stringValue, defaultConfig.type, defaultConfig.description, true);
                 
-                _logger.LogInformation("Configuration {Key} reset to default value {Value}", key, stringValue);
+                _logger.LogInformation("Configuration {Key} reset to default value {Value}", safeKey, stringValue);
             }
             else
             {
-                _logger.LogWarning("No default configuration found for key {Key}", key);
+                _logger.LogWarning("No default configuration found for key {Key}", safeKey);
                 throw new ArgumentException($"No default configuration found for key: {key}");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error resetting configuration {Key}", key);
+            _logger.LogError(ex, "Error resetting configuration {Key}", safeKey);
             throw;
         }
     }
