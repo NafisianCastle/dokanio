@@ -238,8 +238,7 @@ public class CustomerLookupService : ICustomerLookupService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating new customer with mobile: {MobileNumber}", 
-                MaskMobileNumber(request.MobileNumber));
+            _logger.LogError(ex, "Error creating new customer");
             
             return new CustomerCreationResult
             {
