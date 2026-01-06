@@ -11,17 +11,7 @@ public enum ThreatSeverity
     Critical = 4
 }
 
-/// <summary>
-/// Status of security alerts
-/// </summary>
-public enum AlertStatus
-{
-    Active = 1,
-    Acknowledged = 2,
-    InProgress = 3,
-    Resolved = 4,
-    Dismissed = 5
-}
+
 
 /// <summary>
 /// Compliance standards for data protection

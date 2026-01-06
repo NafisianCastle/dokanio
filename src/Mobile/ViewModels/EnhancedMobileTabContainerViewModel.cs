@@ -97,7 +97,8 @@ public partial class EnhancedMobileTabContainerViewModel : BaseViewModel
         ICustomerLookupService customerLookupService,
         IBarcodeIntegrationService barcodeIntegrationService,
         IConnectivityService connectivityService,
-        ILogger<EnhancedMobileTabContainerViewModel> logger)
+        IProductService productService,
+        ILoggerFactory loggerFactory)
     {
         _multiTabSalesManager = multiTabSalesManager;
         _currentUserService = currentUserService;
@@ -105,13 +106,13 @@ public partial class EnhancedMobileTabContainerViewModel : BaseViewModel
         _customerLookupService = customerLookupService;
         _barcodeIntegrationService = barcodeIntegrationService;
         _connectivityService = connectivityService;
-        _logger = logger;
+        _logger = loggerFactory.CreateLogger<EnhancedMobileTabContainerViewModel>();
         
         Title = "Mobile Sales";
         
         InitializeUserContext();
         InitializeMobileFeatures();
-        InitializeChildViewModels();
+        InitializeChildViewModels(productService, loggerFactory);
         InitializeConnectivityMonitoring();
     }
 
@@ -150,11 +151,14 @@ public partial class EnhancedMobileTabContainerViewModel : BaseViewModel
             IsOneHandedMode, IsCompactMode, MaxTabs);
     }
 
-    private void InitializeChildViewModels()
+    private void InitializeChildViewModels(IProductService productService, ILoggerFactory loggerFactory)
     {
-        // Initialize mobile-specific ViewModels
-        CustomerLookupViewModel = new MobileCustomerLookupViewModel(_customerLookupService, _logger);
-        BarcodeScannerViewModel = new MobileBarcodeScannerViewModel(_barcodeIntegrationService, null!, _logger);
+        // Initialize mobile-specific ViewModels with proper logger types
+        var customerLogger = loggerFactory.CreateLogger<MobileCustomerLookupViewModel>();
+        var barcodeLogger = loggerFactory.CreateLogger<MobileBarcodeScannerViewModel>();
+        
+        CustomerLookupViewModel = new MobileCustomerLookupViewModel(_customerLookupService, customerLogger);
+        BarcodeScannerViewModel = new MobileBarcodeScannerViewModel(_barcodeIntegrationService, productService, barcodeLogger);
         
         // Configure for mobile
         CustomerLookupViewModel.EnableHapticFeedback = EnableHapticFeedback;
@@ -916,7 +920,7 @@ public partial class EnhancedMobileTabContainerViewModel : BaseViewModel
             return existing;
         }
 
-        var deviceInfo = DeviceInfo.Current;
+        var deviceInfo = Microsoft.Maui.Devices.DeviceInfo.Current;
         var manufacturer = string.IsNullOrWhiteSpace(deviceInfo.Manufacturer) ? "unknown" : deviceInfo.Manufacturer;
         var model = string.IsNullOrWhiteSpace(deviceInfo.Model) ? "unknown" : deviceInfo.Model;
         var deviceString = $"{deviceInfo.Platform}-{manufacturer}-{model}-{AppInfo.Current.VersionString}";
@@ -955,7 +959,7 @@ public partial class EnhancedMobileTabContainerViewModel : BaseViewModel
         _autoSyncTimer = null;
     }
 
-    private void OnConnectivityChanged(object? sender, ConnectivityChangedEventArgs e)
+    private void OnConnectivityChanged(object? sender, Shared.Core.Services.ConnectivityChangedEventArgs e)
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
@@ -1340,7 +1344,7 @@ public partial class EnhancedMobileTabViewModel : ObservableObject
         }
     }
 
-    private void OnConnectivityChanged(object? sender, ConnectivityChangedEventArgs e)
+    private void OnConnectivityChanged(object? sender, Shared.Core.Services.ConnectivityChangedEventArgs e)
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {

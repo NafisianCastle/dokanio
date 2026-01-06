@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Mobile.ViewModels"
+             x:Class="Mobile.Views.ConfigurationPage"
+             x:DataType="vm:ConfigurationViewModel"
+             Title="Settings">
+
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="True" />
+    </Shell.BackButtonBehavior>
+
+    <Grid>
+        <ScrollView>
+            <StackLayout Padding="16" Spacing="20">
+
+                <!-- User Preferences Section -->
+                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}"
+                       BorderColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                       CornerRadius="8"
+                       Padding="16">
+                    <StackLayout Spacing="16">
+                        <Label Text="👤 User Preferences" 
+                               FontSize="18" 
+                               FontAttributes="Bold" />
+
+                        <!-- Theme Selection -->
+                        <StackLayout Spacing="8">
+                            <Label Text="Theme" FontSize="16" FontAttributes="Bold" />
+                            <Picker ItemsSource="{Binding AvailableThemes}"
+                                    SelectedItem="{Binding UserPreferences.Theme}"
+                                    Title="Select Theme" />
+                        </StackLayout>
+
+                        <!-- Font Size -->
+                        <StackLayout Spacing="8">
+                            <Label Text="Font Size" FontSize="16" FontAttributes="Bold" />
+                            <Picker ItemsSource="{Binding AvailableFontSizes}"
+                                    SelectedItem="{Binding UserPreferences.FontSize}"
+                                    Title="Select Font Size" />
+                        </StackLayout>
+
+                        <!-- Language -->
+                        <StackLayout Spacing="8">
+                            <Label Text="Language" FontSize="16" FontAttributes="Bold" />
+                            <Picker ItemsSource="{Binding AvailableLanguages}"
+                                    SelectedItem="{Binding UserPreferences.Language}"
+                                    Title="Select Language" />
+                        </StackLayout>
+
+                        <!-- Accessibility Options -->
+                        <StackLayout Spacing="12">
+                            <Label Text="Accessibility" FontSize="16" FontAttributes="Bold" />
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding UserPreferences.HighContrastMode}" />
+                                <Label Text="High Contrast Mode" VerticalOptions="Center" />
+                            </StackLayout>
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding UserPreferences.ReducedMotion}" />
+                                <Label Text="Reduced Motion" VerticalOptions="Center" />
+                            </StackLayout>
+                        </StackLayout>
+
+                        <!-- Behavior Options -->
+                        <StackLayout Spacing="12">
+                            <Label Text="Behavior" FontSize="16" FontAttributes="Bold" />
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding UserPreferences.ShowTooltips}" />
+                                <Label Text="Show Tooltips" VerticalOptions="Center" />
+                            </StackLayout>
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding UserPreferences.AutoSaveEnabled}" />
+                                <Label Text="Auto-Save" VerticalOptions="Center" />
+                            </StackLayout>
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding UserPreferences.SoundEnabled}" />
+                                <Label Text="Sound Effects" VerticalOptions="Center" />
+                            </StackLayout>
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding UserPreferences.HapticFeedbackEnabled}" />
+                                <Label Text="Haptic Feedback" VerticalOptions="Center" />
+                            </StackLayout>
+                        </StackLayout>
+
+                        <!-- Auto-Save Interval -->
+                        <StackLayout Spacing="8">
+                            <Label Text="Auto-Save Interval (seconds)" FontSize="16" FontAttributes="Bold" />
+                            <Stepper Value="{Binding UserPreferences.AutoSaveInterval}"
+                                     Minimum="10"
+                                     Maximum="300"
+                                     Increment="5" />
+                            <Label Text="{Binding UserPreferences.AutoSaveInterval, StringFormat='{0} seconds'}"
+                                   HorizontalOptions="Center" />
+                        </StackLayout>
+
+                        <Button Text="Save User Preferences"
+                                Command="{Binding SaveUserPreferencesCommand}"
+                                BackgroundColor="{StaticResource Primary}"
+                                TextColor="White"
+                                CornerRadius="8" />
+                    </StackLayout>
+                </Frame>
+
+                <!-- Barcode Scanner Section -->
+                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}"
+                       BorderColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                       CornerRadius="8"
+                       Padding="16">
+                    <StackLayout Spacing="16">
+                        <Label Text="📷 Barcode Scanner" 
+                               FontSize="18" 
+                               FontAttributes="Bold" />
+
+                        <!-- Scanner Enable/Disable -->
+                        <StackLayout Orientation="Horizontal" Spacing="10">
+                            <Switch IsToggled="{Binding BarcodeScannerSettings.ScannerEnabled}" />
+                            <Label Text="Enable Barcode Scanner" VerticalOptions="Center" FontAttributes="Bold" />
+                        </StackLayout>
+
+                        <!-- Scanner Type -->
+                        <StackLayout Spacing="8">
+                            <Label Text="Scanner Type" FontSize="16" FontAttributes="Bold" />
+                            <Picker ItemsSource="{Binding AvailableScannerTypes}"
+                                    SelectedItem="{Binding BarcodeScannerSettings.ScannerType}"
+                                    Title="Select Scanner Type" />
+                        </StackLayout>
+
+                        <!-- Scan Region -->
+                        <StackLayout Spacing="8">
+                            <Label Text="Scan Region" FontSize="16" FontAttributes="Bold" />
+                            <Picker ItemsSource="{Binding AvailableScanRegions}"
+                                    SelectedItem="{Binding BarcodeScannerSettings.ScanRegion}"
+                                    Title="Select Scan Region" />
+                        </StackLayout>
+
+                        <!-- Scanner Options -->
+                        <StackLayout Spacing="12">
+                            <Label Text="Scanner Options" FontSize="16" FontAttributes="Bold" />
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding BarcodeScannerSettings.AutoFocusEnabled}" />
+                                <Label Text="Auto Focus" VerticalOptions="Center" />
+                            </StackLayout>
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding BarcodeScannerSettings.FlashlightEnabled}" />
+                                <Label Text="Flashlight" VerticalOptions="Center" />
+                            </StackLayout>
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding BarcodeScannerSettings.BeepOnScanEnabled}" />
+                                <Label Text="Beep on Scan" VerticalOptions="Center" />
+                            </StackLayout>
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding BarcodeScannerSettings.VibrateOnScanEnabled}" />
+                                <Label Text="Vibrate on Scan" VerticalOptions="Center" />
+                            </StackLayout>
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding BarcodeScannerSettings.ContinuousScanMode}" />
+                                <Label Text="Continuous Scan" VerticalOptions="Center" />
+                            </StackLayout>
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding BarcodeScannerSettings.ShowScanOverlay}" />
+                                <Label Text="Show Scan Overlay" VerticalOptions="Center" />
+                            </StackLayout>
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding BarcodeScannerSettings.ValidateChecksum}" />
+                                <Label Text="Validate Checksum" VerticalOptions="Center" />
+                            </StackLayout>
+                        </StackLayout>
+
+                        <!-- Scan Timeout -->
+                        <StackLayout Spacing="8">
+                            <Label Text="Scan Timeout (seconds)" FontSize="16" FontAttributes="Bold" />
+                            <Stepper Value="{Binding BarcodeScannerSettings.ScanTimeoutSeconds}"
+                                     Minimum="1"
+                                     Maximum="60"
+                                     Increment="1" />
+                            <Label Text="{Binding BarcodeScannerSettings.ScanTimeoutSeconds, StringFormat='{0} seconds'}"
+                                   HorizontalOptions="Center" />
+                        </StackLayout>
+
+                        <Button Text="Save Scanner Settings"
+                                Command="{Binding SaveBarcodeScannerCommand}"
+                                BackgroundColor="{StaticResource Primary}"
+                                TextColor="White"
+                                CornerRadius="8" />
+                    </StackLayout>
+                </Frame>
+
+                <!-- Performance Section -->
+                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}"
+                       BorderColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                       CornerRadius="8"
+                       Padding="16">
+                    <StackLayout Spacing="16">
+                        <Label Text="⚡ Performance" 
+                               FontSize="18" 
+                               FontAttributes="Bold" />
+
+                        <!-- Performance Options -->
+                        <StackLayout Spacing="12">
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding PerformanceSettings.LazyLoadingEnabled}" />
+                                <Label Text="Lazy Loading" VerticalOptions="Center" />
+                            </StackLayout>
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding PerformanceSettings.BackgroundSyncEnabled}" />
+                                <Label Text="Background Sync" VerticalOptions="Center" />
+                            </StackLayout>
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding PerformanceSettings.CompressionEnabled}" />
+                                <Label Text="Data Compression" VerticalOptions="Center" />
+                            </StackLayout>
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding PerformanceSettings.ImageOptimizationEnabled}" />
+                                <Label Text="Image Optimization" VerticalOptions="Center" />
+                            </StackLayout>
+                            
+                            <StackLayout Orientation="Horizontal" Spacing="10">
+                                <Switch IsToggled="{Binding PerformanceSettings.MemoryOptimizationEnabled}" />
+                                <Label Text="Memory Optimization" VerticalOptions="Center" />
+                            </StackLayout>
+                        </StackLayout>
+
+                        <!-- Page Size -->
+                        <StackLayout Spacing="8">
+                            <Label Text="Page Size" FontSize="16" FontAttributes="Bold" />
+                            <Stepper Value="{Binding PerformanceSettings.PageSize}"
+                                     Minimum="10"
+                                     Maximum="100"
+                                     Increment="10" />
+                            <Label Text="{Binding PerformanceSettings.PageSize, StringFormat='{0} items'}"
+                                   HorizontalOptions="Center" />
+                        </StackLayout>
+
+                        <!-- Sync Interval -->
+                        <StackLayout Spacing="8">
+                            <Label Text="Sync Interval (minutes)" FontSize="16" FontAttributes="Bold" />
+                            <Stepper Value="{Binding PerformanceSettings.SyncIntervalMinutes}"
+                                     Minimum="1"
+                                     Maximum="60"
+                                     Increment="1" />
+                            <Label Text="{Binding PerformanceSettings.SyncIntervalMinutes, StringFormat='{0} minutes'}"
+                                   HorizontalOptions="Center" />
+                        </StackLayout>
+
+                        <Button Text="Save Performance Settings"
+                                Command="{Binding SavePerformanceCommand}"
+                                BackgroundColor="{StaticResource Primary}"
+                                TextColor="White"
+                                CornerRadius="8" />
+                    </StackLayout>
+                </Frame>
+
+                <!-- Action Buttons -->
+                <StackLayout Spacing="12">
+                    <Button Text="Reset to Defaults"
+                            Command="{Binding ResetToDefaultsCommand}"
+                            BackgroundColor="{StaticResource Secondary}"
+                            TextColor="White"
+                            CornerRadius="8" />
+                    
+                    <Button Text="Reload Settings"
+                            Command="{Binding LoadConfigurationsCommand}"
+                            BackgroundColor="{StaticResource Tertiary}"
+                            TextColor="White"
+                            CornerRadius="8" />
+                </StackLayout>
+
+                <!-- Status Message -->
+                <Label Text="{Binding StatusMessage}"
+                       HorizontalOptions="Center"
+                       FontSize="14"
+                       TextColor="{StaticResource Primary}"
+                       IsVisible="{Binding StatusMessage, Converter={StaticResource IsNotNullConverter}}" />
+
+            </StackLayout>
+        </ScrollView>
+
+        <!-- Loading Overlay -->
+        <Grid IsVisible="{Binding IsLoading}"
+              BackgroundColor="#80000000">
+            <StackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                <ActivityIndicator IsRunning="True" 
+                                   Color="{StaticResource Primary}"
+                                   WidthRequest="50"
+                                   HeightRequest="50" />
+                <Label Text="Loading..." 
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       Margin="0,10,0,0" />
+            </StackLayout>
+        </Grid>
+    </Grid>
+</ContentPage>

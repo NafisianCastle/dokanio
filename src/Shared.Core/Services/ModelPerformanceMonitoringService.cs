@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Shared.Core.Enums;
 
 namespace Shared.Core.Services;
 
@@ -377,13 +378,13 @@ public class ModelPerformanceMonitoringService : IModelPerformanceMonitoringServ
                 // Collect critical alerts
                 if (healthStatus.HealthLevel == ModelHealthLevel.Critical)
                 {
-                    foreach (var issue in healthStatus.Issues.Where(i => i.Severity >= HealthSeverity.High))
+                    foreach (var issue in healthStatus.Issues.Where(i => i.Severity >= IssueSeverity.High))
                     {
                         report.CriticalAlerts.Add(new PerformanceAlert
                         {
-                            Severity = issue.Severity == HealthSeverity.Critical ? AlertSeverity.Critical : AlertSeverity.High,
+                            Severity = issue.Severity == IssueSeverity.Critical ? AlertSeverity.Critical : AlertSeverity.High,
                             ModelId = model.ModelId,
-                            AlertType = issue.Type.ToString(),
+                            AlertType = issue.IssueType.ToString(),
                             Message = issue.Description
                         });
                     }
@@ -587,9 +588,11 @@ public class ModelPerformanceMonitoringService : IModelPerformanceMonitoringServ
             {
                 issues.Add(new HealthIssue
                 {
-                    Type = HealthIssueType.PerformanceDegradation.ToString(),
+                    IssueType = HealthIssueType.PerformanceDegradation.ToString(),
                     Description = $"Model accuracy dropped by {accuracyDrop:P2} from baseline",
-                    Severity = accuracyDrop > 0.2 ? HealthSeverity.Critical : HealthSeverity.High,
+                    Severity = ConvertHealthSeverityToIssueSeverity(accuracyDrop > 0.2 ? HealthSeverity.Critical : HealthSeverity.High),
+                    Component = "Model Performance",
+                    DetectedAt = DateTime.UtcNow,
                     RecommendedAction = "Consider retraining the model with recent data"
                 });
             }
@@ -600,9 +603,11 @@ public class ModelPerformanceMonitoringService : IModelPerformanceMonitoringServ
         {
             issues.Add(new HealthIssue
             {
-                Type = HealthIssueType.ModelStaleness.ToString(),
+                IssueType = HealthIssueType.ModelStaleness.ToString(),
                 Description = $"Model hasn't been retrained for {healthStatus.DaysSinceLastRetraining} days",
-                Severity = healthStatus.DaysSinceLastRetraining > 90 ? HealthSeverity.High : HealthSeverity.Medium,
+                Severity = ConvertHealthSeverityToIssueSeverity(healthStatus.DaysSinceLastRetraining > 90 ? HealthSeverity.High : HealthSeverity.Medium),
+                Component = "Model Lifecycle",
+                DetectedAt = DateTime.UtcNow,
                 RecommendedAction = "Schedule model retraining"
             });
         }
@@ -612,15 +617,15 @@ public class ModelPerformanceMonitoringService : IModelPerformanceMonitoringServ
         // Determine overall health level
         healthStatus.HealthLevel = issues.Any() switch
         {
-            true when issues.Any(i => i.Severity == HealthSeverity.Critical) => ModelHealthLevel.Critical,
-            true when issues.Any(i => i.Severity == HealthSeverity.High) => ModelHealthLevel.Warning,
+            true when issues.Any(i => i.Severity == IssueSeverity.Critical) => ModelHealthLevel.Critical,
+            true when issues.Any(i => i.Severity == IssueSeverity.High) => ModelHealthLevel.Warning,
             true => ModelHealthLevel.Warning,
             false => ModelHealthLevel.Healthy
         };
 
         healthStatus.RetrainingRecommended = issues.Any(i => 
-            i.Type == HealthIssueType.PerformanceDegradation.ToString() || 
-            i.Type == HealthIssueType.ModelStaleness.ToString());
+            i.IssueType == HealthIssueType.PerformanceDegradation.ToString() || 
+            i.IssueType == HealthIssueType.ModelStaleness.ToString());
 
         return healthStatus;
     }
@@ -679,6 +684,18 @@ public class ModelPerformanceMonitoringService : IModelPerformanceMonitoringServ
         }
 
         return actions;
+    }
+
+    private static IssueSeverity ConvertHealthSeverityToIssueSeverity(HealthSeverity healthSeverity)
+    {
+        return healthSeverity switch
+        {
+            HealthSeverity.Low => IssueSeverity.Low,
+            HealthSeverity.Medium => IssueSeverity.Medium,
+            HealthSeverity.High => IssueSeverity.High,
+            HealthSeverity.Critical => IssueSeverity.Critical,
+            _ => IssueSeverity.Medium
+        };
     }
 
     #endregion

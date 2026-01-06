@@ -421,7 +421,7 @@ public class SaleService : ISaleService
             }
 
             // Add new applied discounts
-            foreach (var appliedDiscount in discountResult.AppliedDiscounts ?? Enumerable.Empty<AppliedDiscount>())
+            foreach (var appliedDiscount in discountResult.AppliedDiscounts ?? new List<Shared.Core.DTOs.AppliedDiscount>())
             {
                 var saleDiscount = new SaleDiscount
                 {

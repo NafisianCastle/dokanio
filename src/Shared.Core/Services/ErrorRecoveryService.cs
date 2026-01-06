@@ -392,8 +392,9 @@ public class ErrorRecoveryService : IErrorRecoveryService
             var integrityIssues = await ValidateDataIntegrityAsync();
             foreach (var issue in integrityIssues)
             {
-                result.Issues.Add(new HealthIssue
+                result.Issues.Add(new SystemHealthIssue
                 {
+                    Type = "Data Integrity",
                     Category = "Data Integrity",
                     Description = issue,
                     Severity = HealthSeverity.High
@@ -442,8 +443,9 @@ public class ErrorRecoveryService : IErrorRecoveryService
         catch (Exception ex)
         {
             result.IsHealthy = false;
-            result.Issues.Add(new HealthIssue
+            result.Issues.Add(new SystemHealthIssue
             {
+                Type = "System",
                 Category = "System",
                 Description = $"Health check failed: {ex.Message}",
                 Severity = HealthSeverity.Critical
@@ -642,9 +644,9 @@ public class ErrorRecoveryService : IErrorRecoveryService
         }
     }
 
-    private async Task<List<HealthIssue>> CheckTransactionStateHealthAsync()
+    private async Task<List<SystemHealthIssue>> CheckTransactionStateHealthAsync()
     {
-        var issues = new List<HealthIssue>();
+        var issues = new List<SystemHealthIssue>();
 
         try
         {
@@ -653,12 +655,12 @@ public class ErrorRecoveryService : IErrorRecoveryService
 
             if (unsavedCount > 50)
             {
-                issues.Add(new HealthIssue
+                issues.Add(new SystemHealthIssue
                 {
+                    Type = "Transaction State",
                     Category = "Transaction State",
                     Description = $"High number of unsaved transaction states: {unsavedCount}",
-                    Severity = HealthSeverity.Medium,
-                    RecommendedAction = "Review and complete pending transactions"
+                    Severity = HealthSeverity.Medium
                 });
             }
 
@@ -666,19 +668,20 @@ public class ErrorRecoveryService : IErrorRecoveryService
             var oldStates = unsavedStates.Where(s => s.LastSavedAt < DateTime.UtcNow.AddHours(-24)).ToList();
             if (oldStates.Any())
             {
-                issues.Add(new HealthIssue
+                issues.Add(new SystemHealthIssue
                 {
+                    Type = "Transaction State",
                     Category = "Transaction State",
                     Description = $"Found {oldStates.Count} transaction states older than 24 hours",
-                    Severity = HealthSeverity.High,
-                    RecommendedAction = "Review and clean up old transaction states"
+                    Severity = HealthSeverity.High
                 });
             }
         }
         catch (Exception ex)
         {
-            issues.Add(new HealthIssue
+            issues.Add(new SystemHealthIssue
             {
+                Type = "Transaction State",
                 Category = "Transaction State",
                 Description = $"Transaction state health check failed: {ex.Message}",
                 Severity = HealthSeverity.High
@@ -688,9 +691,9 @@ public class ErrorRecoveryService : IErrorRecoveryService
         return issues;
     }
 
-    private async Task<List<HealthIssue>> CheckOfflineQueueHealthAsync()
+    private async Task<List<SystemHealthIssue>> CheckOfflineQueueHealthAsync()
     {
-        var issues = new List<HealthIssue>();
+        var issues = new List<SystemHealthIssue>();
 
         try
         {
@@ -698,42 +701,43 @@ public class ErrorRecoveryService : IErrorRecoveryService
 
             if (queueStats.PendingOperations > 1000)
             {
-                issues.Add(new HealthIssue
+                issues.Add(new SystemHealthIssue
                 {
+                    Type = "Offline Queue",
                     Category = "Offline Queue",
                     Description = $"High number of pending operations: {queueStats.PendingOperations}",
-                    Severity = HealthSeverity.Medium,
-                    RecommendedAction = "Check network connectivity and process queue"
+                    Severity = HealthSeverity.Medium
                 });
             }
 
             if (queueStats.FailedOperations > 100)
             {
-                issues.Add(new HealthIssue
+                issues.Add(new SystemHealthIssue
                 {
+                    Type = "Offline Queue",
                     Category = "Offline Queue",
                     Description = $"High number of failed operations: {queueStats.FailedOperations}",
-                    Severity = HealthSeverity.High,
-                    RecommendedAction = "Review failed operations and resolve issues"
+                    Severity = HealthSeverity.High
                 });
             }
 
             // Check queue size
             if (queueStats.QueueSizeBytes > 100 * 1024 * 1024) // 100MB
             {
-                issues.Add(new HealthIssue
+                issues.Add(new SystemHealthIssue
                 {
+                    Type = "Offline Queue",
                     Category = "Offline Queue",
                     Description = $"Large queue size: {queueStats.QueueSizeBytes / (1024 * 1024)}MB",
-                    Severity = HealthSeverity.Medium,
-                    RecommendedAction = "Process queue to reduce storage usage"
+                    Severity = HealthSeverity.Medium
                 });
             }
         }
         catch (Exception ex)
         {
-            issues.Add(new HealthIssue
+            issues.Add(new SystemHealthIssue
             {
+                Type = "Offline Queue",
                 Category = "Offline Queue",
                 Description = $"Offline queue health check failed: {ex.Message}",
                 Severity = HealthSeverity.High
@@ -743,9 +747,9 @@ public class ErrorRecoveryService : IErrorRecoveryService
         return issues;
     }
 
-    private async Task<List<HealthIssue>> CheckCrashRecoveryHealthAsync()
+    private async Task<List<SystemHealthIssue>> CheckCrashRecoveryHealthAsync()
     {
-        var issues = new List<HealthIssue>();
+        var issues = new List<SystemHealthIssue>();
 
         try
         {
@@ -753,30 +757,31 @@ public class ErrorRecoveryService : IErrorRecoveryService
 
             if (recoveryStats.TotalCrashes > 10)
             {
-                issues.Add(new HealthIssue
+                issues.Add(new SystemHealthIssue
                 {
+                    Type = "Crash Recovery",
                     Category = "Crash Recovery",
                     Description = $"High number of crashes in last 7 days: {recoveryStats.TotalCrashes}",
-                    Severity = HealthSeverity.High,
-                    RecommendedAction = "Investigate crash causes and improve stability"
+                    Severity = HealthSeverity.High
                 });
             }
 
             if (recoveryStats.FailedRecoveries > recoveryStats.SuccessfulRecoveries)
             {
-                issues.Add(new HealthIssue
+                issues.Add(new SystemHealthIssue
                 {
+                    Type = "Crash Recovery",
                     Category = "Crash Recovery",
                     Description = $"More failed recoveries ({recoveryStats.FailedRecoveries}) than successful ({recoveryStats.SuccessfulRecoveries})",
-                    Severity = HealthSeverity.Medium,
-                    RecommendedAction = "Review crash recovery process and improve reliability"
+                    Severity = HealthSeverity.Medium
                 });
             }
         }
         catch (Exception ex)
         {
-            issues.Add(new HealthIssue
+            issues.Add(new SystemHealthIssue
             {
+                Type = "Crash Recovery",
                 Category = "Crash Recovery",
                 Description = $"Crash recovery health check failed: {ex.Message}",
                 Severity = HealthSeverity.Medium
@@ -824,17 +829,18 @@ public class ErrorRecoveryService : IErrorRecoveryService
         return true;
     }
 
-    private async Task<List<HealthIssue>> CheckDatabaseHealthAsync()
+    private async Task<List<SystemHealthIssue>> CheckDatabaseHealthAsync()
     {
-        var issues = new List<HealthIssue>();
+        var issues = new List<SystemHealthIssue>();
 
         try
         {
             var canConnect = await CheckDatabaseConnectivityAsync();
             if (!canConnect)
             {
-                issues.Add(new HealthIssue
+                issues.Add(new SystemHealthIssue
                 {
+                    Type = "Database",
                     Category = "Database",
                     Description = "Cannot connect to database",
                     Severity = HealthSeverity.Critical
@@ -843,8 +849,9 @@ public class ErrorRecoveryService : IErrorRecoveryService
         }
         catch (Exception ex)
         {
-            issues.Add(new HealthIssue
+            issues.Add(new SystemHealthIssue
             {
+                Type = "Database",
                 Category = "Database",
                 Description = $"Database health check failed: {ex.Message}",
                 Severity = HealthSeverity.High
@@ -854,9 +861,9 @@ public class ErrorRecoveryService : IErrorRecoveryService
         return issues;
     }
 
-    private async Task<List<HealthIssue>> CheckTransactionLogHealthAsync()
+    private async Task<List<SystemHealthIssue>> CheckTransactionLogHealthAsync()
     {
-        var issues = new List<HealthIssue>();
+        var issues = new List<SystemHealthIssue>();
 
         try
         {
@@ -865,8 +872,9 @@ public class ErrorRecoveryService : IErrorRecoveryService
 
             if (unprocessedCount > 1000)
             {
-                issues.Add(new HealthIssue
+                issues.Add(new SystemHealthIssue
                 {
+                    Type = "Transaction Logs",
                     Category = "Transaction Logs",
                     Description = $"High number of unprocessed transaction logs: {unprocessedCount}",
                     Severity = HealthSeverity.Medium
@@ -875,8 +883,9 @@ public class ErrorRecoveryService : IErrorRecoveryService
         }
         catch (Exception ex)
         {
-            issues.Add(new HealthIssue
+            issues.Add(new SystemHealthIssue
             {
+                Type = "Transaction Logs",
                 Category = "Transaction Logs",
                 Description = $"Transaction log health check failed: {ex.Message}",
                 Severity = HealthSeverity.High
@@ -886,9 +895,9 @@ public class ErrorRecoveryService : IErrorRecoveryService
         return issues;
     }
 
-    private async Task<List<HealthIssue>> CheckStorageHealthAsync()
+    private async Task<List<SystemHealthIssue>> CheckStorageHealthAsync()
     {
-        var issues = new List<HealthIssue>();
+        var issues = new List<SystemHealthIssue>();
 
         try
         {
@@ -896,8 +905,9 @@ public class ErrorRecoveryService : IErrorRecoveryService
             var dbSize = await GetDatabaseSizeAsync();
             if (dbSize > 1000000000) // 1GB
             {
-                issues.Add(new HealthIssue
+                issues.Add(new SystemHealthIssue
                 {
+                    Type = "Storage",
                     Category = "Storage",
                     Description = $"Database size is large: {dbSize / 1000000}MB",
                     Severity = HealthSeverity.Medium
@@ -906,8 +916,9 @@ public class ErrorRecoveryService : IErrorRecoveryService
         }
         catch (Exception ex)
         {
-            issues.Add(new HealthIssue
+            issues.Add(new SystemHealthIssue
             {
+                Type = "Storage",
                 Category = "Storage",
                 Description = $"Storage health check failed: {ex.Message}",
                 Severity = HealthSeverity.Medium
@@ -917,7 +928,7 @@ public class ErrorRecoveryService : IErrorRecoveryService
         return issues;
     }
 
-    private async Task<bool> AttemptIssueResolutionAsync(HealthIssue issue)
+    private async Task<bool> AttemptIssueResolutionAsync(SystemHealthIssue issue)
     {
         try
         {

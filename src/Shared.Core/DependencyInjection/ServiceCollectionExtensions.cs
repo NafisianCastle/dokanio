@@ -45,6 +45,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICustomerLookupService, CustomerLookupService>();
         services.AddScoped<IValidationService, ValidationService>();
         services.AddScoped<IConfigurationService, ConfigurationService>();
+        services.AddScoped<IConfigurationManagementService, ConfigurationManagementService>();
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IIntegratedPosService, IntegratedPosService>();
         services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
@@ -99,6 +100,12 @@ public static class ServiceCollectionExtensions
         
         // Register comprehensive logging service
         services.AddScoped<IComprehensiveLoggingService, ComprehensiveLoggingService>();
+        
+        // Register error tracking and alerting services
+        services.AddScoped<IErrorTrackingService, ErrorTrackingService>();
+        services.AddScoped<IAlertService, AlertService>();
+        services.AddScoped<IUsageAnalyticsService, UsageAnalyticsService>();
+        services.AddScoped<IComprehensiveMonitoringService, ComprehensiveMonitoringService>();
         
         // Register error recovery and exception handling services
         services.AddScoped<IErrorRecoveryService, ErrorRecoveryService>();
@@ -249,6 +256,7 @@ public static class ServiceCollectionExtensions
         // Register additional services for testing
         services.AddScoped<IDiscountManagementService, DiscountManagementService>();
         services.AddScoped<IConfigurationService, ConfigurationService>();
+        services.AddScoped<IConfigurationManagementService, ConfigurationManagementService>();
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IIntegratedPosService, IntegratedPosService>();
         services.AddScoped<IApplicationStartupService, ApplicationStartupService>();
@@ -318,6 +326,12 @@ public static class ServiceCollectionExtensions
         
         // Register comprehensive logging service
         services.AddScoped<IComprehensiveLoggingService, ComprehensiveLoggingService>();
+        
+        // Register error tracking and alerting services
+        services.AddScoped<IErrorTrackingService, ErrorTrackingService>();
+        services.AddScoped<IAlertService, AlertService>();
+        services.AddScoped<IUsageAnalyticsService, UsageAnalyticsService>();
+        services.AddScoped<IComprehensiveMonitoringService, ComprehensiveMonitoringService>();
         
         // Register error recovery and exception handling services
         services.AddScoped<IErrorRecoveryService, ErrorRecoveryService>();
@@ -406,3 +420,6 @@ public static class ServiceCollectionExtensions
         return services;
     }
 }
+// Additional monitoring service registration
+// Note: IEnhancedPerformanceMonitoringService should be registered in both AddSharedCore and AddSharedCoreInMemory methods
+// This is a temporary addition to ensure the service is available

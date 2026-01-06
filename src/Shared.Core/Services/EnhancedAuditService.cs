@@ -106,7 +106,7 @@ public class EnhancedAuditService : IEnhancedAuditService
     {
         try
         {
-            var currentUser = await _currentUserService.GetCurrentUserAsync();
+            var currentUser = _currentUserService.CurrentUser;
             var effectiveUserId = userId ?? currentUser?.Id;
             var username = currentUser?.Username ?? "Anonymous";
 
@@ -231,7 +231,7 @@ public class EnhancedAuditService : IEnhancedAuditService
     {
         try
         {
-            var currentUser = await _currentUserService.GetCurrentUserAsync();
+            var currentUser = _currentUserService.CurrentUser;
             var effectiveUserId = userId ?? currentUser?.Id;
             var username = currentUser?.Username ?? "System";
 

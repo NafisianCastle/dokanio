@@ -53,7 +53,7 @@ public partial class ValidationTextBox : UserControl
     public static readonly StyledProperty<IBrush> ValidationMessageColorProperty =
         AvaloniaProperty.Register<ValidationTextBox, IBrush>(nameof(ValidationMessageColor), Brushes.Red);
 
-    public static readonly StyledProperty<IBrush> BorderBrushProperty =
+    public new static readonly StyledProperty<IBrush> BorderBrushProperty =
         AvaloniaProperty.Register<ValidationTextBox, IBrush>(nameof(BorderBrush), Brushes.Gray);
 
     public static readonly StyledProperty<bool> ShowValidationIconProperty =
@@ -137,7 +137,7 @@ public partial class ValidationTextBox : UserControl
         set => SetValue(ValidationMessageColorProperty, value);
     }
 
-    public IBrush BorderBrush
+    public new IBrush BorderBrush
     {
         get => GetValue(BorderBrushProperty);
         set => SetValue(BorderBrushProperty, value);
@@ -174,15 +174,21 @@ public partial class ValidationTextBox : UserControl
         _validationTimer.Elapsed += OnValidationTimerElapsed;
         _validationTimer.AutoReset = false;
 
-        // Subscribe to value changes
-        this.GetObservable(ValueProperty).Subscribe(OnValueChanged);
+        // Subscribe to value changes using property changed event
+        this.PropertyChanged += (sender, e) =>
+        {
+            if (e.Property == ValueProperty)
+            {
+                OnValueChanged(e.NewValue);
+            }
+        };
     }
 
-    private void OnValueChanged(ValidationTextBox sender, AvaloniaPropertyChangedEventArgs e)
+    private void OnValueChanged(object? newValue)
     {
-        if (e.NewValue is string newValue && newValue != _currentValue)
+        if (newValue is string stringValue && stringValue != _currentValue)
         {
-            _currentValue = newValue;
+            _currentValue = stringValue;
             
             // Reset timer for real-time validation
             _validationTimer.Stop();

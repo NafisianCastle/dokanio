@@ -351,14 +351,12 @@ public partial class BarcodeScannerViewModel : BaseViewModel
         _currentProduct = null;
     }
 
-    protected override void Dispose(bool disposing)
+    public void Dispose()
     {
-        if (disposing && _barcodeIntegrationService != null)
+        if (_barcodeIntegrationService != null)
         {
             _barcodeIntegrationService.BarcodeProcessed -= OnBarcodeProcessed;
             _barcodeIntegrationService.ScanError -= OnScanError;
         }
-        
-        base.Dispose(disposing);
     }
 }

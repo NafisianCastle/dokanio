@@ -948,7 +948,7 @@ public class DashboardService : IDashboardService
         var shopPerformances = await GetShopPerformanceSummariesAsync(businessId, period);
         var inventoryStatus = await GetInventoryStatusSummaryAsync(businessId);
 
-        var insights = new List<BusinessInsight>();
+        var insights = new List<Shared.Core.DTOs.BusinessInsight>();
         var recommendations = new List<RecommendationInsight>();
         var trends = new List<TrendInsight>();
         var opportunities = new List<OpportunityInsight>();
@@ -956,11 +956,11 @@ public class DashboardService : IDashboardService
         // Generate insights based on data
         if (revenueTrends.RevenueGrowthPercentage > 10)
         {
-            insights.Add(new BusinessInsight
+            insights.Add(new Shared.Core.DTOs.BusinessInsight
             {
                 Title = "Strong Revenue Growth",
                 Description = $"Revenue has grown by {revenueTrends.RevenueGrowthPercentage:F1}% compared to the previous period",
-                Type = InsightType.Performance,
+                Type = Shared.Core.DTOs.InsightType.Performance,
                 Priority = InsightPriority.High,
                 ImpactValue = revenueTrends.TotalRevenue
             });

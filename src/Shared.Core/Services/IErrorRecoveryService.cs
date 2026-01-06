@@ -68,7 +68,7 @@ public class RecoveryResult
 public class SystemHealthResult
 {
     public bool IsHealthy { get; set; }
-    public List<HealthIssue> Issues { get; set; } = new();
+    public List<SystemHealthIssue> Issues { get; set; } = new();
     public List<string> RecoveryActionsPerformed { get; set; } = new();
     public DateTime CheckTimestamp { get; set; } = DateTime.UtcNow;
     public TimeSpan CheckDuration { get; set; }
@@ -77,7 +77,7 @@ public class SystemHealthResult
 /// <summary>
 /// Represents a system health issue
 /// </summary>
-public class HealthIssue
+public class SystemHealthIssue
 {
     public string Type { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
