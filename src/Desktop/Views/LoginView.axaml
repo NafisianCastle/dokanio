@@ -10,7 +10,7 @@
 
   <Border Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
           CornerRadius="8"
-          Padding="40"
+          Padding="40,40"
           MaxWidth="400"
           HorizontalAlignment="Center"
           VerticalAlignment="Center">

@@ -53,7 +53,7 @@ public partial class ValidationTextBox : UserControl
     public static readonly StyledProperty<IBrush> ValidationMessageColorProperty =
         AvaloniaProperty.Register<ValidationTextBox, IBrush>(nameof(ValidationMessageColor), Brushes.Red);
 
-    public static readonly StyledProperty<IBrush> BorderBrushProperty =
+    public new static readonly StyledProperty<IBrush> BorderBrushProperty =
         AvaloniaProperty.Register<ValidationTextBox, IBrush>(nameof(BorderBrush), Brushes.Gray);
 
     public static readonly StyledProperty<bool> ShowValidationIconProperty =
@@ -137,7 +137,7 @@ public partial class ValidationTextBox : UserControl
         set => SetValue(ValidationMessageColorProperty, value);
     }
 
-    public IBrush BorderBrush
+    public new IBrush BorderBrush
     {
         get => GetValue(BorderBrushProperty);
         set => SetValue(BorderBrushProperty, value);

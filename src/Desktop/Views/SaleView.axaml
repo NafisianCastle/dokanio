@@ -114,7 +114,7 @@
                                                     <Button Grid.Column="2"
                                                             Content="+"
                                                             Classes="btn-primary btn-small"
-                                                            Command="{Binding $parent[UserControl].((vm:SaleViewModel)DataContext).AddProductCommand}"
+                                                            Command="{Binding $parent[UserControl].DataContext.AddProductCommand}"
                                                             CommandParameter="{Binding}"
                                                             Margin="8,0,0,0"
                                                             Width="32"
@@ -268,7 +268,7 @@
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Button Content="🗑️" 
-                                                    Command="{Binding $parent[UserControl].((vm:SaleViewModel)DataContext).RemoveItemCommand}"
+                                                    Command="{Binding $parent[UserControl].DataContext.RemoveItemCommand}"
                                                     CommandParameter="{Binding}"
                                                     Classes="btn-danger btn-small"
                                                     ToolTip.Tip="Remove item from cart"/>

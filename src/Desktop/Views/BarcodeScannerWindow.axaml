@@ -26,23 +26,23 @@
                 CornerRadius="{StaticResource RadiusMD}">
             <Grid>
                 <!-- Camera Placeholder -->
-                <StackLayout VerticalAlignment="Center" 
+                <StackPanel VerticalAlignment="Center" 
                             HorizontalAlignment="Center"
                             Spacing="16"
                             IsVisible="{Binding !IsScanning}">
                     <TextBlock Text="📷" 
                                FontSize="64" 
-                               TextColor="White" 
+                               Foreground="White" 
                                HorizontalAlignment="Center" />
                     <TextBlock Text="Camera View" 
-                               TextColor="White" 
+                               Foreground="White" 
                                FontSize="18" 
                                HorizontalAlignment="Center" />
                     <TextBlock Text="Click 'Start Scanning' to begin" 
-                               TextColor="Gray" 
+                               Foreground="Gray" 
                                FontSize="14" 
                                HorizontalAlignment="Center" />
-                </StackLayout>
+                </StackPanel>
 
                 <!-- Scanning Overlay -->
                 <Grid IsVisible="{Binding IsScanning}">
@@ -56,7 +56,7 @@
                                VerticalAlignment="Center"/>
                     
                     <TextBlock Text="🔍 Scanning for barcodes..." 
-                               TextColor="White" 
+                               Foreground="White" 
                                FontSize="16" 
                                HorizontalAlignment="Center"
                                VerticalAlignment="Bottom"
@@ -78,15 +78,15 @@
                         Margin="16">
                     <StackPanel Spacing="8" Margin="16">
                         <TextBlock Text="✅ Barcode Detected!" 
-                                   TextColor="LimeGreen" 
+                                   Foreground="LimeGreen" 
                                    FontSize="16" 
                                    FontWeight="Bold"/>
                         <TextBlock Text="{Binding ScannedBarcode}" 
-                                   TextColor="White" 
+                                   Foreground="White" 
                                    FontSize="14" 
                                    FontFamily="Consolas"/>
                         <TextBlock Text="{Binding ProductInfo}" 
-                                   TextColor="LightGray" 
+                                   Foreground="LightGray" 
                                    FontSize="12" 
                                    TextWrapping="Wrap"/>
                     </StackPanel>
@@ -99,11 +99,11 @@
                         Margin="16">
                     <StackPanel Spacing="8" Margin="16">
                         <TextBlock Text="❌ Scan Error" 
-                                   TextColor="Red" 
+                                   Foreground="Red" 
                                    FontSize="16" 
                                    FontWeight="Bold"/>
                         <TextBlock Text="{Binding ErrorMessage}" 
-                                   TextColor="White" 
+                                   Foreground="White" 
                                    FontSize="12" 
                                    TextWrapping="Wrap"/>
                     </StackPanel>
