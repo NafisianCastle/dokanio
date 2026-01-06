@@ -142,6 +142,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPaginationService, PaginationService>();
         services.AddScoped<IPerformanceMonitoringService, PerformanceMonitoringService>();
         services.AddScoped<ISystemMonitoringService, SystemMonitoringService>();
+        services.AddScoped<IEnhancedPerformanceMonitoringService, EnhancedPerformanceMonitoringService>();
         
         // Register background services
         services.AddHostedService<SessionCleanupService>();
@@ -310,6 +311,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPaginationService, PaginationService>();
         services.AddScoped<IPerformanceMonitoringService, PerformanceMonitoringService>();
         services.AddScoped<ISystemMonitoringService, SystemMonitoringService>();
+        services.AddScoped<IEnhancedPerformanceMonitoringService, EnhancedPerformanceMonitoringService>();
         
         services.AddScoped<IAuthenticationService>(provider => new AuthenticationService(
             provider.GetRequiredService<IUserRepository>(),

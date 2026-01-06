@@ -959,6 +959,8 @@ public class ConfigurationService : IConfigurationService
         catch
         {
             return value.ToString() ?? string.Empty;
+        }
+    }
     private string SanitizeForLogging(string input)
     {
         if (string.IsNullOrEmpty(input))
@@ -970,8 +972,7 @@ public class ConfigurationService : IConfigurationService
             .Replace("\n", string.Empty);
     }
 
-        }
-    }
+    
 
     private ConfigurationType DetectConfigurationType<T>()
     {

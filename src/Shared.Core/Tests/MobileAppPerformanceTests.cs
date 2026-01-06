@@ -5,6 +5,7 @@ using Shared.Core.Data;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Services;
+using Shared.Core.DependencyInjection;
 using System.Diagnostics;
 using Xunit;
 using Xunit.Abstractions;
@@ -48,12 +49,19 @@ public class MobileAppPerformanceTests : IDisposable
         }
 
         var services = new ServiceCollection();
+        
+        // Use the shared core DI registration to ensure all dependencies are met
+        services.AddSharedCoreInMemory();
+        
+        // Remove the InMemory options registration to replace with Sqlite for this test
+        var dbContextDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<PosDbContext>));
+        if (dbContextDescriptor != null) services.Remove(dbContextDescriptor);
+        
+        // Add Sqlite options using the open connection
         services.AddDbContext<PosDbContext>(options =>
             options.UseSqlite(_connection));
-        services.AddLogging(builder => builder.AddConsole());
-        services.AddScoped<IPerformanceOptimizationService, PerformanceOptimizationService>();
-        services.AddScoped<IDatabaseQueryOptimizationService, DatabaseQueryOptimizationService>();
-        services.AddScoped<ICachingStrategyService, CachingStrategyService>();
+            
+        // No need to manually register other services as AddSharedCoreInMemory covers them
 
         _serviceProvider = services.BuildServiceProvider();
         _context = _serviceProvider.GetRequiredService<PosDbContext>();
