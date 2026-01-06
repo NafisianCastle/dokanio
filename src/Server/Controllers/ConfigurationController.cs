@@ -310,6 +310,8 @@ public class ConfigurationController : ControllerBase
     [HttpPost("reset/{key}")]
     public async Task<ActionResult> ResetConfiguration(string key)
     {
+        // Sanitize user-provided key before logging to prevent log forging
+        var safeKey = key?.Replace("\r", string.Empty).Replace("\n", string.Empty);
         try
         {
             await _configurationService.ResetConfigurationAsync(key);
@@ -317,12 +319,12 @@ public class ConfigurationController : ControllerBase
         }
         catch (ArgumentException ex)
         {
-            _logger.LogWarning(ex, "Invalid configuration key: {Key}", key);
+            _logger.LogWarning(ex, "Invalid configuration key: {Key}", safeKey);
             return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error resetting configuration {Key}", key);
+            _logger.LogError(ex, "Error resetting configuration {Key}", safeKey);
             return StatusCode(500, "Internal server error");
         }
     }
