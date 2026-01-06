@@ -418,3 +418,5 @@ FodyWeavers.xsd
 *.msp
 .kiro/
 .idea/
+*.db
+*.sqlite
