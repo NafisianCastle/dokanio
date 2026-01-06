@@ -764,15 +764,11 @@ public partial class SaleViewModel : BaseViewModel
             // Reset session state if multi-tab manager is available
             if (_salesManager != null)
             {
-                var request = new CreateSaleSessionRequest
+                var itemsToRemove = SaleItems.Select(i => i.Id).ToList();
+                foreach (var itemId in itemsToRemove)
                 {
-                    TabName = TabName,
-                    ShopId = _shopId,
-                    UserId = _userId,
-                    DeviceId = CreateDeterministicGuidFromString(Environment.MachineName)
-                };
-                
-                await _salesManager.CreateNewSaleSessionAsync(request);
+                    await _salesManager.RemoveItemFromSessionAsync(_sessionId, itemId);
+                }
             }
             
             TriggerRealTimeCalculation();
