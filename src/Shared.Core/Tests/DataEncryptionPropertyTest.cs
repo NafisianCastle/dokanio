@@ -7,6 +7,7 @@ using Shared.Core.Enums;
 using Shared.Core.Repositories;
 using Shared.Core.Services;
 using Xunit;
+using System.Security.Cryptography;
 
 namespace Shared.Core.Tests;
 
@@ -217,12 +218,12 @@ public class DataEncryptionPropertyTest : IDisposable
         // Add random generated data
         for (int i = 0; i < 10; i++)
         {
-            var length = random.Next(1, 200);
-            var randomString = GenerateRandomString(length, random);
+            var length = RandomNumberGenerator.GetInt32(1, 200);
+            var randomString = GenerateRandomString(length);
             dataSets.Add(new SensitiveDataTestSet 
             { 
                 PlainText = randomString, 
-                IsPassword = random.Next(0, 3) == 0 // 33% chance of being treated as password
+                IsPassword = RandomNumberGenerator.GetInt32(0, 3) == 0 // 33% chance of being treated as password
             });
         }
         
@@ -238,14 +239,15 @@ public class DataEncryptionPropertyTest : IDisposable
     /// <summary>
     /// Generates a random string of specified length
     /// </summary>
-    private static string GenerateRandomString(int length, Random random)
+    private static string GenerateRandomString(int length)
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;':\",./<>? \t\n";
         var result = new char[length];
         
         for (int i = 0; i < length; i++)
         {
-            result[i] = chars[random.Next(chars.Length)];
+            var index = RandomNumberGenerator.GetInt32(chars.Length);
+            result[i] = chars[index];
         }
         
         return new string(result);
