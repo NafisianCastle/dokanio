@@ -739,6 +739,8 @@ public partial class SaleViewModel : BaseViewModel
     {
         try
         {
+            var itemsToRemove = SaleItems.Select(i => i.Id).ToList();
+
             SaleItems.Clear();
             ClearCustomerInfo();
             AmountReceived = 0;
@@ -746,25 +748,24 @@ public partial class SaleViewModel : BaseViewModel
             SearchText = string.Empty;
             SearchResults.Clear();
             ErrorMessage = string.Empty;
-            
+
             // Reset calculation values
             CalculatedSubtotal = 0;
             CalculatedTax = 0;
             CalculatedTotal = 0;
             CalculatedTotalDiscount = 0;
             CalculationBreakdown.Clear();
-            
+
             // Reset barcode scanning state
             LastScannedBarcode = string.Empty;
             LastScanTime = null;
             ScanStatus = "Ready";
-            
+
             HasUnsavedChanges = false;
-            
+
             // Reset session state if multi-tab manager is available
             if (_salesManager != null)
             {
-                var itemsToRemove = SaleItems.Select(i => i.Id).ToList();
                 foreach (var itemId in itemsToRemove)
                 {
                     await _salesManager.RemoveItemFromSessionAsync(_sessionId, itemId);
