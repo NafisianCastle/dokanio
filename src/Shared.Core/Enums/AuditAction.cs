@@ -29,5 +29,9 @@ public enum AuditAction
     SessionTimeout = 21,
     PasswordChange = 22,
     AccountLocked = 23,
-    AccountUnlocked = 24
+    AccountUnlocked = 24,
+    Read = 25,
+    Update = 26,
+    LoginFailed = 27,
+    ValidationFailed = 28
 }

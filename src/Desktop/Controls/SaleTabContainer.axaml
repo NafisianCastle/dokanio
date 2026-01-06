@@ -1,0 +1,102 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Desktop.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="Desktop.Controls.SaleTabContainer"
+             x:DataType="vm:SaleTabContainerViewModel">
+
+  <Grid RowDefinitions="Auto,*">
+    
+    <!-- Tab Header -->
+    <Border Grid.Row="0" 
+            Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+            BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+            BorderThickness="0,0,0,1">
+      
+      <Grid ColumnDefinitions="*,Auto">
+        
+        <!-- Tab Headers -->
+        <ScrollViewer Grid.Column="0" 
+                      HorizontalScrollBarVisibility="Auto" 
+                      VerticalScrollBarVisibility="Disabled">
+          <ItemsControl ItemsSource="{Binding SaleTabs}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Background="{Binding IsActive, Converter={StaticResource BoolToTabBackgroundConverter}}"
+                        BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                        BorderThickness="1,1,1,0"
+                        Margin="0,0,1,0"
+                        MinWidth="120"
+                        Height="40">
+                  
+                  <Grid ColumnDefinitions="*,Auto">
+                    
+                    <!-- Tab Title -->
+                    <Button Grid.Column="0"
+                            Content="{Binding TabName}"
+                            Command="{Binding $parent[UserControl].((vm:SaleTabContainerViewModel)DataContext).SwitchToTabCommand}"
+                            CommandParameter="{Binding}"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            FontWeight="{Binding IsActive, Converter={StaticResource BoolToFontWeightConverter}}"
+                            Foreground="{Binding IsActive, Converter={StaticResource BoolToTabForegroundConverter}}" />
+                    
+                    <!-- Close Button -->
+                    <Button Grid.Column="1"
+                            Content="×"
+                            Command="{Binding $parent[UserControl].((vm:SaleTabContainerViewModel)DataContext).CloseTabCommand}"
+                            CommandParameter="{Binding}"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Width="20"
+                            Height="20"
+                            Margin="2"
+                            FontSize="14"
+                            FontWeight="Bold"
+                            ToolTip.Tip="Close Tab"
+                            IsVisible="{Binding CanClose}" />
+                    
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+        
+        <!-- New Tab Button -->
+        <Button Grid.Column="1"
+                Content="+"
+                Command="{Binding CreateNewTabCommand}"
+                Background="Transparent"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+                Width="40"
+                Height="40"
+                Margin="4,0"
+                FontSize="16"
+                FontWeight="Bold"
+                ToolTip.Tip="New Sale Tab" />
+        
+      </Grid>
+    </Border>
+    
+    <!-- Tab Content -->
+    <ContentControl Grid.Row="1" 
+                    Content="{Binding ActiveTabContent}"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch" />
+    
+  </Grid>
+
+</UserControl>

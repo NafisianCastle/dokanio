@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Desktop.ViewModels"
+        x:Class="Desktop.Views.BarcodeScannerWindow"
+        x:DataType="vm:BarcodeScannerWindowViewModel"
+        Title="Barcode Scanner"
+        Width="600"
+        Height="500"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="{StaticResource BackgroundBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Camera/Scanner View -->
+        <Border Grid.Row="0" 
+                Classes="card-elevated" 
+                Margin="16"
+                Background="Black"
+                CornerRadius="{StaticResource RadiusMD}">
+            <Grid>
+                <!-- Camera Placeholder -->
+                <StackLayout VerticalAlignment="Center" 
+                            HorizontalAlignment="Center"
+                            Spacing="16"
+                            IsVisible="{Binding !IsScanning}">
+                    <TextBlock Text="📷" 
+                               FontSize="64" 
+                               TextColor="White" 
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="Camera View" 
+                               TextColor="White" 
+                               FontSize="18" 
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="Click 'Start Scanning' to begin" 
+                               TextColor="Gray" 
+                               FontSize="14" 
+                               HorizontalAlignment="Center" />
+                </StackLayout>
+
+                <!-- Scanning Overlay -->
+                <Grid IsVisible="{Binding IsScanning}">
+                    <!-- Scanning Animation -->
+                    <Rectangle Fill="Transparent" 
+                               Stroke="Lime" 
+                               StrokeThickness="2"
+                               Width="200"
+                               Height="100"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                    
+                    <TextBlock Text="🔍 Scanning for barcodes..." 
+                               TextColor="White" 
+                               FontSize="16" 
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Bottom"
+                               Margin="0,0,0,50"/>
+                    
+                    <!-- Scanning Progress -->
+                    <ProgressBar IsIndeterminate="True"
+                                 Classes="loading-primary"
+                                 Width="200"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Bottom"
+                                 Margin="0,0,0,20"/>
+                </Grid>
+
+                <!-- Scan Result Overlay -->
+                <Border IsVisible="{Binding HasScanResult}"
+                        Background="#CC000000"
+                        VerticalAlignment="Bottom"
+                        Margin="16">
+                    <StackPanel Spacing="8" Margin="16">
+                        <TextBlock Text="✅ Barcode Detected!" 
+                                   TextColor="LimeGreen" 
+                                   FontSize="16" 
+                                   FontWeight="Bold"/>
+                        <TextBlock Text="{Binding ScannedBarcode}" 
+                                   TextColor="White" 
+                                   FontSize="14" 
+                                   FontFamily="Consolas"/>
+                        <TextBlock Text="{Binding ProductInfo}" 
+                                   TextColor="LightGray" 
+                                   FontSize="12" 
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Error Overlay -->
+                <Border IsVisible="{Binding HasError}"
+                        Background="#CCCC0000"
+                        VerticalAlignment="Bottom"
+                        Margin="16">
+                    <StackPanel Spacing="8" Margin="16">
+                        <TextBlock Text="❌ Scan Error" 
+                                   TextColor="Red" 
+                                   FontSize="16" 
+                                   FontWeight="Bold"/>
+                        <TextBlock Text="{Binding ErrorMessage}" 
+                                   TextColor="White" 
+                                   FontSize="12" 
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Scanner Status and Info -->
+        <Border Grid.Row="1" 
+                Classes="card" 
+                Margin="16,0,16,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="Scanner Status" Classes="label"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Ellipse Width="8" Height="8" 
+                                 Fill="{Binding ScannerStatusColor, FallbackValue=Gray}"/>
+                        <TextBlock Text="{Binding ScannerStatus, FallbackValue='Disconnected'}" 
+                                   Classes="body-2"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Text="Supported Formats" Classes="label"/>
+                    <TextBlock Text="EAN-13, EAN-8, Code 128, Code 39, UPC-A" 
+                               Classes="caption"
+                               TextAlignment="Right"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Controls -->
+        <Border Grid.Row="2" 
+                Classes="card" 
+                Margin="16,0,16,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Manual Entry -->
+                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                    <TextBlock Text="Manual Entry" Classes="label"/>
+                    <TextBox Text="{Binding ManualBarcode}" 
+                             Watermark="Enter barcode manually..."
+                             Classes="input-primary"
+                             KeyDown="OnManualBarcodeKeyDown"/>
+                </StackPanel>
+
+                <!-- Action Buttons -->
+                <Button Grid.Column="1" 
+                        Content="🔍 Start Scanning" 
+                        Command="{Binding StartScanningCommand}"
+                        Classes="btn-primary"
+                        IsVisible="{Binding !IsScanning}"
+                        Margin="4,16,4,0"
+                        VerticalAlignment="Bottom"/>
+
+                <Button Grid.Column="1" 
+                        Content="⏹️ Stop Scanning" 
+                        Command="{Binding StopScanningCommand}"
+                        Classes="btn-warning"
+                        IsVisible="{Binding IsScanning}"
+                        Margin="4,16,4,0"
+                        VerticalAlignment="Bottom"/>
+
+                <Button Grid.Column="2" 
+                        Content="✅ Add to Sale" 
+                        Command="{Binding AddToSaleCommand}"
+                        Classes="btn-success"
+                        IsEnabled="{Binding HasValidProduct}"
+                        Margin="4,16,4,0"
+                        VerticalAlignment="Bottom"/>
+
+                <Button Grid.Column="3" 
+                        Content="❌ Close" 
+                        Command="{Binding CloseCommand}"
+                        Classes="btn-outline"
+                        Margin="4,16,0,0"
+                        VerticalAlignment="Bottom"/>
+            </Grid>
+        </Border>
+
+        <!-- Loading Overlay -->
+        <Border IsVisible="{Binding IsBusy}" 
+                Background="#80000000" 
+                Grid.RowSpan="3"
+                ZIndex="1000">
+            <StackPanel HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        Spacing="16">
+                <ProgressBar Classes="loading-circular" 
+                             IsIndeterminate="True" 
+                             Width="48" 
+                             Height="48"/>
+                <TextBlock Text="{Binding BusyMessage, FallbackValue='Processing...'}" 
+                           Classes="heading-4" 
+                           Foreground="White" 
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

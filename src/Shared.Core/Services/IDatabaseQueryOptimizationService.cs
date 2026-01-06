@@ -46,4 +46,38 @@ public interface IDatabaseQueryOptimizationService
     /// Clears query cache to free memory
     /// </summary>
     void ClearQueryCache();
+
+    /// <summary>
+    /// Gets paginated products with search functionality
+    /// </summary>
+    Task<PaginatedResult<Product>> GetProductsPaginatedAsync(
+        Guid shopId, 
+        string? searchTerm = null, 
+        string? category = null, 
+        bool activeOnly = true,
+        int page = 0, 
+        int pageSize = 20);
+
+    /// <summary>
+    /// Gets paginated sales with advanced filtering
+    /// </summary>
+    Task<PaginatedResult<Sale>> GetSalesPaginatedAsync(
+        Guid shopId,
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        Guid? customerId = null,
+        decimal? minAmount = null,
+        decimal? maxAmount = null,
+        int page = 0,
+        int pageSize = 20);
+
+    /// <summary>
+    /// Gets customer lookup results with fast mobile number search
+    /// </summary>
+    Task<IEnumerable<Customer>> GetCustomersByMobileAsync(string mobileNumber);
+
+    /// <summary>
+    /// Gets performance analytics for database operations
+    /// </summary>
+    Task<DatabasePerformanceAnalytics> GetPerformanceAnalyticsAsync();
 }

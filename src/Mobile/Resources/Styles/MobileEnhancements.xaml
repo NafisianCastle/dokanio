@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Mobile-Specific Colors -->
+    <Color x:Key="TouchHighlight">#E3F2FD</Color>
+    <Color x:Key="TouchPressed">#BBDEFB</Color>
+    <Color x:Key="CardShadow">#1A000000</Color>
+    <Color x:Key="SuccessGreen">#4CAF50</Color>
+    <Color x:Key="WarningOrange">#FF9800</Color>
+    <Color x:Key="ErrorRed">#F44336</Color>
+
+    <!-- Touch-Optimized Button Style -->
+    <Style x:Key="TouchButton" TargetType="Button">
+        <Setter Property="MinimumHeightRequest" Value="48" />
+        <Setter Property="MinimumWidthRequest" Value="48" />
+        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="Padding" Value="16,12" />
+        <Setter Property="Shadow">
+            <Shadow Brush="{StaticResource CardShadow}"
+                    Offset="0,2"
+                    Radius="4"
+                    Opacity="0.3" />
+        </Setter>
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal" />
+                    <VisualState x:Name="Pressed">
+                        <VisualState.Setters>
+                            <Setter Property="Scale" Value="0.95" />
+                            <Setter Property="Opacity" Value="0.8" />
+                        </VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="Disabled">
+                        <VisualState.Setters>
+                            <Setter Property="Opacity" Value="0.5" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
+    </Style>
+
+    <!-- Primary Action Button -->
+    <Style x:Key="PrimaryActionButton" TargetType="Button" BasedOn="{StaticResource TouchButton}">
+        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="HeightRequest" Value="56" />
+        <Setter Property="FontSize" Value="18" />
+    </Style>
+
+    <!-- Secondary Action Button -->
+    <Style x:Key="SecondaryActionButton" TargetType="Button" BasedOn="{StaticResource TouchButton}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+        <Setter Property="HeightRequest" Value="48" />
+    </Style>
+
+    <!-- Danger Action Button -->
+    <Style x:Key="DangerActionButton" TargetType="Button" BasedOn="{StaticResource TouchButton}">
+        <Setter Property="BackgroundColor" Value="{StaticResource ErrorRed}" />
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="HeightRequest" Value="48" />
+    </Style>
+
+    <!-- Success Action Button -->
+    <Style x:Key="SuccessActionButton" TargetType="Button" BasedOn="{StaticResource TouchButton}">
+        <Setter Property="BackgroundColor" Value="{StaticResource SuccessGreen}" />
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="HeightRequest" Value="48" />
+    </Style>
+
+    <!-- Warning Action Button -->
+    <Style x:Key="WarningActionButton" TargetType="Button" BasedOn="{StaticResource TouchButton}">
+        <Setter Property="BackgroundColor" Value="{StaticResource WarningOrange}" />
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="HeightRequest" Value="48" />
+    </Style>
+
+    <!-- Circular Icon Button -->
+    <Style x:Key="CircularIconButton" TargetType="Button" BasedOn="{StaticResource TouchButton}">
+        <Setter Property="WidthRequest" Value="48" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FontSize" Value="20" />
+    </Style>
+
+    <!-- Modern Card Style -->
+    <Style x:Key="ModernCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="20,16" />
+        <Setter Property="HasShadow" Value="True" />
+        <Setter Property="Shadow">
+            <Shadow Brush="{StaticResource CardShadow}"
+                    Offset="0,2"
+                    Radius="8"
+                    Opacity="0.15" />
+        </Setter>
+    </Style>
+
+    <!-- Compact Card Style -->
+    <Style x:Key="CompactCard" TargetType="Frame" BasedOn="{StaticResource ModernCard}">
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="CornerRadius" Value="12" />
+    </Style>
+
+    <!-- Header Card Style -->
+    <Style x:Key="HeaderCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="CornerRadius" Value="0,0,20,20" />
+        <Setter Property="Padding" Value="20,15,20,20" />
+        <Setter Property="HasShadow" Value="True" />
+        <Setter Property="Shadow">
+            <Shadow Brush="{StaticResource CardShadow}"
+                    Offset="0,4"
+                    Radius="12"
+                    Opacity="0.25" />
+        </Setter>
+    </Style>
+
+    <!-- Bottom Sheet Style -->
+    <Style x:Key="BottomSheet" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}" />
+        <Setter Property="CornerRadius" Value="20,20,0,0" />
+        <Setter Property="Padding" Value="20,20,20,30" />
+        <Setter Property="HasShadow" Value="True" />
+        <Setter Property="Shadow">
+            <Shadow Brush="{StaticResource CardShadow}"
+                    Offset="0,-4"
+                    Radius="16"
+                    Opacity="0.2" />
+        </Setter>
+    </Style>
+
+    <!-- Touch-Optimized Entry Style -->
+    <Style x:Key="TouchEntry" TargetType="Entry">
+        <Setter Property="MinimumHeightRequest" Value="48" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Padding" Value="16,12" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal" />
+                    <VisualState x:Name="Focused">
+                        <VisualState.Setters>
+                            <Setter Property="BackgroundColor" Value="{StaticResource TouchHighlight}" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
+    </Style>
+
+    <!-- Touch-Optimized Picker Style -->
+    <Style x:Key="TouchPicker" TargetType="Picker">
+        <Setter Property="MinimumHeightRequest" Value="48" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+    </Style>
+
+    <!-- Responsive Grid Styles -->
+    <Style x:Key="ResponsiveGrid" TargetType="Grid">
+        <Setter Property="ColumnSpacing" Value="12" />
+        <Setter Property="RowSpacing" Value="12" />
+    </Style>
+
+    <!-- One-Handed Operation Styles -->
+    <Style x:Key="ThumbReachButton" TargetType="Button" BasedOn="{StaticResource TouchButton}">
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="VerticalOptions" Value="End" />
+        <Setter Property="Margin" Value="0,0,20,20" />
+    </Style>
+
+    <!-- Accessibility Styles -->
+    <Style x:Key="AccessibleLabel" TargetType="Label">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="LineHeight" Value="1.4" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+    </Style>
+
+    <!-- High Contrast Styles -->
+    <Style x:Key="HighContrastButton" TargetType="Button" BasedOn="{StaticResource TouchButton}">
+        <Setter Property="BorderWidth" Value="2" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+    </Style>
+
+</ResourceDictionary>
