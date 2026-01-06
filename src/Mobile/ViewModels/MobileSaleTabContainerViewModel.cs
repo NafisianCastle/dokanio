@@ -902,7 +902,9 @@ public partial class MobileSaleTabViewModel : ObservableObject
                     BatchNumber = item.BatchNumber,
                     Weight = item.Weight,
                     IsWeightBased = item.IsWeightBased,
-                    DiscountPercentage = item.DiscountAmount > 0 ? (item.DiscountAmount / item.LineTotal) * 100 : 0
+                    DiscountPercentage = (item.DiscountAmount > 0 && item.LineTotal > 0)
+                        ? (item.DiscountAmount / item.LineTotal) * 100
+                        : 0
                 };
                 
                 SaleViewModel.SaleItems.Add(saleItemViewModel);
