@@ -227,8 +227,8 @@ public class CustomerLookupService : ICustomerLookupService
 
             var result = await MapToLookupResultAsync(customer);
             
-            _logger.LogInformation("New customer created successfully: {CustomerId}, Mobile: {MobileNumber}", 
-                customer.Id, MaskMobileNumber(normalizedNumber));
+            _logger.LogInformation("New customer created successfully: {CustomerId}", 
+                customer.Id);
 
             return new CustomerCreationResult
             {
