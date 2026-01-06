@@ -88,14 +88,14 @@ public static class MauiProgram
     private static void SetupGlobalExceptionHandling(IServiceProvider serviceProvider)
     {
         // Handle unhandled exceptions in the current AppDomain
-        AppDomain.CurrentDomain.UnhandledException += async (sender, e) =>
+        AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
         {
             if (e.ExceptionObject is Exception exception)
             {
                 try
                 {
                     var exceptionHandler = serviceProvider.GetRequiredService<GlobalExceptionHandlerService>();
-                    await exceptionHandler.HandleUnhandledExceptionAsync(exception, "AppDomain Unhandled Exception");
+                    exceptionHandler.HandleUnhandledExceptionAsync(exception, "AppDomain Unhandled Exception").GetAwaiter().GetResult();
                 }
                 catch
                 {
@@ -106,12 +106,12 @@ public static class MauiProgram
         };
 
         // Handle unhandled exceptions in tasks
-        TaskScheduler.UnobservedTaskException += async (sender, e) =>
+        TaskScheduler.UnobservedTaskException += (sender, e) =>
         {
             try
             {
                 var exceptionHandler = serviceProvider.GetRequiredService<GlobalExceptionHandlerService>();
-                await exceptionHandler.HandleUnhandledExceptionAsync(e.Exception, "Task Unobserved Exception");
+                exceptionHandler.HandleUnhandledExceptionAsync(e.Exception, "Task Unobserved Exception").GetAwaiter().GetResult();
             }
             catch
             {
