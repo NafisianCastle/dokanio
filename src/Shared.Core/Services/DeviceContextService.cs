@@ -72,7 +72,7 @@ public class DeviceContextService : IDeviceContextService
         try
         {
             // Try to generate a consistent device ID based on machine characteristics
-            var machineId = Environment.MachineName + Environment.UserName + Environment.OSVersion.ToString();
+            var machineId = Environment.MachineName + Environment.OSVersion.ToString();
             var hash = System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(machineId));
             
             // Use first 16 bytes to create a GUID
