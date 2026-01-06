@@ -181,7 +181,12 @@ public class BusinessManagementService : IBusinessManagementService
 
     public async Task<ShopResponse> CreateShopAsync(CreateShopRequest request)
     {
-        _logger.LogInformation("Creating shop: {ShopName} for business: {BusinessId}", request.Name, request.BusinessId);
+        var safeShopName = request.Name?
+            .Replace("\r\n", " ")
+            .Replace("\n", " ")
+            .Replace("\r", " ");
+
+        _logger.LogInformation("Creating shop: {ShopName} for business: {BusinessId}", safeShopName, request.BusinessId);
 
         // Validate business exists
         var business = await _businessRepository.GetByIdAsync(request.BusinessId);
