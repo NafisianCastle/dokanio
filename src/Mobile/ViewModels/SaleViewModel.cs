@@ -1509,8 +1509,6 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
         {
             System.Diagnostics.Debug.WriteLine($"Sync failed: {ex.Message}");
         }
-    }ces.HapticFeedbackType.LongPress);
-        }
     }
 
     private async Task PrintReceipt()
