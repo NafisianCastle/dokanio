@@ -458,14 +458,7 @@ public partial class MobileSaleTabViewModel : ObservableObject
         _logger = logger;
 
         // Create the mobile sale view model for this tab
-        SaleViewModel = new SaleViewModel(
-            null!, // These would be injected in a real implementation
-            null!,
-            null!,
-            null!,
-            null!,
-            null!,
-            null!);
+        SaleViewModel = saleViewModelFactory();
         
         // Load session data into the view model
         LoadSessionDataIntoViewModel();
