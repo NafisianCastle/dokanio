@@ -336,9 +336,15 @@ public class CustomerLookupService : ICustomerLookupService
     public async Task InvalidateCustomerCacheAsync(Guid customerId)
     {
         try
+    {
+        var customer = await _customerRepository.GetByIdAsync(customerId);
+        if (customer != null)
         {
-            await _cachingService.InvalidateCacheAsync($"customer_*_{customerId}");
-            await _cachingService.InvalidateCacheAsync($"membership_details_{customerId}");
+            var normalized = NormalizeMobileNumber(customer.Phone);
+            await _cachingService.InvalidateCacheAsync($"customer_mobile_{normalized}");
+        }
+
+        await _cachingService.InvalidateCacheAsync($"membership_details_{customerId}");
             await _cachingService.InvalidateCacheAsync($"customer_preferences_{customerId}");
         }
         catch (Exception ex)
