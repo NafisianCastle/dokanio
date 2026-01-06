@@ -236,7 +236,7 @@ public partial class EnhancedMobileTabContainerViewModel : BaseViewModel
             // Switch to new tab
             await SwitchToTab(tabViewModel);
 
-            _logger.LogInformation("Created new enhanced mobile sale tab: {TabName}", tabName);
+            _logger.LogInformation("Created new enhanced mobile sale tab.");
         }
         catch (Exception ex)
         {
