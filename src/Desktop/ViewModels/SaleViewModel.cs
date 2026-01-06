@@ -769,9 +769,7 @@ public partial class SaleViewModel : BaseViewModel
                     TabName = TabName,
                     ShopId = _shopId,
                     UserId = _userId,
-                    DeviceId = Environment.MachineName.GetHashCode() != 0 
-                        ? new Guid(Environment.MachineName.GetHashCode(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                        : Guid.NewGuid()
+                    DeviceId = CreateDeterministicGuidFromString(Environment.MachineName)
                 };
                 
                 await _salesManager.CreateNewSaleSessionAsync(request);
