@@ -111,8 +111,8 @@ public class MultiTabSalesManager : IMultiTabSalesManager
             await _sessionRepository.AddAsync(session);
             await _sessionRepository.SaveChangesAsync();
 
-            _logger.LogInformation("Created new sale session {SessionId} with tab name '{TabName}' for user {UserId}",
-                session.Id, session.TabName, session.UserId);
+            _logger.LogInformation("Created new sale session {SessionId} for user {UserId}",
+                session.Id, session.UserId);
 
             return new SessionOperationResult
             {
