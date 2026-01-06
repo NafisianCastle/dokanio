@@ -868,13 +868,13 @@ public partial class MobileSaleTabViewModel : ObservableObject
         var saleViewModel = new SaleViewModel(
             null!, // IEnhancedSalesService - would be injected
             null!, // IProductService - would be injected
-            null!, // IPrinterService - would be injected
-            null!, // IReceiptService - would be injected
-            null!, // ICurrentUserService - would be injected
-            null!, // IUserContextService - would be injected
-            null!, // IBusinessManagementService - would be injected
-            null!, // IMultiTabSalesManager - would be injected
-            null!, // ICustomerLookupService - would be injected
+    // Create the mobile sale view model for this tab
+    SaleViewModel = CreateSaleViewModelForTab(sessionData);
+
+    // Load session data into the view model
+    LoadSessionDataIntoViewModel();
+
+    // Subscribe to changes
             null!  // IBarcodeIntegrationService - would be injected
         );
 
