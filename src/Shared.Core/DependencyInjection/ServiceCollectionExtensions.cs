@@ -41,6 +41,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
         services.AddScoped<IDiscountService, DiscountService>();
         services.AddScoped<IMembershipService, MembershipService>();
+        services.AddScoped<IRealTimeCalculationEngine, RealTimeCalculationEngine>();
         services.AddScoped<ICustomerLookupService, CustomerLookupService>();
         services.AddScoped<IConfigurationService, ConfigurationService>();
         services.AddScoped<ILicenseService, LicenseService>();
@@ -208,6 +209,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
         services.AddScoped<IDiscountService, DiscountService>();
         services.AddScoped<IMembershipService, MembershipService>();
+        services.AddScoped<IRealTimeCalculationEngine, RealTimeCalculationEngine>();
         services.AddScoped<ICustomerLookupService, CustomerLookupService>();
         
         // Register device context service
