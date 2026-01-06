@@ -86,7 +86,8 @@ public class DashboardApiService : IDashboardApiService
             var lowStockProducts = allStock.Count(s => s.Quantity <= lowStockThreshold);
             var outOfStockProducts = allStock.Count(s => s.Quantity == 0);
             var expiringProducts = products.Count(p => p.ExpiryDate.HasValue && p.ExpiryDate.Value <= DateTime.UtcNow.AddDays(30));
-            var totalInventoryValue = allStock.Sum(s => s.Quantity * (products.FirstOrDefault(p => p.Id == s.ProductId)?.UnitPrice ?? 0));
+            var productsById = products.ToDictionary(p => p.Id);
+            var totalInventoryValue = allStock.Sum(s => s.Quantity * (productsById.TryGetValue(s.ProductId, out var product) ? product.UnitPrice : 0));
 
             return new DashboardOverview
             {
