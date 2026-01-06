@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Security.Cryptography;
 
 namespace Shared.Core.Services;
 
@@ -12,6 +14,27 @@ namespace Shared.Core.Services;
 public class CachingStrategyService : ICachingStrategyService, IDisposable
 {
     private readonly ILogger<CachingStrategyService> _logger;
+
+    private static string GetSafeCacheKeyForLogging(string key)
+    {
+        if (string.IsNullOrEmpty(key))
+            return "<empty>";
+
+        // Use a hash of the key so logs remain useful for correlation
+        // without exposing the underlying (potentially sensitive) value.
+        using var sha = SHA256.Create();
+        var bytes = Encoding.UTF8.GetBytes(key);
+        var hash = sha.ComputeHash(bytes);
+
+        // Take first 8 bytes to keep log entry concise
+        var sb = new StringBuilder(16);
+        for (int i = 0; i < Math.Min(8, hash.Length); i++)
+        {
+            sb.Append(hash[i].ToString("x2"));
+        }
+
+        return $"hash:{sb}";
+    }
     private readonly ConcurrentDictionary<string, CacheEntry> _memoryCache = new();
     private readonly ConcurrentDictionary<string, CacheEntry> _persistentCache = new();
     private readonly Timer _cleanupTimer;
@@ -100,7 +123,8 @@ public class CachingStrategyService : ICachingStrategyService, IDisposable
             return existing;
         });
 
-        _logger.LogDebug("Data cached in memory for key: {Key}, expires at: {ExpiresAt}", key, cacheEntry.ExpiresAt);
+        _logger.LogDebug("Data cached in memory for key hash: {SafeKey}, expires at: {ExpiresAt}",
+            GetSafeCacheKeyForLogging(key), cacheEntry.ExpiresAt);
         await Task.CompletedTask;
     }
 
@@ -113,7 +137,8 @@ public class CachingStrategyService : ICachingStrategyService, IDisposable
         {
             entry.LastAccessed = DateTime.UtcNow;
             entry.AccessCount++;
-            _logger.LogDebug("Persistent cache hit for key: {Key}", key);
+            var safeKey = GetSafeCacheKeyForLogging(key);
+            _logger.LogDebug("Persistent cache hit for key hash: {SafeKey}", safeKey);
             
             try
             {
@@ -121,13 +146,13 @@ public class CachingStrategyService : ICachingStrategyService, IDisposable
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to deserialize persistent cached data for key: {Key}", key);
+                _logger.LogWarning(ex, "Failed to deserialize persistent cached data for key hash: {SafeKey}", safeKey);
                 _persistentCache.TryRemove(key, out _);
                 return null;
             }
         }
 
-        _logger.LogDebug("Persistent cache miss for key: {Key}", key);
+        _logger.LogDebug("Persistent cache miss for key hash: {SafeKey}", GetSafeCacheKeyForLogging(key));
         return null;
     }
 
@@ -165,7 +190,8 @@ public class CachingStrategyService : ICachingStrategyService, IDisposable
             return existing;
         });
 
-        _logger.LogDebug("Data cached persistently for key: {Key}, expires at: {ExpiresAt}", key, cacheEntry.ExpiresAt);
+        _logger.LogDebug("Data cached persistently for key hash: {SafeKey}, expires at: {ExpiresAt}",
+            GetSafeCacheKeyForLogging(key), cacheEntry.ExpiresAt);
         await Task.CompletedTask;
     }
 
