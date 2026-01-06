@@ -259,7 +259,8 @@ public class ConfigurationRepository : Repository<Configuration>, IConfiguration
         catch (Exception ex)
         {
             var safeValue = value.Replace("\r", string.Empty).Replace("\n", string.Empty);
-            _logger.LogError(ex, "Error setting shop configuration Shop={ShopId}, Key={Key}, Value={Value}", shopId, key, safeValue);
+            var valuePreview = safeValue.Length <= 256 ? safeValue : safeValue.Substring(0, 256) + "...";
+            _logger.LogError(ex, "Error setting shop configuration Shop={ShopId}, Key={Key}, ValuePreview={ValuePreview}", shopId, key, valuePreview);
             throw;
         }
     }
