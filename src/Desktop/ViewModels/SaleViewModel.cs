@@ -194,6 +194,33 @@ public partial class SaleViewModel : BaseViewModel
         });
     }
 
+    [RelayCommand]
+    private void RecalculateTotals()
+    {
+        OnPropertyChanged(nameof(Subtotal));
+        OnPropertyChanged(nameof(Tax));
+        OnPropertyChanged(nameof(Total));
+        OnPropertyChanged(nameof(ChangeAmount));
+    }
+
+    [RelayCommand]
+    private async Task LookupCustomer()
+    {
+        if (string.IsNullOrWhiteSpace(CustomerPhone))
+            return;
+
+        // Simulate customer lookup
+        await Task.Delay(500);
+        
+        // In real app, this would query the database
+        // For demo, just populate with sample data if phone matches pattern
+        if (CustomerPhone.Length >= 10)
+        {
+            CustomerName = "Sample Customer";
+            // Could set membership info, discounts, etc.
+        }
+    }
+
     private void LoadSampleProducts()
     {
         // This would be loaded from database in real app
