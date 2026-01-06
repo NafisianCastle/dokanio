@@ -82,6 +82,14 @@ public class PosDbContext : DbContext
             entity.HasIndex(e => e.EntityType);
             entity.HasIndex(e => e.EntityId);
             
+            // Performance optimization: Composite indexes for common query patterns
+            entity.HasIndex(e => new { e.IsProcessed, e.CreatedAt })
+                  .HasDatabaseName("IX_TransactionLog_IsProcessed_CreatedAt");
+            entity.HasIndex(e => new { e.EntityType, e.EntityId, e.CreatedAt })
+                  .HasDatabaseName("IX_TransactionLog_Entity_CreatedAt");
+            entity.HasIndex(e => new { e.DeviceId, e.IsProcessed })
+                  .HasDatabaseName("IX_TransactionLog_Device_IsProcessed");
+            
             entity.Property(e => e.Operation).IsRequired().HasMaxLength(20);
             entity.Property(e => e.EntityType).IsRequired().HasMaxLength(100);
             entity.Property(e => e.EntityData).IsRequired();
@@ -97,6 +105,14 @@ public class PosDbContext : DbContext
             entity.HasIndex(e => e.IsActive);
             entity.HasIndex(e => e.SyncStatus);
             entity.HasIndex(e => e.DeviceId);
+            
+            // Performance optimization: Composite indexes for common query patterns
+            entity.HasIndex(e => new { e.OwnerId, e.IsActive, e.IsDeleted })
+                  .HasDatabaseName("IX_Business_Owner_Active_NotDeleted");
+            entity.HasIndex(e => new { e.Type, e.IsActive })
+                  .HasDatabaseName("IX_Business_Type_Active");
+            entity.HasIndex(e => new { e.SyncStatus, e.UpdatedAt })
+                  .HasDatabaseName("IX_Business_Sync_Updated");
             
             entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
             entity.Property(e => e.Description).HasMaxLength(500);
@@ -153,6 +169,19 @@ public class PosDbContext : DbContext
             entity.HasIndex(e => e.DeviceId);
             entity.HasIndex(e => e.IsWeightBased);
             
+            // Performance optimization: Composite indexes for common query patterns
+            entity.HasIndex(e => new { e.ShopId, e.IsActive, e.IsDeleted })
+                  .HasDatabaseName("IX_Product_Shop_Active_NotDeleted");
+            entity.HasIndex(e => new { e.ShopId, e.Category, e.IsActive })
+                  .HasDatabaseName("IX_Product_Shop_Category_Active");
+            entity.HasIndex(e => new { e.Barcode, e.ShopId })
+                  .HasDatabaseName("IX_Product_Barcode_Shop");
+            entity.HasIndex(e => new { e.ExpiryDate, e.ShopId })
+                  .HasDatabaseName("IX_Product_Expiry_Shop")
+                  .HasFilter("ExpiryDate IS NOT NULL");
+            entity.HasIndex(e => new { e.Name, e.ShopId })
+                  .HasDatabaseName("IX_Product_Name_Shop");
+            
             entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
             entity.Property(e => e.Barcode).HasMaxLength(50);
             entity.Property(e => e.Category).HasMaxLength(100);
@@ -183,6 +212,19 @@ public class PosDbContext : DbContext
             entity.HasIndex(e => e.SyncStatus);
             entity.HasIndex(e => e.DeviceId);
             entity.HasIndex(e => e.CustomerId);
+            
+            // Performance optimization: Composite indexes for common query patterns
+            entity.HasIndex(e => new { e.ShopId, e.CreatedAt, e.IsDeleted })
+                  .HasDatabaseName("IX_Sale_Shop_Created_NotDeleted");
+            entity.HasIndex(e => new { e.UserId, e.CreatedAt })
+                  .HasDatabaseName("IX_Sale_User_Created");
+            entity.HasIndex(e => new { e.CustomerId, e.CreatedAt })
+                  .HasDatabaseName("IX_Sale_Customer_Created")
+                  .HasFilter("CustomerId IS NOT NULL");
+            entity.HasIndex(e => new { e.ShopId, e.PaymentMethod, e.CreatedAt })
+                  .HasDatabaseName("IX_Sale_Shop_Payment_Created");
+            entity.HasIndex(e => new { e.CreatedAt, e.TotalAmount })
+                  .HasDatabaseName("IX_Sale_Created_Amount");
             
             entity.Property(e => e.InvoiceNumber).IsRequired().HasMaxLength(50);
             entity.Property(e => e.TotalAmount).HasPrecision(10, 2);
@@ -357,6 +399,16 @@ public class PosDbContext : DbContext
             entity.HasIndex(e => e.TotalSpent);
             entity.HasIndex(e => e.SyncStatus);
             entity.HasIndex(e => e.DeviceId);
+            
+            // Performance optimization: Add mobile number index for fast lookup
+            entity.HasIndex(e => e.Phone)
+                  .HasDatabaseName("IX_Customer_Phone");
+            entity.HasIndex(e => new { e.Phone, e.IsActive, e.IsDeleted })
+                  .HasDatabaseName("IX_Customer_Phone_Active_NotDeleted");
+            entity.HasIndex(e => new { e.Tier, e.IsActive })
+                  .HasDatabaseName("IX_Customer_Tier_Active");
+            entity.HasIndex(e => new { e.TotalSpent, e.Tier })
+                  .HasDatabaseName("IX_Customer_Spent_Tier");
             
             entity.Property(e => e.MembershipNumber).IsRequired().HasMaxLength(50);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
