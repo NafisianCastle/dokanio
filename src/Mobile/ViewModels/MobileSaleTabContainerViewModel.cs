@@ -95,9 +95,12 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
         if (currentUser != null)
         {
             _currentUserId = currentUser.Id;
-            _currentDeviceId = Microsoft.Maui.Devices.DeviceInfo.Current.Idiom == DeviceIdiom.Phone 
-                ? new Guid(Microsoft.Maui.Devices.DeviceInfo.Current.Model.GetHashCode(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                : Guid.NewGuid();
+            var storedDeviceId = Microsoft.Maui.Storage.Preferences.Default.Get("device_id", string.Empty);
+            if (!Guid.TryParse(storedDeviceId, out _currentDeviceId))
+            {
+                _currentDeviceId = Guid.NewGuid();
+                Microsoft.Maui.Storage.Preferences.Default.Set("device_id", _currentDeviceId.ToString());
+            }
             _currentShopId = currentShop?.Id ?? currentUser.ShopId ?? Guid.NewGuid();
         }
     }
