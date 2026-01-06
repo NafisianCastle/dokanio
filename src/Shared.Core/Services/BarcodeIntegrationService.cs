@@ -425,7 +425,7 @@ public class BarcodeIntegrationService : IBarcodeIntegrationService
         if (string.IsNullOrWhiteSpace(barcode)) return false;
 
         // Ensure all characters are valid printable ASCII characters (or other supported sets if needed)
-        return barcode.All(c => !char.IsControl(c));
+        return barcode.All(c => c >= 32 && c <= 126);
     }
 
     private bool IsValidCode39(string barcode)
