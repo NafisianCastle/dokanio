@@ -260,17 +260,17 @@ public partial class SaleViewModel : BaseViewModel
         }
     }
 
-    private void OnBarcodeProcessed(object? sender, BarcodeProcessedEventArgs e)
+    private async void OnBarcodeProcessed(object? sender, BarcodeProcessedEventArgs e)
     {
         LastScannedBarcode = e.Barcode;
         LastScanTime = e.Timestamp;
         ScanStatus = "Product added";
-        
+    
         if (e.Product != null)
         {
             // Convert to desktop model and add to sale
             var desktopProduct = ConvertToDesktopProduct(e.Product);
-            AddProduct(desktopProduct);
+            await AddProduct(desktopProduct);
         }
     }
 
