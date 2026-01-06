@@ -291,8 +291,8 @@ public partial class MobileCustomerLookupViewModel : BaseViewModel
 
                 await Shell.Current.DisplayAlert("Success", "New customer created successfully!", "OK");
                 
-                _logger.LogInformation("Successfully created new customer: {CustomerName} ({MobileNumber})", 
-                    result.Customer.Name, result.Customer.Phone);
+                _logger.LogInformation("Successfully created new customer: {CustomerName} (Id: {CustomerId})",
+                    result.Customer.Name, result.Customer.Id);
             }
             else
             {
