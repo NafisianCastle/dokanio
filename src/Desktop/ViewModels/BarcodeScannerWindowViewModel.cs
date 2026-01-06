@@ -36,6 +36,9 @@ public partial class BarcodeScannerWindowViewModel : BaseViewModel
     [ObservableProperty]
     private IBrush scannerStatusColor = Brushes.Gray;
 
+    [ObservableProperty]
+    private string busyMessage = string.Empty;
+
     private Product? _currentProduct;
     private CancellationTokenSource? _scanningCancellationToken;
 
@@ -263,20 +266,15 @@ public partial class BarcodeScannerWindowViewModel : BaseViewModel
         IsScanning = false;
     }
 
-    protected override void Dispose(bool disposing)
+    public void Cleanup()
     {
-        if (disposing)
-        {
-            _scanningCancellationToken?.Cancel();
-            _scanningCancellationToken?.Dispose();
-            
-            if (_barcodeIntegrationService != null)
-            {
-                _barcodeIntegrationService.BarcodeProcessed -= OnBarcodeProcessed;
-                _barcodeIntegrationService.ScanError -= OnScanError;
-            }
-        }
+        _scanningCancellationToken?.Cancel();
+        _scanningCancellationToken?.Dispose();
         
-        base.Dispose(disposing);
+        if (_barcodeIntegrationService != null)
+        {
+            _barcodeIntegrationService.BarcodeProcessed -= OnBarcodeProcessed;
+            _barcodeIntegrationService.ScanError -= OnScanError;
+        }
     }
 }
