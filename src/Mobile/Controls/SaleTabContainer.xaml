@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Mobile.ViewModels"
+             x:Class="Mobile.Controls.SaleTabContainer"
+             x:DataType="vm:MobileSaleTabContainerViewModel">
+
+    <Grid RowDefinitions="Auto,*">
+        
+        <!-- Tab Header -->
+        <Frame Grid.Row="0" 
+               BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+               BorderColor="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}"
+               CornerRadius="0"
+               Padding="0"
+               HasShadow="False">
+            
+            <Grid ColumnDefinitions="*,Auto">
+                
+                <!-- Tab Headers Scroll View -->
+                <ScrollView Grid.Column="0" 
+                           Orientation="Horizontal"
+                           HorizontalScrollBarVisibility="Never">
+                    
+                    <StackLayout Orientation="Horizontal" 
+                                Spacing="2"
+                                Padding="8,4">
+                        
+                        <BindableLayout.ItemsSource>
+                            <Binding Path="SaleTabs" />
+                        </BindableLayout.ItemsSource>
+                        
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Frame BackgroundColor="{Binding IsActive, Converter={StaticResource BoolToTabBackgroundConverter}}"
+                                       BorderColor="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}"
+                                       CornerRadius="8"
+                                       Padding="0"
+                                       HasShadow="False"
+                                       MinimumWidthRequest="100"
+                                       HeightRequest="40">
+                                    
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        
+                                        <!-- Tab Title Button -->
+                                        <Button Grid.Column="0"
+                                               Text="{Binding TabName}"
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MobileSaleTabContainerViewModel}}, Path=SwitchToTabCommand}"
+                                               CommandParameter="{Binding}"
+                                               BackgroundColor="Transparent"
+                                               BorderWidth="0"
+                                               FontSize="14"
+                                               FontAttributes="{Binding IsActive, Converter={StaticResource BoolToFontAttributesConverter}}"
+                                               TextColor="{Binding IsActive, Converter={StaticResource BoolToTabTextColorConverter}}"
+                                               HorizontalOptions="FillAndExpand" />
+                                        
+                                        <!-- Close Button -->
+                                        <Button Grid.Column="1"
+                                               Text="×"
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MobileSaleTabContainerViewModel}}, Path=CloseTabCommand}"
+                                               CommandParameter="{Binding}"
+                                               BackgroundColor="Transparent"
+                                               BorderWidth="0"
+                                               WidthRequest="24"
+                                               HeightRequest="24"
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"
+                                               IsVisible="{Binding CanClose}" />
+                                        
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                        
+                    </StackLayout>
+                </ScrollView>
+                
+                <!-- New Tab Button -->
+                <Button Grid.Column="1"
+                       Text="+"
+                       Command="{Binding CreateNewTabCommand}"
+                       BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                       TextColor="White"
+                       BorderWidth="0"
+                       CornerRadius="20"
+                       WidthRequest="40"
+                       HeightRequest="40"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       Margin="8,4" />
+                
+            </Grid>
+        </Frame>
+        
+        <!-- Tab Content -->
+        <ContentView Grid.Row="1" 
+                    Content="{Binding ActiveTabContent}"
+                    HorizontalOptions="FillAndExpand"
+                    VerticalOptions="FillAndExpand" />
+        
+    </Grid>
+
+</ContentView>

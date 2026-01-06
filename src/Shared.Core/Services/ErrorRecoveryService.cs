@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Core.Data;
+using Shared.Core.Entities;
+using Shared.Core.Enums;
 using System.Diagnostics;
 
 namespace Shared.Core.Services;
@@ -14,22 +16,32 @@ public class ErrorRecoveryService : IErrorRecoveryService
     private readonly PosDbContext _context;
     private readonly IComprehensiveLoggingService _loggingService;
     private readonly ITransactionLogService _transactionLogService;
+    private readonly ITransactionStateService _transactionStateService;
+    private readonly IOfflineQueueService _offlineQueueService;
+    private readonly ICrashRecoveryService _crashRecoveryService;
     private readonly ILogger<ErrorRecoveryService> _logger;
 
     public ErrorRecoveryService(
         PosDbContext context,
         IComprehensiveLoggingService loggingService,
         ITransactionLogService transactionLogService,
+        ITransactionStateService transactionStateService,
+        IOfflineQueueService offlineQueueService,
+        ICrashRecoveryService crashRecoveryService,
         ILogger<ErrorRecoveryService> logger)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _loggingService = loggingService ?? throw new ArgumentNullException(nameof(loggingService));
         _transactionLogService = transactionLogService ?? throw new ArgumentNullException(nameof(transactionLogService));
+        _transactionStateService = transactionStateService ?? throw new ArgumentNullException(nameof(transactionStateService));
+        _offlineQueueService = offlineQueueService ?? throw new ArgumentNullException(nameof(offlineQueueService));
+        _crashRecoveryService = crashRecoveryService ?? throw new ArgumentNullException(nameof(crashRecoveryService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
     /// Recovers from storage errors by attempting database repair and restoration
+    /// Enhanced with transaction state persistence and auto-save functionality
     /// Local-first: Uses Local_Storage for recovery operations
     /// </summary>
     public async Task<RecoveryResult> RecoverFromStorageErrorAsync(Exception exception)
@@ -65,7 +77,23 @@ public class ErrorRecoveryService : IErrorRecoveryService
             var recoveredTransactions = await _transactionLogService.RecoverFromLogsAsync();
             result.ActionsPerformed.Add($"Recovered {recoveredTransactions} transactions from logs");
 
-            // Step 3: Validate data integrity
+            // Step 3: Restore unsaved transaction states
+            var unsavedStates = await _transactionStateService.GetUnsavedTransactionStatesAsync();
+            foreach (var state in unsavedStates)
+            {
+                try
+                {
+                    await _transactionStateService.SaveTransactionStateAsync(state.SaleSessionId, state);
+                    result.ActionsPerformed.Add($"Restored transaction state for session {state.SaleSessionId}");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to restore transaction state for session {SessionId}", state.SaleSessionId);
+                    result.ActionsPerformed.Add($"Failed to restore transaction state for session {state.SaleSessionId}");
+                }
+            }
+
+            // Step 4: Validate data integrity
             var integrityIssues = await ValidateDataIntegrityAsync();
             if (integrityIssues.Any())
             {
@@ -76,7 +104,7 @@ public class ErrorRecoveryService : IErrorRecoveryService
                 result.ActionsPerformed.Add($"Fixed {fixedIssues} data integrity issues");
             }
 
-            // Step 4: Optimize database if needed
+            // Step 5: Optimize database if needed
             await OptimizeDatabaseAsync();
             result.ActionsPerformed.Add("Database optimization completed");
 
@@ -111,6 +139,7 @@ public class ErrorRecoveryService : IErrorRecoveryService
 
     /// <summary>
     /// Recovers from sync errors by implementing retry logic and conflict resolution
+    /// Enhanced with offline queue management for failed operations
     /// Local-first: Prioritizes Local_Storage operations
     /// </summary>
     public async Task<RecoveryResult> RecoverFromSyncErrorAsync(Exception exception)
@@ -141,11 +170,18 @@ public class ErrorRecoveryService : IErrorRecoveryService
                 result.ActionsPerformed.Add("Local data integrity verified");
             }
 
-            // Step 2: Queue failed sync operations for retry
-            await QueueFailedSyncOperationsAsync();
-            result.ActionsPerformed.Add("Failed sync operations queued for retry");
+            // Step 2: Queue failed sync operations for retry using offline queue
+            var queuedOperations = await QueueFailedSyncOperationsAsync();
+            result.ActionsPerformed.Add($"Queued {queuedOperations} failed sync operations for retry");
 
-            // Step 3: Reset sync status for retry
+            // Step 3: Start offline queue monitoring for automatic retry when connectivity restored
+            var monitoringStarted = await _offlineQueueService.StartQueueMonitoringAsync();
+            if (monitoringStarted)
+            {
+                result.ActionsPerformed.Add("Started offline queue monitoring for automatic retry");
+            }
+
+            // Step 4: Reset sync status for retry
             await ResetSyncStatusForRetryAsync();
             result.ActionsPerformed.Add("Sync status reset for retry");
 
@@ -332,6 +368,7 @@ public class ErrorRecoveryService : IErrorRecoveryService
 
     /// <summary>
     /// Performs comprehensive system health check and recovery
+    /// Enhanced with crash detection and transaction state validation
     /// Local-first: Uses Local_Storage for health monitoring
     /// </summary>
     public async Task<SystemHealthResult> PerformSystemHealthCheckAsync()
@@ -370,6 +407,18 @@ public class ErrorRecoveryService : IErrorRecoveryService
             // Check 4: Storage space and performance
             var storageHealth = await CheckStorageHealthAsync();
             result.Issues.AddRange(storageHealth);
+
+            // Check 5: Transaction state persistence health
+            var transactionStateHealth = await CheckTransactionStateHealthAsync();
+            result.Issues.AddRange(transactionStateHealth);
+
+            // Check 6: Offline queue health
+            var offlineQueueHealth = await CheckOfflineQueueHealthAsync();
+            result.Issues.AddRange(offlineQueueHealth);
+
+            // Check 7: Crash recovery readiness
+            var crashRecoveryHealth = await CheckCrashRecoveryHealthAsync();
+            result.Issues.AddRange(crashRecoveryHealth);
 
             // Attempt to resolve critical issues automatically
             var criticalIssues = result.Issues.Where(i => i.Severity == HealthSeverity.Critical).ToList();
@@ -565,10 +614,176 @@ public class ErrorRecoveryService : IErrorRecoveryService
         return issues.Count == 0;
     }
 
-    private async Task QueueFailedSyncOperationsAsync()
+    private async Task<int> QueueFailedSyncOperationsAsync()
     {
-        // In real implementation, would queue failed sync operations for retry
-        await Task.CompletedTask;
+        // Enhanced implementation using offline queue service
+        try
+        {
+            // Get recent failed sales and queue them
+            var recentSales = await _context.Sales
+                .Where(s => s.SyncStatus == SyncStatus.SyncFailed || s.SyncStatus == SyncStatus.NotSynced)
+                .Take(100) // Limit to prevent overwhelming the queue
+                .ToListAsync();
+
+            var queuedCount = 0;
+            foreach (var sale in recentSales)
+            {
+                var queued = await _offlineQueueService.QueueSaleAsync(sale, OperationPriority.High);
+                if (queued) queuedCount++;
+            }
+
+            _logger.LogInformation("Queued {Count} failed sales for retry", queuedCount);
+            return queuedCount;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error queuing failed sync operations");
+            return 0;
+        }
+    }
+
+    private async Task<List<HealthIssue>> CheckTransactionStateHealthAsync()
+    {
+        var issues = new List<HealthIssue>();
+
+        try
+        {
+            var unsavedStates = await _transactionStateService.GetUnsavedTransactionStatesAsync();
+            var unsavedCount = unsavedStates.Count;
+
+            if (unsavedCount > 50)
+            {
+                issues.Add(new HealthIssue
+                {
+                    Category = "Transaction State",
+                    Description = $"High number of unsaved transaction states: {unsavedCount}",
+                    Severity = HealthSeverity.Medium,
+                    RecommendedAction = "Review and complete pending transactions"
+                });
+            }
+
+            // Check for very old unsaved states
+            var oldStates = unsavedStates.Where(s => s.LastSavedAt < DateTime.UtcNow.AddHours(-24)).ToList();
+            if (oldStates.Any())
+            {
+                issues.Add(new HealthIssue
+                {
+                    Category = "Transaction State",
+                    Description = $"Found {oldStates.Count} transaction states older than 24 hours",
+                    Severity = HealthSeverity.High,
+                    RecommendedAction = "Review and clean up old transaction states"
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            issues.Add(new HealthIssue
+            {
+                Category = "Transaction State",
+                Description = $"Transaction state health check failed: {ex.Message}",
+                Severity = HealthSeverity.High
+            });
+        }
+
+        return issues;
+    }
+
+    private async Task<List<HealthIssue>> CheckOfflineQueueHealthAsync()
+    {
+        var issues = new List<HealthIssue>();
+
+        try
+        {
+            var queueStats = await _offlineQueueService.GetQueueStatisticsAsync();
+
+            if (queueStats.PendingOperations > 1000)
+            {
+                issues.Add(new HealthIssue
+                {
+                    Category = "Offline Queue",
+                    Description = $"High number of pending operations: {queueStats.PendingOperations}",
+                    Severity = HealthSeverity.Medium,
+                    RecommendedAction = "Check network connectivity and process queue"
+                });
+            }
+
+            if (queueStats.FailedOperations > 100)
+            {
+                issues.Add(new HealthIssue
+                {
+                    Category = "Offline Queue",
+                    Description = $"High number of failed operations: {queueStats.FailedOperations}",
+                    Severity = HealthSeverity.High,
+                    RecommendedAction = "Review failed operations and resolve issues"
+                });
+            }
+
+            // Check queue size
+            if (queueStats.QueueSizeBytes > 100 * 1024 * 1024) // 100MB
+            {
+                issues.Add(new HealthIssue
+                {
+                    Category = "Offline Queue",
+                    Description = $"Large queue size: {queueStats.QueueSizeBytes / (1024 * 1024)}MB",
+                    Severity = HealthSeverity.Medium,
+                    RecommendedAction = "Process queue to reduce storage usage"
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            issues.Add(new HealthIssue
+            {
+                Category = "Offline Queue",
+                Description = $"Offline queue health check failed: {ex.Message}",
+                Severity = HealthSeverity.High
+            });
+        }
+
+        return issues;
+    }
+
+    private async Task<List<HealthIssue>> CheckCrashRecoveryHealthAsync()
+    {
+        var issues = new List<HealthIssue>();
+
+        try
+        {
+            var recoveryStats = await _crashRecoveryService.GetRecoveryStatisticsAsync(DateTime.UtcNow.AddDays(-7));
+
+            if (recoveryStats.TotalCrashes > 10)
+            {
+                issues.Add(new HealthIssue
+                {
+                    Category = "Crash Recovery",
+                    Description = $"High number of crashes in last 7 days: {recoveryStats.TotalCrashes}",
+                    Severity = HealthSeverity.High,
+                    RecommendedAction = "Investigate crash causes and improve stability"
+                });
+            }
+
+            if (recoveryStats.FailedRecoveries > recoveryStats.SuccessfulRecoveries)
+            {
+                issues.Add(new HealthIssue
+                {
+                    Category = "Crash Recovery",
+                    Description = $"More failed recoveries ({recoveryStats.FailedRecoveries}) than successful ({recoveryStats.SuccessfulRecoveries})",
+                    Severity = HealthSeverity.Medium,
+                    RecommendedAction = "Review crash recovery process and improve reliability"
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            issues.Add(new HealthIssue
+            {
+                Category = "Crash Recovery",
+                Description = $"Crash recovery health check failed: {ex.Message}",
+                Severity = HealthSeverity.Medium
+            });
+        }
+
+        return issues;
     }
 
     private async Task ResetSyncStatusForRetryAsync()

@@ -202,8 +202,8 @@ public class SimpleEncryptionTest
     /// Generates a random string of specified length
     /// </summary>
     private static string GenerateRandomString(int length, RandomNumberGenerator rng)
-        var buffer = new byte[length];
     {
+        var buffer = new byte[length];
         rng.GetBytes(buffer);
         
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;':\",./<>? \t\n";

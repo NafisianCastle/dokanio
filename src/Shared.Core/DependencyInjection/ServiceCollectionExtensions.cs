@@ -33,12 +33,17 @@ public static class ServiceCollectionExtensions
         // Register business logic services
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IEnhancedSalesService, EnhancedSalesService>();
+        services.AddScoped<IEnhancedSalesGridEngine, EnhancedSalesGridEngine>();
+        services.AddScoped<IMultiTabSalesManager, MultiTabSalesManager>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IEnhancedInventoryService, EnhancedInventoryService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
         services.AddScoped<IDiscountService, DiscountService>();
         services.AddScoped<IMembershipService, MembershipService>();
+        services.AddScoped<IRealTimeCalculationEngine, RealTimeCalculationEngine>();
+        services.AddScoped<ICustomerLookupService, CustomerLookupService>();
+        services.AddScoped<IValidationService, ValidationService>();
         services.AddScoped<IConfigurationService, ConfigurationService>();
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IIntegratedPosService, IntegratedPosService>();
@@ -58,11 +63,15 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ISaleRepository, SaleRepository>();
         services.AddScoped<ISaleItemRepository, SaleItemRepository>();
+        services.AddScoped<ISaleSessionRepository, SaleSessionRepository>();
         services.AddScoped<IStockRepository, StockRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IUserSessionRepository, UserSessionRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<ICustomerMembershipRepository, CustomerMembershipRepository>();
+        services.AddScoped<IMembershipBenefitRepository, MembershipBenefitRepository>();
+        services.AddScoped<ICustomerPreferenceRepository, CustomerPreferenceRepository>();
         services.AddScoped<IDiscountRepository, DiscountRepository>();
         services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
         services.AddScoped<ILicenseRepository, LicenseRepository>();
@@ -83,6 +92,7 @@ public static class ServiceCollectionExtensions
             provider.GetRequiredService<IEncryptionService>(),
             provider.GetRequiredService<IAuditService>()));
         services.AddScoped<IAuditService, AuditService>();
+        services.AddScoped<IEnhancedAuditService, EnhancedAuditService>();
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
@@ -93,6 +103,12 @@ public static class ServiceCollectionExtensions
         // Register error recovery and exception handling services
         services.AddScoped<IErrorRecoveryService, ErrorRecoveryService>();
         services.AddScoped<IGlobalExceptionHandler, GlobalExceptionHandler>();
+        
+        // Register enhanced error recovery and resilience services
+        services.AddScoped<ITransactionStateService, TransactionStateService>();
+        services.AddScoped<IOfflineQueueService, OfflineQueueService>();
+        services.AddScoped<ICrashRecoveryService, CrashRecoveryService>();
+        services.AddScoped<IEnhancedErrorRecoveryService, EnhancedErrorRecoveryService>();
         
         // Register database migration service
         services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
@@ -116,6 +132,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDatabaseQueryOptimizationService, DatabaseQueryOptimizationService>();
         services.AddScoped<ICachingStrategyService, CachingStrategyService>();
         services.AddScoped<ITestOptimizationService, TestOptimizationService>();
+        services.AddScoped<IPaginationService, PaginationService>();
+        services.AddScoped<IPerformanceMonitoringService, PerformanceMonitoringService>();
+        services.AddScoped<ISystemMonitoringService, SystemMonitoringService>();
         
         // Register background services
         services.AddHostedService<SessionCleanupService>();
@@ -131,6 +150,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IReceiptService, ReceiptService>();
         services.AddScoped<IPrinterService, PrinterService>();
         services.AddScoped<IBarcodeScanner, BarcodeScanner>();
+        services.AddScoped<IBarcodeIntegrationService, BarcodeIntegrationService>();
         services.AddScoped<ICashDrawerService, CashDrawerService>();
         
         // Register hardware configurations (should be configured by the consuming application)
@@ -195,12 +215,17 @@ public static class ServiceCollectionExtensions
         // Register business logic services
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IEnhancedSalesService, EnhancedSalesService>();
+        services.AddScoped<IEnhancedSalesGridEngine, EnhancedSalesGridEngine>();
+        services.AddScoped<IMultiTabSalesManager, MultiTabSalesManager>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IEnhancedInventoryService, EnhancedInventoryService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IWeightBasedPricingService, WeightBasedPricingService>();
         services.AddScoped<IDiscountService, DiscountService>();
         services.AddScoped<IMembershipService, MembershipService>();
+        services.AddScoped<IRealTimeCalculationEngine, RealTimeCalculationEngine>();
+        services.AddScoped<ICustomerLookupService, CustomerLookupService>();
+        services.AddScoped<IValidationService, ValidationService>();
         
         // Register device context service
         services.AddSingleton<IDeviceContextService, DeviceContextService>();
@@ -209,8 +234,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ISaleRepository, SaleRepository>();
         services.AddScoped<ISaleItemRepository, SaleItemRepository>();
+        services.AddScoped<ISaleSessionRepository, SaleSessionRepository>();
         services.AddScoped<IStockRepository, StockRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<ICustomerMembershipRepository, CustomerMembershipRepository>();
+        services.AddScoped<IMembershipBenefitRepository, MembershipBenefitRepository>();
+        services.AddScoped<ICustomerPreferenceRepository, CustomerPreferenceRepository>();
         services.AddScoped<IDiscountRepository, DiscountRepository>();
         services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
         services.AddScoped<ILicenseRepository, LicenseRepository>();
@@ -243,6 +272,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IReceiptService, ReceiptService>();
         services.AddScoped<IPrinterService, PrinterService>();
         services.AddScoped<IBarcodeScanner, BarcodeScanner>();
+        services.AddScoped<IBarcodeIntegrationService, BarcodeIntegrationService>();
         services.AddScoped<ICashDrawerService, CashDrawerService>();
         
         // Register additional repositories and services
@@ -269,6 +299,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDatabaseQueryOptimizationService, DatabaseQueryOptimizationService>();
         services.AddScoped<ICachingStrategyService, CachingStrategyService>();
         services.AddScoped<ITestOptimizationService, TestOptimizationService>();
+        services.AddScoped<IPaginationService, PaginationService>();
+        services.AddScoped<IPerformanceMonitoringService, PerformanceMonitoringService>();
+        services.AddScoped<ISystemMonitoringService, SystemMonitoringService>();
         
         services.AddScoped<IAuthenticationService>(provider => new AuthenticationService(
             provider.GetRequiredService<IUserRepository>(),
@@ -278,6 +311,7 @@ public static class ServiceCollectionExtensions
             provider.GetRequiredService<IEncryptionService>(),
             provider.GetRequiredService<IAuditService>()));
         services.AddScoped<IAuditService, AuditService>();
+        services.AddScoped<IEnhancedAuditService, EnhancedAuditService>();
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();
         services.AddSingleton<ICrossPlatformConfigurationService, CrossPlatformConfigurationService>();
@@ -288,6 +322,12 @@ public static class ServiceCollectionExtensions
         // Register error recovery and exception handling services
         services.AddScoped<IErrorRecoveryService, ErrorRecoveryService>();
         services.AddScoped<IGlobalExceptionHandler, GlobalExceptionHandler>();
+        
+        // Register enhanced error recovery and resilience services
+        services.AddScoped<ITransactionStateService, TransactionStateService>();
+        services.AddScoped<IOfflineQueueService, OfflineQueueService>();
+        services.AddScoped<ICrashRecoveryService, CrashRecoveryService>();
+        services.AddScoped<IEnhancedErrorRecoveryService, EnhancedErrorRecoveryService>();
         
         // Add test configurations
         services.AddSingleton(provider => new SyncConfiguration
