@@ -77,21 +77,18 @@ public class CustomerLookupService : ICustomerLookupService
 
             if (cachedResult != null)
             {
-                _logger.LogDebug("Customer lookup successful for mobile number: {MobileNumber}", 
-                    MaskMobileNumber(mobileNumber));
+                _logger.LogDebug("Customer lookup successful for provided mobile number.");
             }
             else
             {
-                _logger.LogDebug("No customer found for mobile number: {MobileNumber}", 
-                    MaskMobileNumber(mobileNumber));
+                _logger.LogDebug("No customer found for provided mobile number.");
             }
 
             return cachedResult;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during customer lookup for mobile number: {MobileNumber}", 
-                MaskMobileNumber(mobileNumber));
+            _logger.LogError(ex, "Error during customer lookup for provided mobile number.");
             return null;
         }
     }
@@ -230,8 +227,8 @@ public class CustomerLookupService : ICustomerLookupService
 
             var result = await MapToLookupResultAsync(customer);
             
-            _logger.LogInformation("New customer created successfully: {CustomerId}, Mobile: {MobileNumber}", 
-                customer.Id, MaskMobileNumber(normalizedNumber));
+            _logger.LogInformation("New customer created successfully: {CustomerId}", 
+                customer.Id);
 
             return new CustomerCreationResult
             {
@@ -241,8 +238,7 @@ public class CustomerLookupService : ICustomerLookupService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating new customer with mobile: {MobileNumber}", 
-                MaskMobileNumber(request.MobileNumber));
+            _logger.LogError(ex, "Error creating new customer");
             
             return new CustomerCreationResult
             {
