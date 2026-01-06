@@ -448,12 +448,17 @@ public class GlobalExceptionHandler : IGlobalExceptionHandler
     {
         try
         {
-            var logCategory = DetermineLogCategory(exception, context);
+            // Sanitize context to prevent log forging via newline or control characters
+            var safeContext = (context ?? string.Empty)
+                .Replace("\r", string.Empty)
+                .Replace("\n", string.Empty);
+
+            var logCategory = DetermineLogCategory(exception, safeContext);
             var additionalData = new Dictionary<string, object>
             {
                 ["ExceptionType"] = exception.GetType().Name,
                 ["StackTrace"] = exception.StackTrace ?? "No stack trace available",
-                ["Context"] = context,
+                ["Context"] = safeContext,
                 ["InnerException"] = exception.InnerException?.Message ?? "None"
             };
 
@@ -466,7 +471,7 @@ public class GlobalExceptionHandler : IGlobalExceptionHandler
             }
 
             await _loggingService.LogErrorAsync(
-                $"Exception in {context}: {exception.Message}",
+                $"Exception in {safeContext}: {exception.Message}",
                 logCategory,
                 deviceId,
                 exception,
@@ -477,7 +482,7 @@ public class GlobalExceptionHandler : IGlobalExceptionHandler
         {
             // Fallback to basic logging if structured logging fails
             _logger.LogError(loggingException, "Failed to log exception through comprehensive logging service");
-            _logger.LogError(exception, "Original exception in context {Context}", context);
+            _logger.LogError(exception, "Original exception in context {Context}", safeContext);
         }
     }
 
