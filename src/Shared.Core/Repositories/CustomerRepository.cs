@@ -21,7 +21,10 @@ public class CustomerRepository : Repository<Customer>, ICustomerRepository
     public async Task<Customer?> GetByMobileNumberAsync(string mobileNumber)
     {
         return await _context.Customers
-            .FirstOrDefaultAsync(c => c.Phone == mobileNumber && c.IsActive);
+            .Include(c => c.Membership)
+                .ThenInclude(m => m!.Benefits.Where(b => b.IsActive && !b.IsDeleted))
+            .Include(c => c.Preferences.Where(p => p.IsActive && !p.IsDeleted))
+            .FirstOrDefaultAsync(c => c.Phone == mobileNumber && c.IsActive && !c.IsDeleted);
     }
 
     public async Task<IEnumerable<Customer>> GetByTierAsync(MembershipTier tier)

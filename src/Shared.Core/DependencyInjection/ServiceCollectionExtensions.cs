@@ -69,6 +69,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IUserSessionRepository, UserSessionRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<ICustomerMembershipRepository, CustomerMembershipRepository>();
+        services.AddScoped<IMembershipBenefitRepository, MembershipBenefitRepository>();
+        services.AddScoped<ICustomerPreferenceRepository, CustomerPreferenceRepository>();
         services.AddScoped<IDiscountRepository, DiscountRepository>();
         services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
         services.AddScoped<ILicenseRepository, LicenseRepository>();
@@ -89,6 +92,7 @@ public static class ServiceCollectionExtensions
             provider.GetRequiredService<IEncryptionService>(),
             provider.GetRequiredService<IAuditService>()));
         services.AddScoped<IAuditService, AuditService>();
+        services.AddScoped<IEnhancedAuditService, EnhancedAuditService>();
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();
         services.AddSingleton<ICurrentUserService, CurrentUserService>();
@@ -233,6 +237,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISaleSessionRepository, SaleSessionRepository>();
         services.AddScoped<IStockRepository, StockRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<ICustomerMembershipRepository, CustomerMembershipRepository>();
+        services.AddScoped<IMembershipBenefitRepository, MembershipBenefitRepository>();
+        services.AddScoped<ICustomerPreferenceRepository, CustomerPreferenceRepository>();
         services.AddScoped<IDiscountRepository, DiscountRepository>();
         services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
         services.AddScoped<ILicenseRepository, LicenseRepository>();
@@ -304,6 +311,7 @@ public static class ServiceCollectionExtensions
             provider.GetRequiredService<IEncryptionService>(),
             provider.GetRequiredService<IAuditService>()));
         services.AddScoped<IAuditService, AuditService>();
+        services.AddScoped<IEnhancedAuditService, EnhancedAuditService>();
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();
         services.AddSingleton<ICrossPlatformConfigurationService, CrossPlatformConfigurationService>();
