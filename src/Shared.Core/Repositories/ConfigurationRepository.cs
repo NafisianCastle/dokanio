@@ -258,7 +258,8 @@ public class ConfigurationRepository : Repository<Configuration>, IConfiguration
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error setting shop configuration Shop={ShopId}, Key={Key}, Value={Value}", shopId, key, value);
+            var safeValue = value.Replace("\r", string.Empty).Replace("\n", string.Empty);
+            _logger.LogError(ex, "Error setting shop configuration Shop={ShopId}, Key={Key}, Value={Value}", shopId, key, safeValue);
             throw;
         }
     }
