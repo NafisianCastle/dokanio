@@ -100,6 +100,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IErrorRecoveryService, ErrorRecoveryService>();
         services.AddScoped<IGlobalExceptionHandler, GlobalExceptionHandler>();
         
+        // Register enhanced error recovery and resilience services
+        services.AddScoped<ITransactionStateService, TransactionStateService>();
+        services.AddScoped<IOfflineQueueService, OfflineQueueService>();
+        services.AddScoped<ICrashRecoveryService, CrashRecoveryService>();
+        services.AddScoped<IEnhancedErrorRecoveryService, EnhancedErrorRecoveryService>();
+        
         // Register database migration service
         services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
         
@@ -122,6 +128,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDatabaseQueryOptimizationService, DatabaseQueryOptimizationService>();
         services.AddScoped<ICachingStrategyService, CachingStrategyService>();
         services.AddScoped<ITestOptimizationService, TestOptimizationService>();
+        services.AddScoped<IPaginationService, PaginationService>();
+        services.AddScoped<IPerformanceMonitoringService, PerformanceMonitoringService>();
+        services.AddScoped<ISystemMonitoringService, SystemMonitoringService>();
         
         // Register background services
         services.AddHostedService<SessionCleanupService>();
@@ -283,6 +292,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDatabaseQueryOptimizationService, DatabaseQueryOptimizationService>();
         services.AddScoped<ICachingStrategyService, CachingStrategyService>();
         services.AddScoped<ITestOptimizationService, TestOptimizationService>();
+        services.AddScoped<IPaginationService, PaginationService>();
+        services.AddScoped<IPerformanceMonitoringService, PerformanceMonitoringService>();
+        services.AddScoped<ISystemMonitoringService, SystemMonitoringService>();
         
         services.AddScoped<IAuthenticationService>(provider => new AuthenticationService(
             provider.GetRequiredService<IUserRepository>(),
@@ -302,6 +314,12 @@ public static class ServiceCollectionExtensions
         // Register error recovery and exception handling services
         services.AddScoped<IErrorRecoveryService, ErrorRecoveryService>();
         services.AddScoped<IGlobalExceptionHandler, GlobalExceptionHandler>();
+        
+        // Register enhanced error recovery and resilience services
+        services.AddScoped<ITransactionStateService, TransactionStateService>();
+        services.AddScoped<IOfflineQueueService, OfflineQueueService>();
+        services.AddScoped<ICrashRecoveryService, CrashRecoveryService>();
+        services.AddScoped<IEnhancedErrorRecoveryService, EnhancedErrorRecoveryService>();
         
         // Add test configurations
         services.AddSingleton(provider => new SyncConfiguration

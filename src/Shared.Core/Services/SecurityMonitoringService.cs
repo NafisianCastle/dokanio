@@ -384,7 +384,7 @@ public class SecurityMonitoringService : ISecurityMonitoringService
             Description = threat.Description,
             RecommendedActions = GetRecommendedActions(threat.ThreatType),
             CreatedAt = DateTime.UtcNow,
-            Status = AlertStatus.Active,
+            Status = Shared.Core.Enums.AlertStatus.Active,
             AffectedUsers = threat.AffectedUsers
         };
 
