@@ -150,10 +150,9 @@
 
     private void RefreshPage()
     {
-        // In a real implementation, this would refresh the current page or component
-        // For now, we'll just clear the error and let the user try again
+        // Recover the error boundary to re-render the child content.
         errorInfo = null;
-        StateHasChanged();
+        errorBoundary?.Recover();
     }
 
     private void ReportError()
