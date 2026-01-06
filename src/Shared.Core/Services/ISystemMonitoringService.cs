@@ -112,18 +112,7 @@ namespace Shared.Core.Services
         public Dictionary<string, object> Properties { get; set; } = new();
     }
 
-    public class SystemAlert
-    {
-        public string Id { get; set; } = string.Empty;
-        public string Title { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string Severity { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; }
-        public DateTime? ResolvedAt { get; set; }
-        public Guid? BusinessId { get; set; }
-        public Dictionary<string, object> Metadata { get; set; } = new();
-    }
+
 
     public class DataIsolationStatus
     {
