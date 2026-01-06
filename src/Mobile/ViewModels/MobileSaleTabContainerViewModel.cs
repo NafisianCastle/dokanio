@@ -483,17 +483,25 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
             "Compact", 
             "Expanded");
         
-        // This would adjust the UI layout - implementation depends on the UI framework
-        // For now, just provide feedback
-        if (isCompactView)
+        if (item.Quantity <= 0 || item.Quantity % 1 != 0 || item.Quantity > int.MaxValue)
         {
-            MaxTabs = 5; // Allow more tabs in compact mode
+            _logger.LogWarning("Invalid quantity {Quantity} for product {ProductId} in tab {TabName}", item.Quantity, item.ProductId, TabName);
+            continue;
         }
-        else
+
+        var saleItemViewModel = new SaleItemViewModel
         {
-            MaxTabs = 3; // Fewer tabs in expanded mode
-        }
-    }
+            ProductId = item.ProductId,
+            ProductName = item.ProductName,
+            Quantity = checked((int)item.Quantity),
+            UnitPrice = item.UnitPrice,
+            BatchNumber = item.BatchNumber,
+            Weight = item.Weight,
+            IsWeightBased = item.IsWeightBased,
+            DiscountPercentage = (item.DiscountAmount > 0 && item.LineTotal > 0)
+                ? (item.DiscountAmount / item.LineTotal) * 100
+                : 0
+        };
 
     [RelayCommand]
     private async Task ShakeToRefresh()
