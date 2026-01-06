@@ -43,6 +43,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMembershipService, MembershipService>();
         services.AddScoped<IRealTimeCalculationEngine, RealTimeCalculationEngine>();
         services.AddScoped<ICustomerLookupService, CustomerLookupService>();
+        services.AddScoped<IValidationService, ValidationService>();
         services.AddScoped<IConfigurationService, ConfigurationService>();
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IIntegratedPosService, IntegratedPosService>();
@@ -211,6 +212,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMembershipService, MembershipService>();
         services.AddScoped<IRealTimeCalculationEngine, RealTimeCalculationEngine>();
         services.AddScoped<ICustomerLookupService, CustomerLookupService>();
+        services.AddScoped<IValidationService, ValidationService>();
         
         // Register device context service
         services.AddSingleton<IDeviceContextService, DeviceContextService>();

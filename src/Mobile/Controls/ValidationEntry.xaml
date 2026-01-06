@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Mobile.Controls.ValidationEntry">
+    
+    <Grid RowDefinitions="Auto,Auto,Auto">
+        <!-- Label -->
+        <Label Grid.Row="0" 
+               Text="{Binding Source={x:Reference ValidationEntryControl}, Path=Label}"
+               FontAttributes="Bold"
+               FontSize="14"
+               Margin="0,0,0,4"
+               IsVisible="{Binding Source={x:Reference ValidationEntryControl}, Path=Label, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+        
+        <!-- Input Container -->
+        <Border Grid.Row="1" 
+                Stroke="{Binding Source={x:Reference ValidationEntryControl}, Path=BorderColor}"
+                StrokeThickness="1"
+                BackgroundColor="White"
+                Padding="0">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            
+            <Grid ColumnDefinitions="*,Auto">
+                <!-- Entry Input -->
+                <Entry Grid.Column="0"
+                       Text="{Binding Source={x:Reference ValidationEntryControl}, Path=Value, Mode=TwoWay}"
+                       Placeholder="{Binding Source={x:Reference ValidationEntryControl}, Path=Placeholder}"
+                       Keyboard="{Binding Source={x:Reference ValidationEntryControl}, Path=Keyboard}"
+                       IsPassword="{Binding Source={x:Reference ValidationEntryControl}, Path=IsPassword}"
+                       MaxLength="{Binding Source={x:Reference ValidationEntryControl}, Path=MaxLength}"
+                       BackgroundColor="Transparent"
+                       Margin="12,8"
+                       FontSize="16"
+                       TextChanged="OnTextChanged" />
+                
+                <!-- Validation Icon -->
+                <Image Grid.Column="1" 
+                       Source="{Binding Source={x:Reference ValidationEntryControl}, Path=ValidationIcon}"
+                       WidthRequest="24" 
+                       HeightRequest="24"
+                       Margin="8"
+                       IsVisible="{Binding Source={x:Reference ValidationEntryControl}, Path=ShowValidationIcon}" />
+            </Grid>
+        </Border>
+        
+        <!-- Validation Message -->
+        <Label Grid.Row="2"
+               Text="{Binding Source={x:Reference ValidationEntryControl}, Path=ValidationMessage}"
+               TextColor="{Binding Source={x:Reference ValidationEntryControl}, Path=ValidationMessageColor}"
+               FontSize="12"
+               Margin="0,4,0,0"
+               LineBreakMode="WordWrap"
+               IsVisible="{Binding Source={x:Reference ValidationEntryControl}, Path=ValidationMessage, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+    </Grid>
+    
+</ContentView>
