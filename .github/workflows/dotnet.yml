@@ -20,16 +20,23 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-    - name: Restore, Build and Test (auto-detect solution)
+        
+    - name: Restore workloads
       run: |
-        set -euo pipefail
-        # find first solution file tracked by git
         sln=$(git ls-files '*.sln' | head -n1 || true)
         if [ -z "$sln" ]; then
           echo "No .sln file found in repo"
           exit 1
         fi
         echo "Using solution: $sln"
+        dotnet workload restore "$sln"
+        
+    - name: Restore, Build and Test (auto-detect solution)
+      run: |
+        sln=$(git ls-files '*.sln' | head -n1 || true)
         dotnet restore "$sln"
         dotnet build "$sln" --no-restore
         dotnet test "$sln" --no-build --verbosity normal
+            dotnet restore "$sln"
+            dotnet build "$sln" --no-restore
+            dotnet test "$sln" --no-build --verbosity normal
