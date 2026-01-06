@@ -730,9 +730,10 @@ public partial class ComprehensiveMobileSaleViewModel : SaleViewModel
     {
         if (IsOfflineMode || !_pendingActions.Any()) return;
 
+        List<PendingAction> actionsToSync;
         try
         {
-            var actionsToSync = _pendingActions.ToList();
+            actionsToSync = _pendingActions.ToList();
             _pendingActions.Clear();
 
             foreach (var action in actionsToSync)
@@ -746,11 +747,14 @@ public partial class ComprehensiveMobileSaleViewModel : SaleViewModel
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error syncing pending actions");
-            // Re-queue failed actions
-            foreach (var action in _pendingActions)
+
+            // Re-queue the actions we attempted (don't lose them)
+            foreach (var action in actionsToSync)
             {
                 _pendingActions.Enqueue(action);
             }
+
+            PendingSyncCount = _pendingActions.Count;
         }
     }
 
