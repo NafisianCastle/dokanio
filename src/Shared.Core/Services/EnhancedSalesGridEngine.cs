@@ -82,10 +82,19 @@ public class EnhancedSalesGridEngine : IEnhancedSalesGridEngine
             }
 
             // Create new sale item
+            var saleId = saleSession.SaleId ?? Guid.NewGuid();
+            if (!saleSession.SaleId.HasValue)
+            {
+                saleSession.SaleId = saleId;
+                saleSession.LastModified = DateTime.UtcNow;
+                await _saleSessionRepository.UpdateAsync(saleSession);
+                await _saleSessionRepository.SaveChangesAsync();
+            }
+
             var saleItem = new SaleItem
             {
                 Id = Guid.NewGuid(),
-                SaleId = saleSession.SaleId ?? Guid.NewGuid(), // Temporary sale ID if not set
+                SaleId = saleId,
                 ProductId = product.Id,
                 Quantity = (int)quantity,
                 UnitPrice = product.UnitPrice,
@@ -95,11 +104,6 @@ public class EnhancedSalesGridEngine : IEnhancedSalesGridEngine
             // Add to repository
             await _saleItemRepository.AddAsync(saleItem);
             await _saleItemRepository.SaveChangesAsync();
-
-            // Update session
-            saleSession.LastModified = DateTime.UtcNow;
-            await _saleSessionRepository.UpdateAsync(saleSession);
-            await _saleSessionRepository.SaveChangesAsync();
 
             // Recalculate totals
             var calculationResult = await RecalculateAllTotalsAsync(saleSessionId);
