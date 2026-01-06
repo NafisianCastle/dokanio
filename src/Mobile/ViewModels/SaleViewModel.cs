@@ -1449,20 +1449,38 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
         }
     }
 
+    private bool _connectivitySubscribed;
+
     private void InitializeMobileFeatures()
     {
         // Enable one-handed mode for smaller screens
         var screenHeight = DeviceDisplay.Current.MainDisplayInfo.Height;
         var screenDensity = DeviceDisplay.Current.MainDisplayInfo.Density;
         var physicalHeight = screenHeight / screenDensity;
-        
-        IsOneHandedMode = physicalHeight < 6.0; // Enable for screens smaller than 6 inches
-        
-        // Check connectivity status
+
+        IsOneHandedMode = physicalHeight < 6.0;
+
         UpdateConnectionStatus();
-        
-        // Subscribe to connectivity changes
-        Connectivity.ConnectivityChanged += OnConnectivityChanged;
+
+        if (!_connectivitySubscribed)
+        {
+            Connectivity.ConnectivityChanged += OnConnectivityChanged;
+            _connectivitySubscribed = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        StopAutoSave();
+
+        _barcodeIntegrationService.BarcodeProcessed -= OnBarcodeProcessed;
+        _barcodeIntegrationService.ScanError -= OnBarcodeScanError;
+
+        if (_connectivitySubscribed)
+        {
+            Connectivity.ConnectivityChanged -= OnConnectivityChanged;
+            _connectivitySubscribed = false;
+        }
     }
 
     private void UpdateConnectionStatus()
