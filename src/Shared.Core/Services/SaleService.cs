@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Shared.Core.Data;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Repositories;
@@ -16,6 +19,8 @@ public class SaleService : ISaleService
     private readonly IDiscountService _discountService;
     private readonly IConfigurationService _configurationService;
     private readonly ILicenseService _licenseService;
+    private readonly PosDbContext _context;
+    private readonly ILogger<SaleService> _logger;
 
     public SaleService(
         ISaleRepository saleRepository,
@@ -26,7 +31,9 @@ public class SaleService : ISaleService
         IMembershipService membershipService,
         IDiscountService discountService,
         IConfigurationService configurationService,
-        ILicenseService licenseService)
+        ILicenseService licenseService,
+        PosDbContext context,
+        ILogger<SaleService> logger)
     {
         _saleRepository = saleRepository;
         _saleItemRepository = saleItemRepository;
@@ -37,6 +44,8 @@ public class SaleService : ISaleService
         _discountService = discountService;
         _configurationService = configurationService;
         _licenseService = licenseService;
+        _context = context;
+        _logger = logger;
     }
 
     public async Task<Sale> CreateSaleAsync(string invoiceNumber, Guid deviceId)
@@ -399,10 +408,44 @@ public class SaleService : ISaleService
 
     private async Task SaveAppliedDiscountsAsync(Sale sale, DiscountCalculationResult discountResult)
     {
-        // For now, skip saving applied discounts to avoid Entity Framework issues
-        // This would typically be handled by a separate SaleDiscountRepository
-        // TODO: Implement proper SaleDiscount management
-        await Task.CompletedTask;
+        try
+        {
+            // Clear existing applied discounts for this sale
+            var existingDiscounts = await _context.SaleDiscounts
+                .Where(sd => sd.SaleId == sale.Id)
+                .ToListAsync();
+            
+            if (existingDiscounts.Any())
+            {
+                _context.SaleDiscounts.RemoveRange(existingDiscounts);
+            }
+
+            // Add new applied discounts
+            foreach (var appliedDiscount in discountResult.AppliedDiscounts ?? Enumerable.Empty<AppliedDiscount>())
+            {
+                var saleDiscount = new SaleDiscount
+                {
+                    Id = Guid.NewGuid(),
+                    SaleId = sale.Id,
+                    DiscountId = appliedDiscount.DiscountId,
+                    DiscountAmount = appliedDiscount.CalculatedAmount,
+                    DiscountReason = appliedDiscount.Reason,
+                    AppliedAt = DateTime.UtcNow
+                };
+
+                _context.SaleDiscounts.Add(saleDiscount);
+            }
+
+            await _context.SaveChangesAsync();
+            
+            _logger.LogInformation("Successfully saved {Count} applied discounts for sale {SaleId}", 
+                discountResult.AppliedDiscounts.Count, sale.Id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error saving applied discounts for sale {SaleId}", sale.Id);
+            // Don't throw - this is not critical for sale completion
+        }
     }
 
     public async Task<Sale?> GetSaleByInvoiceNumberAsync(string invoiceNumber)

@@ -10,15 +10,18 @@ public class DiscountService : IDiscountService
 {
     private readonly IDiscountRepository _discountRepository;
     private readonly IProductRepository _productRepository;
+    private readonly IDeviceContextService _deviceContextService;
     private readonly ILogger<DiscountService> _logger;
 
     public DiscountService(
         IDiscountRepository discountRepository,
         IProductRepository productRepository,
+        IDeviceContextService deviceContextService,
         ILogger<DiscountService> logger)
     {
         _discountRepository = discountRepository;
         _productRepository = productRepository;
+        _deviceContextService = deviceContextService;
         _logger = logger;
     }
 
@@ -168,7 +171,7 @@ public class DiscountService : IDiscountService
             StartTime = request.StartTime,
             EndTime = request.EndTime,
             IsActive = request.IsActive,
-            DeviceId = Guid.NewGuid() // This should come from current device context
+            DeviceId = _deviceContextService.GetCurrentDeviceId()
         };
 
         var validationResult = await ValidateDiscountRulesAsync(discount);
