@@ -177,9 +177,9 @@ public class EnhancedPerformanceMonitoringService : IEnhancedPerformanceMonitori
                 Overview = new PerformanceOverview
                 {
                     AverageResponseTime = summary.AverageResponseTime,
-                    ThroughputPerSecond = summary.RequestsPerSecond,
+                    ThroughputPerSecond = summary.TotalRequests / summary.Period.TotalSeconds,
                     ErrorRate = summary.ErrorRate,
-                    TotalRequests = summary.TotalRequests,
+                    TotalRequests = (int)summary.TotalRequests,
                     UptimePercentage = 99.9 // Simplified
                 },
                 UserMetrics = new List<UserPerformanceMetric>(),
@@ -208,10 +208,10 @@ public class EnhancedPerformanceMonitoringService : IEnhancedPerformanceMonitori
                 Period = period,
                 SystemOverview = new SystemPerformanceOverview
                 {
-                    SystemCpuUsage = currentMetrics.CpuUsage,
-                    SystemMemoryUsage = currentMetrics.MemoryUsage,
+                    SystemCpuUsage = currentMetrics.CpuUsagePercent,
+                    SystemMemoryUsage = currentMetrics.MemoryUsageMB,
                     OverallResponseTime = summary.AverageResponseTime,
-                    OverallThroughput = summary.RequestsPerSecond,
+                    OverallThroughput = summary.TotalRequests / summary.Period.TotalSeconds,
                     OverallErrorRate = summary.ErrorRate
                 },
                 BusinessSummaries = new List<BusinessPerformanceSummary>(),
@@ -247,10 +247,14 @@ public class EnhancedPerformanceMonitoringService : IEnhancedPerformanceMonitori
                 },
                 Throughput = new PerformanceMetricComparison
                 {
-                    CurrentValue = currentSummary.RequestsPerSecond,
-                    ComparisonValue = comparisonSummary.RequestsPerSecond,
-                    ChangePercentage = CalculateChangePercentage(currentSummary.RequestsPerSecond, comparisonSummary.RequestsPerSecond),
-                    Direction = DetermineChangeDirection(currentSummary.RequestsPerSecond, comparisonSummary.RequestsPerSecond, true)
+                    CurrentValue = currentSummary.TotalRequests / currentSummary.Period.TotalSeconds,
+                    ComparisonValue = comparisonSummary.TotalRequests / comparisonSummary.Period.TotalSeconds,
+                    ChangePercentage = CalculateChangePercentage(
+                        currentSummary.TotalRequests / currentSummary.Period.TotalSeconds, 
+                        comparisonSummary.TotalRequests / comparisonSummary.Period.TotalSeconds),
+                    Direction = DetermineChangeDirection(
+                        currentSummary.TotalRequests / currentSummary.Period.TotalSeconds, 
+                        comparisonSummary.TotalRequests / comparisonSummary.Period.TotalSeconds, true)
                 },
                 ErrorRate = new PerformanceMetricComparison
                 {
@@ -326,12 +330,12 @@ public class EnhancedPerformanceMonitoringService : IEnhancedPerformanceMonitori
             
             return new RealTimePerformanceMetrics
             {
-                CurrentCpuUsage = currentMetrics.CpuUsage,
-                CurrentMemoryUsage = currentMetrics.MemoryUsage,
-                CurrentResponseTime = currentMetrics.AverageResponseTime,
-                CurrentThroughput = currentMetrics.RequestsPerSecond,
-                CurrentErrorRate = currentMetrics.ErrorRate,
-                ActiveConnections = 0, // Would be implemented with real connection tracking
+                CurrentCpuUsage = currentMetrics.CpuUsagePercent,
+                CurrentMemoryUsage = currentMetrics.MemoryUsageMB,
+                CurrentResponseTime = currentMetrics.ResponseTimeMs,
+                CurrentThroughput = currentMetrics.TotalRequests, // Using total requests as throughput approximation
+                CurrentErrorRate = currentMetrics.ErrorCount, // Using error count as error rate approximation
+                ActiveConnections = currentMetrics.ActiveConnections,
                 QueuedRequests = 0, // Would be implemented with real queue monitoring
                 ActiveAlerts = new List<RealTimeAlert>(),
                 CustomMetrics = new Dictionary<string, double>()

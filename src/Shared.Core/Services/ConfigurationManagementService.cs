@@ -376,7 +376,7 @@ public class ConfigurationManagementService : IConfigurationManagementService
                 Category = "Performance",
                 Title = "Reduce Page Size",
                 Description = "Consider reducing page size to improve loading times on mobile devices",
-                Priority = RecommendationPriority.Medium,
+                Priority = Shared.Core.DTOs.RecommendationPriority.Medium,
                 RecommendedValue = "50"
             });
         }
@@ -388,7 +388,7 @@ public class ConfigurationManagementService : IConfigurationManagementService
                 Category = "Performance",
                 Title = "Enable Lazy Loading",
                 Description = "Enable lazy loading to improve initial page load performance",
-                Priority = RecommendationPriority.High,
+                Priority = Shared.Core.DTOs.RecommendationPriority.High,
                 RecommendedValue = "true"
             });
         }
@@ -403,7 +403,7 @@ public class ConfigurationManagementService : IConfigurationManagementService
                 Category = "Pricing",
                 Title = "Enable Membership Pricing",
                 Description = "Enable membership pricing to increase customer loyalty and retention",
-                Priority = RecommendationPriority.Medium,
+                Priority = Shared.Core.DTOs.RecommendationPriority.Medium,
                 RecommendedValue = "true"
             });
         }
@@ -415,7 +415,7 @@ public class ConfigurationManagementService : IConfigurationManagementService
                 Category = "Pricing",
                 Title = "Increase Bulk Discount",
                 Description = "Consider increasing bulk discount percentage to encourage larger purchases",
-                Priority = RecommendationPriority.Low,
+                Priority = Shared.Core.DTOs.RecommendationPriority.Low,
                 RecommendedValue = "5.0"
             });
         }

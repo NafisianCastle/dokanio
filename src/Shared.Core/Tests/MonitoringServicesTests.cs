@@ -53,7 +53,7 @@ public class MonitoringServicesTests
             "TestAlert", 
             "Test Alert Title", 
             "Test alert message", 
-            Shared.Core.Enums.AlertSeverity.Medium);
+            Shared.Core.Services.AlertSeverity.Medium);
 
         // Verify alerts can be retrieved
         var alerts = await alertService.GetActiveAlertsAsync(businessId);

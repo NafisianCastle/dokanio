@@ -6,6 +6,7 @@ using Shared.Core.DTOs;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Mobile.ViewModels;
+using Mobile.Services;
 using System.Collections.ObjectModel;
 
 namespace Mobile.Tests;
@@ -29,6 +30,8 @@ public class ComprehensiveMobileViewModelTests
     private readonly Mock<IConnectivityService> _mockConnectivityService;
     private readonly Mock<IOfflineQueueService> _mockOfflineQueueService;
     private readonly Mock<ILogger<ComprehensiveMobileSaleViewModel>> _mockLogger;
+    private readonly Mock<ILogger<MobileCustomerLookupViewModel>> _mockCustomerLogger;
+    private readonly Mock<ILogger<MobileBarcodeScannerViewModel>> _mockBarcodeLogger;
 
     public ComprehensiveMobileViewModelTests()
     {
@@ -45,6 +48,8 @@ public class ComprehensiveMobileViewModelTests
         _mockConnectivityService = new Mock<IConnectivityService>();
         _mockOfflineQueueService = new Mock<IOfflineQueueService>();
         _mockLogger = new Mock<ILogger<ComprehensiveMobileSaleViewModel>>();
+        _mockCustomerLogger = new Mock<ILogger<MobileCustomerLookupViewModel>>();
+        _mockBarcodeLogger = new Mock<ILogger<MobileBarcodeScannerViewModel>>();
     }
 
     [Fact]
@@ -113,7 +118,7 @@ public class ComprehensiveMobileViewModelTests
         var initialOneHandedMode = viewModel.IsOneHandedMode;
 
         // Act
-        await viewModel.ToggleOneHandedModeCommand.ExecuteAsync(null);
+        await viewModel.ToggleOneHandedModeComprehensiveCommand.ExecuteAsync(null);
 
         // Assert
         Assert.NotEqual(initialOneHandedMode, viewModel.IsOneHandedMode);
@@ -199,7 +204,7 @@ public class ComprehensiveMobileViewModelTests
     public void MobileCustomerLookupViewModel_Initialize_SetsUpTouchOptimizedFeatures()
     {
         // Arrange & Act
-        var viewModel = new MobileCustomerLookupViewModel(_mockCustomerService.Object, _mockLogger.Object);
+        var viewModel = new MobileCustomerLookupViewModel(_mockCustomerService.Object, _mockCustomerLogger.Object);
 
         // Assert
         Assert.True(viewModel.EnableHapticFeedback);
@@ -212,7 +217,7 @@ public class ComprehensiveMobileViewModelTests
     public async Task MobileCustomerLookupViewModel_LookupCustomer_ValidatesAndSearches()
     {
         // Arrange
-        var viewModel = new MobileCustomerLookupViewModel(_mockCustomerService.Object, _mockLogger.Object);
+        var viewModel = new MobileCustomerLookupViewModel(_mockCustomerService.Object, _mockCustomerLogger.Object);
         var mobileNumber = "1234567890";
         var expectedCustomer = new CustomerLookupResult
         {
@@ -243,7 +248,7 @@ public class ComprehensiveMobileViewModelTests
     public async Task MobileCustomerLookupViewModel_CreateNewCustomer_CreatesAndSelects()
     {
         // Arrange
-        var viewModel = new MobileCustomerLookupViewModel(_mockCustomerService.Object, _mockLogger.Object);
+        var viewModel = new MobileCustomerLookupViewModel(_mockCustomerService.Object, _mockCustomerLogger.Object);
         var customerName = "Jane Smith";
         var mobileNumber = "9876543210";
         
@@ -279,7 +284,7 @@ public class ComprehensiveMobileViewModelTests
     public async Task MobileBarcodeScannerViewModel_ScanBarcode_ProcessesSuccessfulScan()
     {
         // Arrange
-        var viewModel = new MobileBarcodeScannerViewModel(_mockBarcodeService.Object, _mockProductService.Object, _mockLogger.Object);
+        var viewModel = new MobileBarcodeScannerViewModel(_mockBarcodeService.Object, _mockProductService.Object, _mockBarcodeLogger.Object);
         var barcode = "1234567890123";
         var product = new Product
         {
@@ -319,7 +324,7 @@ public class ComprehensiveMobileViewModelTests
     public async Task MobileBarcodeScannerViewModel_ManualBarcodeEntry_ValidatesAndLooksUp()
     {
         // Arrange
-        var viewModel = new MobileBarcodeScannerViewModel(_mockBarcodeService.Object, _mockProductService.Object, _mockLogger.Object);
+        var viewModel = new MobileBarcodeScannerViewModel(_mockBarcodeService.Object, _mockProductService.Object, _mockBarcodeLogger.Object);
         var barcode = "9876543210987";
 
         _mockBarcodeService.Setup(x => x.ValidateBarcodeFormatAsync(barcode))
@@ -452,10 +457,10 @@ public class ComprehensiveMobileViewModelTests
     {
         // Setup basic mocks
         _mockCurrentUserService.Setup(x => x.CurrentUser)
-            .Returns(new User { Id = Guid.NewGuid(), Name = "Test User" });
+            .Returns(new User { Id = Guid.NewGuid(), FullName = "Test User" });
 
         _mockUserContextService.Setup(x => x.CurrentShop)
-            .Returns(new Shop { Id = Guid.NewGuid(), Name = "Test Shop" });
+            .Returns(new ShopResponse { Id = Guid.NewGuid(), Name = "Test Shop" });
 
         return new ComprehensiveMobileSaleViewModel(
             _mockSalesService.Object,
@@ -479,10 +484,10 @@ public class ComprehensiveMobileViewModelTests
         var mockTabLogger = new Mock<ILogger<EnhancedMobileTabContainerViewModel>>();
         
         _mockCurrentUserService.Setup(x => x.CurrentUser)
-            .Returns(new User { Id = Guid.NewGuid(), Name = "Test User" });
+            .Returns(new User { Id = Guid.NewGuid(), FullName = "Test User" });
 
         _mockUserContextService.Setup(x => x.CurrentShop)
-            .Returns(new Shop { Id = Guid.NewGuid(), Name = "Test Shop" });
+            .Returns(new ShopResponse { Id = Guid.NewGuid(), Name = "Test Shop" });
 
         return new EnhancedMobileTabContainerViewModel(
             _mockTabManager.Object,
@@ -491,7 +496,8 @@ public class ComprehensiveMobileViewModelTests
             _mockCustomerService.Object,
             _mockBarcodeService.Object,
             _mockConnectivityService.Object,
-            mockTabLogger.Object
+            Mock.Of<IProductService>(),
+            Mock.Of<ILoggerFactory>()
         );
     }
 

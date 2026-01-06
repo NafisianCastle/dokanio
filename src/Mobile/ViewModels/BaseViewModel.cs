@@ -22,7 +22,7 @@ public partial class BaseViewModel : ObservableObject
         HasError = !string.IsNullOrEmpty(message);
     }
 
-    protected void ClearError()
+    public void ClearError()
     {
         ErrorMessage = string.Empty;
         HasError = false;

@@ -5,6 +5,7 @@ using Mobile.ViewModels;
 using Mobile.Views;
 using Mobile.Services;
 using System.IO;
+using CommunityToolkit.Maui;
 
 namespace Mobile;
 
@@ -15,6 +16,7 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
+            .UseMauiCommunityToolkit()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -67,13 +69,13 @@ public static class MauiProgram
                 if (!success)
                 {
                     // Log error but don't prevent app startup
-                    var logger = app.Services.GetRequiredService<ILogger<MauiProgram>>();
+                    var logger = app.Services.GetRequiredService<ILogger<App>>();
                     logger.LogError("Mobile application initialization failed, but app will continue");
                 }
             }
             catch (Exception ex)
             {
-                var logger = app.Services.GetRequiredService<ILogger<MauiProgram>>();
+                var logger = app.Services.GetRequiredService<ILogger<App>>();
                 logger.LogError(ex, "Error during mobile application initialization");
                 
                 // Handle initialization exception
@@ -129,7 +131,7 @@ public static class MauiProgram
     /// <returns>Initialization result</returns>
     public static async Task<bool> InitializeMobileApplicationAsync(this IServiceProvider serviceProvider)
     {
-        var logger = serviceProvider.GetRequiredService<ILogger<MauiProgram>>();
+        var logger = serviceProvider.GetRequiredService<ILogger<App>>();
         var startupService = serviceProvider.GetRequiredService<IMultiBusinessStartupService>();
         
         try

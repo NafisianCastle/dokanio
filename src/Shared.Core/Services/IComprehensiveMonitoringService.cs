@@ -79,6 +79,21 @@ public interface IComprehensiveMonitoringService
     /// <param name="businessId">Business context (optional)</param>
     /// <returns>Configuration recommendations</returns>
     Task<List<MonitoringRecommendation>> GetConfigurationRecommendationsAsync(Guid? businessId = null);
+
+    /// <summary>
+    /// Gets system insights for the specified business and time period
+    /// </summary>
+    /// <param name="businessId">Business ID</param>
+    /// <param name="period">Time period for analysis</param>
+    /// <returns>System insights</returns>
+    Task<SystemInsights> GetSystemInsightsAsync(Guid businessId, TimeSpan period);
+
+    /// <summary>
+    /// Gets optimization recommendations for the specified business
+    /// </summary>
+    /// <param name="businessId">Business ID</param>
+    /// <returns>Optimization recommendations</returns>
+    Task<List<OptimizationRecommendation>> GetOptimizationRecommendationsAsync(Guid businessId);
 }
 
 /// <summary>
@@ -439,3 +454,40 @@ public enum PerformanceGrade
     D,
     F
 }
+
+/// <summary>
+/// System insights data
+/// </summary>
+public class SystemInsights
+{
+    public Guid BusinessId { get; set; }
+    public TimeSpan Period { get; set; }
+    public DateTime GeneratedAt { get; set; } = DateTime.UtcNow;
+    public List<SystemInsight> Insights { get; set; } = new();
+    public SystemHealthSummary HealthSummary { get; set; } = new();
+    public PerformanceSummary PerformanceSummary { get; set; } = new();
+}
+
+/// <summary>
+/// System insight data
+/// </summary>
+public class SystemInsight
+{
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public InsightType Type { get; set; }
+    public double ImpactScore { get; set; }
+    public List<string> Recommendations { get; set; } = new();
+}
+
+/// <summary>
+/// System health summary
+/// </summary>
+public class SystemHealthSummary
+{
+    public HealthStatus OverallHealth { get; set; }
+    public int TotalIssues { get; set; }
+    public int CriticalIssues { get; set; }
+    public double HealthScore { get; set; }
+}
+

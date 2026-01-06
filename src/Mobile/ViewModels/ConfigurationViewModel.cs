@@ -132,7 +132,7 @@ public class ConfigurationViewModel : BaseViewModel
             IsLoading = true;
             StatusMessage = "Loading configurations...";
 
-            var currentUser = await _currentUserService.GetCurrentUserAsync();
+            var currentUser = _currentUserService.CurrentUser;
 
             if (currentUser != null)
             {
@@ -163,7 +163,7 @@ public class ConfigurationViewModel : BaseViewModel
             IsLoading = true;
             StatusMessage = "Saving user preferences...";
 
-            var currentUser = await _currentUserService.GetCurrentUserAsync();
+            var currentUser = _currentUserService.CurrentUser;
             if (currentUser == null)
             {
                 StatusMessage = "No current user";

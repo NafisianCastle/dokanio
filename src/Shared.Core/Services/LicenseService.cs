@@ -33,6 +33,26 @@ public class LicenseService : ILicenseService
         var hashBytes = sha256.ComputeHash(bytes);
         return Convert.ToHexString(hashBytes);
     }
+
+    /// <summary>
+    /// Masks a license key for safe logging by showing only first and last few characters
+    /// </summary>
+    /// <param name="licenseKey">The license key to mask</param>
+    /// <returns>Masked license key</returns>
+    private static string MaskLicenseKey(string licenseKey)
+    {
+        if (string.IsNullOrEmpty(licenseKey))
+        {
+            return string.Empty;
+        }
+
+        if (licenseKey.Length <= 8)
+        {
+            return new string('*', licenseKey.Length);
+        }
+
+        return $"{licenseKey[..4]}****{licenseKey[^4..]}";
+    }
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<LicenseService> _logger;
 
