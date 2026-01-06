@@ -18,6 +18,12 @@ public class CustomerRepository : Repository<Customer>, ICustomerRepository
             .FirstOrDefaultAsync(c => c.MembershipNumber == membershipNumber && c.IsActive);
     }
 
+    public async Task<Customer?> GetByMobileNumberAsync(string mobileNumber)
+    {
+        return await _context.Customers
+            .FirstOrDefaultAsync(c => c.Phone == mobileNumber && c.IsActive);
+    }
+
     public async Task<IEnumerable<Customer>> GetByTierAsync(MembershipTier tier)
     {
         return await _context.Customers
@@ -77,5 +83,29 @@ public class CustomerRepository : Repository<Customer>, ICustomerRepository
         }
         
         return !await query.AnyAsync();
+    }
+
+    public async Task<bool> IsMobileNumberUniqueAsync(string mobileNumber, Guid? excludeCustomerId = null)
+    {
+        var query = _context.Customers.Where(c => c.Phone == mobileNumber);
+        
+        if (excludeCustomerId.HasValue)
+        {
+            query = query.Where(c => c.Id != excludeCustomerId.Value);
+        }
+        
+        return !await query.AnyAsync();
+    }
+
+    public async Task<IEnumerable<Customer>> SearchByNameOrMembershipAsync(string searchTerm, int maxResults = 10)
+    {
+        return await _context.Customers
+            .Where(c => c.IsActive && 
+                       (c.Name.Contains(searchTerm) || 
+                        c.MembershipNumber.Contains(searchTerm) ||
+                        (c.Phone != null && c.Phone.Contains(searchTerm))))
+            .OrderBy(c => c.Name)
+            .Take(maxResults)
+            .ToListAsync();
     }
 }
