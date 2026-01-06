@@ -4,295 +4,527 @@
              xmlns:vm="clr-namespace:Mobile.ViewModels"
              x:Class="Mobile.Views.SalePage"
              x:DataType="vm:SaleViewModel"
-             Title="{Binding Title}">
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}">
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Header with Business/Shop Info and Invoice Number -->
-        <Grid Grid.Row="0" BackgroundColor="DodgerBlue" Padding="15">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            
-            <StackLayout Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="10">
-                <Label Text="{Binding BusinessName}"
-                       FontSize="16"
-                       FontAttributes="Bold"
+        <!-- Modern Header with Gradient Background -->
+        <Frame Grid.Row="0" 
+               Style="{StaticResource HeaderCard}">
+            <Grid Padding="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                
+                <!-- Business Info Row -->
+                <Grid Grid.Row="0" ColumnSpacing="15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackLayout Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalOptions="Center">
+                        <Label Text="{Binding BusinessName}"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="White"
+                               VerticalOptions="Center" />
+                        
+                        <BoxView BackgroundColor="White" 
+                                 WidthRequest="4" 
+                                 HeightRequest="4" 
+                                 CornerRadius="2"
+                                 VerticalOptions="Center"
+                                 IsVisible="{Binding ShopName, Converter={StaticResource IsNotNullConverter}}" />
+                        
+                        <Label Text="{Binding ShopName}"
+                               FontSize="14"
+                               TextColor="White"
+                               Opacity="0.8"
+                               VerticalOptions="Center"
+                               IsVisible="{Binding ShopName, Converter={StaticResource IsNotNullConverter}}" />
+                    </StackLayout>
+                    
+                    <!-- Touch-Optimized Scan Button -->
+                    <Button Grid.Column="1"
+                            Text="📷 Scan"
+                            Command="{Binding ScanBarcodeCommand}"
+                            Style="{StaticResource TouchButton}"
+                            BackgroundColor="White"
+                            TextColor="{StaticResource Primary}"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            WidthRequest="100"
+                            HeightRequest="44" />
+                </Grid>
+                
+                <!-- Invoice Number -->
+                <Label Grid.Row="1"
+                       Text="{Binding InvoiceNumber, StringFormat='Invoice: {0}'}"
+                       FontSize="13"
                        TextColor="White"
-                       VerticalOptions="Center" />
+                       Opacity="0.9"
+                       Margin="0,8,0,0" />
                 
-                <Label Text="•"
-                       FontSize="14"
-                       TextColor="LightGray"
-                       VerticalOptions="Center"
-                       IsVisible="{Binding ShopName, Converter={StaticResource IsNotNullConverter}}" />
-                
-                <Label Text="{Binding ShopName}"
-                       FontSize="14"
-                       TextColor="LightGray"
-                       VerticalOptions="Center"
-                       IsVisible="{Binding ShopName, Converter={StaticResource IsNotNullConverter}}" />
-            </StackLayout>
-            
-            <Button Grid.Row="0" Grid.Column="1"
-                    Text="Scan"
-                    Command="{Binding ScanBarcodeCommand}"
-                    BackgroundColor="White"
-                    TextColor="DodgerBlue"
-                    WidthRequest="80"
-                    HeightRequest="35"
-                    CornerRadius="17" />
-            
-            <Label Grid.Row="1" Grid.Column="0"
-                   Text="{Binding InvoiceNumber, StringFormat='Invoice: {0}'}"
-                   FontSize="14"
-                   TextColor="LightGray"
-                   VerticalOptions="Center" />
-        </Grid>
+                <!-- Quick Stats Row -->
+                <Grid Grid.Row="2" Margin="0,12,0,0" ColumnSpacing="20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackLayout Grid.Column="0" HorizontalOptions="Start">
+                        <Label Text="{Binding SaleItems.Count}"
+                               FontSize="20"
+                               FontAttributes="Bold"
+                               TextColor="White"
+                               HorizontalOptions="Start" />
+                        <Label Text="Items"
+                               FontSize="11"
+                               TextColor="White"
+                               Opacity="0.8"
+                               HorizontalOptions="Start" />
+                    </StackLayout>
+                    
+                    <StackLayout Grid.Column="1" HorizontalOptions="Center">
+                        <Label Text="{Binding TotalAmount, StringFormat='${0:F2}'}"
+                               FontSize="20"
+                               FontAttributes="Bold"
+                               TextColor="White"
+                               HorizontalOptions="Center" />
+                        <Label Text="Total"
+                               FontSize="11"
+                               TextColor="White"
+                               Opacity="0.8"
+                               HorizontalOptions="Center" />
+                    </StackLayout>
+                    
+                    <StackLayout Grid.Column="2" HorizontalOptions="End">
+                        <Label Text="{Binding SelectedPaymentMethod}"
+                               FontSize="20"
+                               FontAttributes="Bold"
+                               TextColor="White"
+                               HorizontalOptions="End" />
+                        <Label Text="Payment"
+                               FontSize="11"
+                               TextColor="White"
+                               Opacity="0.8"
+                               HorizontalOptions="End" />
+                    </StackLayout>
+                </Grid>
+            </Grid>
+        </Frame>
 
-        <!-- Sale Items List -->
-        <CollectionView Grid.Row="1"
-                        ItemsSource="{Binding SaleItems}"
-                        Margin="10">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Grid Padding="15" BackgroundColor="White" Margin="0,2" RowSpacing="5">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+        <!-- Sale Items List with Touch-Optimized Design -->
+        <RefreshView Grid.Row="1" 
+                     IsRefreshing="{Binding IsBusy}"
+                     Command="{Binding RefreshCommand}"
+                     Margin="0,10,0,0">
+            <CollectionView ItemsSource="{Binding SaleItems}"
+                            SelectionMode="None"
+                            ItemSizingStrategy="MeasureAllItems">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                </CollectionView.ItemsLayout>
+                
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <!-- Modern Card Design for Sale Items -->
+                        <Frame Style="{StaticResource ModernCard}"
+                               Margin="16,0">
+                            
+                            <!-- Swipe Actions for Touch Interaction -->
+                            <SwipeView>
+                                <SwipeView.RightItems>
+                                    <SwipeItems>
+                                        <SwipeItem Text="Remove"
+                                                   BackgroundColor="{StaticResource ErrorRed}"
+                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SaleViewModel}}, Path=RemoveItemCommand}"
+                                                   CommandParameter="{Binding .}" />
+                                        <SwipeItem Text="Discount"
+                                                   BackgroundColor="{StaticResource WarningOrange}"
+                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SaleViewModel}}, Path=ApplyDiscountCommand}"
+                                                   CommandParameter="{Binding .}"
+                                                   IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:SaleViewModel}}, Path=ShowBusinessTypeFeatures}" />
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+                                
+                                <Grid Padding="0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Product Name and Price -->
+                                    <StackLayout Grid.Row="0" Grid.Column="0" Spacing="4">
+                                        <Label Text="{Binding ProductName}"
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+                                        
+                                        <Label Text="{Binding UnitPrice, StringFormat='${0:F2} each'}"
+                                               FontSize="13"
+                                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+                                    </StackLayout>
+
+                                    <!-- Line Total -->
+                                    <StackLayout Grid.Row="0" Grid.Column="1" HorizontalOptions="End" Spacing="2">
+                                        <Label Text="{Binding LineTotal, StringFormat='${0:F2}'}"
+                                               FontSize="18"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource Primary}"
+                                               HorizontalOptions="End" />
+                                        
+                                        <Label Text="{Binding DiscountAmount, StringFormat='-${0:F2}'}"
+                                               FontSize="12"
+                                               TextColor="Red"
+                                               HorizontalOptions="End"
+                                               IsVisible="{Binding DiscountAmount, Converter={StaticResource GreaterThanZeroConverter}}" />
+                                    </StackLayout>
+
+                                    <!-- Product Details Row -->
+                                    <StackLayout Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                                                 Orientation="Horizontal" 
+                                                 Spacing="12"
+                                                 Margin="0,8,0,0">
+                                        
+                                        <Frame Style="{StaticResource CompactCard}"
+                                               BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}"
+                                               IsVisible="{Binding BatchNumber, Converter={StaticResource IsNotNullConverter}}">
+                                            <Label Text="{Binding BatchNumber, StringFormat='Batch: {0}'}"
+                                                   FontSize="11"
+                                                   TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}" />
+                                        </Frame>
+                                        
+                                        <Frame Style="{StaticResource CompactCard}"
+                                               BackgroundColor="{StaticResource WarningOrange}"
+                                               IsVisible="{Binding ExpiryDate, Converter={StaticResource IsNotNullConverter}}">
+                                            <Label Text="{Binding ExpiryDate, StringFormat='Exp: {0:MM/dd/yyyy}'}"
+                                                   FontSize="11"
+                                                   TextColor="White" />
+                                        </Frame>
+                                        
+                                        <Frame Style="{StaticResource CompactCard}"
+                                               BackgroundColor="{StaticResource Primary}"
+                                               IsVisible="{Binding IsWeightBased}">
+                                            <Label Text="{Binding Weight, StringFormat='{0:F2} kg'}"
+                                                   FontSize="11"
+                                                   TextColor="White" />
+                                        </Frame>
+                                    </StackLayout>
+
+                                    <!-- Touch-Optimized Quantity Controls -->
+                                    <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
+                                          Margin="0,12,0,0"
+                                          ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <!-- Decrease Button -->
+                                        <Button Grid.Column="0"
+                                                Text="−"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SaleViewModel}}, Path=DecreaseQuantityCommand}"
+                                                CommandParameter="{Binding .}"
+                                                Style="{StaticResource CircularIconButton}"
+                                                BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
+                                                TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}"
+                                                FontSize="20"
+                                                FontAttributes="Bold" />
+                                        
+                                        <!-- Quantity Display -->
+                                        <Frame Grid.Column="1"
+                                               Style="{StaticResource CompactCard}"
+                                               BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center">
+                                            <Label Text="{Binding Quantity, StringFormat='Qty: {0}'}"
+                                                   FontSize="14"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}"
+                                                   HorizontalOptions="Center" />
+                                        </Frame>
+                                        
+                                        <!-- Increase Button -->
+                                        <Button Grid.Column="2"
+                                                Text="+"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SaleViewModel}}, Path=IncreaseQuantityCommand}"
+                                                CommandParameter="{Binding .}"
+                                                Style="{StaticResource CircularIconButton}"
+                                                BackgroundColor="{StaticResource Primary}"
+                                                TextColor="White"
+                                                FontSize="20"
+                                                FontAttributes="Bold" />
+                                        
+                                        <!-- Remove Button -->
+                                        <Button Grid.Column="3"
+                                                Text="🗑"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SaleViewModel}}, Path=RemoveItemCommand}"
+                                                CommandParameter="{Binding .}"
+                                                Style="{StaticResource CircularIconButton}"
+                                                BackgroundColor="{StaticResource ErrorRed}"
+                                                TextColor="White"
+                                                FontSize="16" />
+                                    </Grid>
+                                </Grid>
+                            </SwipeView>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                
+                <!-- Empty State with Modern Design -->
+                <CollectionView.EmptyView>
+                    <StackLayout VerticalOptions="Center" 
+                                 HorizontalOptions="Center"
+                                 Spacing="20"
+                                 Margin="40">
+                        
+                        <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}"
+                               WidthRequest="120"
+                               HeightRequest="120"
+                               CornerRadius="60"
+                               HasShadow="False"
+                               HorizontalOptions="Center">
+                            <Label Text="🛒"
+                                   FontSize="60"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center" />
+                        </Frame>
+                        
+                        <Label Text="No items in your cart"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"
+                               HorizontalOptions="Center" />
+                        
+                        <Label Text="Scan a barcode or add products to get started"
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray500}}"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center" />
+                        
+                        <Button Text="📷 Scan Product"
+                                Command="{Binding ScanBarcodeCommand}"
+                                Style="{StaticResource PrimaryActionButton}"
+                                WidthRequest="200"
+                                Margin="0,10" />
+                    </StackLayout>
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </RefreshView>
+
+        <!-- Bottom Action Panel with Modern Design -->
+        <Frame Grid.Row="2" 
+               Style="{StaticResource BottomSheet}">
+            <Grid Padding="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                
+                <!-- Payment Method Selection with Modern Design -->
+                <Frame Grid.Row="0"
+                       Style="{StaticResource CompactCard}"
+                       BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}"
+                       Margin="0,0,0,16">
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <Label Grid.Column="0"
+                               Text="💳"
+                               FontSize="20"
+                               VerticalOptions="Center" />
+                        
+                        <Picker Grid.Column="1"
+                                ItemsSource="{Binding PaymentMethods}"
+                                SelectedItem="{Binding SelectedPaymentMethod}"
+                                Style="{StaticResource TouchPicker}" />
+                    </Grid>
+                </Frame>
+
+                <!-- Calculation Breakdown with Modern Cards -->
+                <StackLayout Grid.Row="1" Spacing="8" Margin="0,0,0,16">
+                    
+                    <!-- Subtotal -->
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <Label Grid.Column="0" 
+                               Text="Subtotal" 
+                               FontSize="16" 
+                               TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}" />
+                        <Label Grid.Column="1" 
+                               Text="{Binding Subtotal, StringFormat='${0:F2}'}" 
+                               FontSize="16" 
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+                    </Grid>
+                    
+                    <!-- Discount (if applicable) -->
+                    <Grid IsVisible="{Binding DiscountAmount, Converter={StaticResource GreaterThanZeroConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-
-                        <!-- Product Name -->
-                        <Label Grid.Row="0" Grid.Column="0"
-                               Text="{Binding ProductName}"
-                               FontSize="16"
+                        
+                        <Label Grid.Column="0" 
+                               Text="Discount" 
+                               FontSize="16" 
+                               TextColor="Red" />
+                        <Label Grid.Column="1" 
+                               Text="{Binding DiscountAmount, StringFormat='-${0:F2}'}" 
+                               FontSize="16" 
                                FontAttributes="Bold"
-                               VerticalOptions="Center" />
-
-                        <!-- Quantity Controls -->
-                        <Stepper Grid.Row="0" Grid.Column="1"
-                                 Value="{Binding Quantity}"
-                                 Minimum="0"
-                                 Maximum="999"
-                                 Increment="1"
-                                 VerticalOptions="Center" />
-
-                        <Label Grid.Row="0" Grid.Column="2"
-                               Text="{Binding Quantity}"
-                               FontSize="14"
-                               VerticalOptions="Center"
-                               Margin="5,0" />
-
-                        <!-- Remove Button -->
-                        <Button Grid.Row="0" Grid.Column="3"
-                                Text="×"
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SaleViewModel}}, Path=RemoveItemCommand}"
-                                CommandParameter="{Binding .}"
-                                BackgroundColor="Red"
-                                TextColor="White"
-                                WidthRequest="40"
-                                HeightRequest="40"
-                                CornerRadius="20" />
-
-                        <!-- Product Details -->
-                        <StackLayout Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="15">
-                            <Label Text="{Binding UnitPrice, StringFormat='${0:F2} each'}"
-                                   FontSize="12"
-                                   TextColor="Gray" />
-                            
-                            <Label Text="{Binding BatchNumber, StringFormat='Batch: {0}'}"
-                                   FontSize="12"
-                                   TextColor="Gray"
-                                   IsVisible="{Binding BatchNumber, Converter={StaticResource IsNotNullConverter}}" />
-                            
-                            <Label Text="{Binding ExpiryDate, StringFormat='Exp: {0:MM/dd/yyyy}'}"
-                                   FontSize="12"
-                                   TextColor="Orange"
-                                   IsVisible="{Binding ExpiryDate, Converter={StaticResource IsNotNullConverter}}" />
-                            
-                            <Label Text="{Binding Weight, StringFormat='{0:F2} kg'}"
-                                   FontSize="12"
-                                   TextColor="Blue"
-                                   IsVisible="{Binding IsWeightBased}" />
-                        </StackLayout>
-
-                        <!-- Pricing Details -->
-                        <StackLayout Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" HorizontalOptions="End">
-                            <Label Text="{Binding LineTotal, StringFormat='${0:F2}'}"
-                                   FontSize="14"
-                                   FontAttributes="Bold"
-                                   TextColor="Green"
-                                   HorizontalOptions="End" />
-                            
-                            <Label Text="{Binding DiscountAmount, StringFormat='-${0:F2}'}"
-                                   FontSize="12"
-                                   TextColor="Red"
-                                   HorizontalOptions="End"
-                                   IsVisible="{Binding DiscountAmount, Converter={StaticResource GreaterThanZeroConverter}}" />
-                        </StackLayout>
-
-                        <!-- Discount Controls (if enabled) -->
-                        <Button Grid.Row="2" Grid.Column="0"
-                                Text="Apply Discount"
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SaleViewModel}}, Path=ApplyDiscountCommand}"
-                                CommandParameter="{Binding .}"
-                                BackgroundColor="Orange"
-                                TextColor="White"
-                                FontSize="12"
-                                HeightRequest="30"
-                                CornerRadius="15"
-                                IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:SaleViewModel}}, Path=ShowBusinessTypeFeatures}" />
+                               TextColor="Red" />
                     </Grid>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                    
+                    <!-- Tax (if applicable) -->
+                    <Grid IsVisible="{Binding TaxAmount, Converter={StaticResource GreaterThanZeroConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <Label Grid.Column="0" 
+                               Text="Tax" 
+                               FontSize="16" 
+                               TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}" />
+                        <Label Grid.Column="1" 
+                               Text="{Binding TaxAmount, StringFormat='${0:F2}'}" 
+                               FontSize="16" 
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+                    </Grid>
+                    
+                    <!-- Divider -->
+                    <BoxView BackgroundColor="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}"
+                             HeightRequest="1"
+                             Margin="0,8" />
+                </StackLayout>
 
-        <!-- Empty State -->
-        <StackLayout Grid.Row="1"
-                     IsVisible="{Binding SaleItems.Count, Converter={StaticResource IntToBoolConverter}, ConverterParameter=0}"
-                     VerticalOptions="Center"
-                     HorizontalOptions="Center">
-            <Label Text="No items in sale"
-                   FontSize="16"
-                   TextColor="Gray"
-                   HorizontalOptions="Center" />
-            <Button Text="Add Products"
-                    Command="{Binding ScanBarcodeCommand}"
-                    BackgroundColor="DodgerBlue"
-                    TextColor="White"
-                    Margin="0,10" />
-        </StackLayout>
+                <!-- Total Amount with Emphasis -->
+                <Frame Grid.Row="2"
+                       Style="{StaticResource ModernCard}"
+                       BackgroundColor="{StaticResource Primary}"
+                       Margin="0,0,0,20">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <Label Grid.Column="0"
+                               Text="Total Amount"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="White"
+                               VerticalOptions="Center" />
+                        
+                        <Label Grid.Column="1"
+                               Text="{Binding TotalAmount, StringFormat='${0:F2}'}"
+                               FontSize="24"
+                               FontAttributes="Bold"
+                               TextColor="White"
+                               VerticalOptions="Center" />
+                    </Grid>
+                </Frame>
 
-        <!-- Payment Method Selection -->
-        <Grid Grid.Row="2" Padding="15" BackgroundColor="LightGray">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            
-            <Label Grid.Column="0"
-                   Text="Payment:"
-                   FontSize="14"
-                   VerticalOptions="Center"
-                   Margin="0,0,10,0" />
-            
-            <Picker Grid.Column="1"
-                    ItemsSource="{Binding PaymentMethods}"
-                    SelectedItem="{Binding SelectedPaymentMethod}"
-                    FontSize="14" />
-        </Grid>
-
-        <!-- Total and Actions -->
-        <Grid Grid.Row="3" Padding="15" BackgroundColor="DarkGray">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-
-            <!-- Calculation Breakdown -->
-            <StackLayout Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Spacing="2">
-                <Grid>
+                <!-- Action Buttons with Touch-Optimized Design -->
+                <Grid Grid.Row="3" ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="2*" />
                     </Grid.ColumnDefinitions>
-                    
-                    <Label Grid.Column="0" Text="Subtotal:" FontSize="14" TextColor="White" />
-                    <Label Grid.Column="1" Text="{Binding Subtotal, StringFormat='${0:F2}'}" FontSize="14" TextColor="White" />
+
+                    <!-- Clear Sale Button -->
+                    <Button Grid.Column="0"
+                            Text="Clear"
+                            Command="{Binding ClearSaleCommand}"
+                            Style="{StaticResource SecondaryActionButton}" />
+
+                    <!-- Complete Sale Button -->
+                    <Button Grid.Column="1"
+                            Text="💳 Complete Sale"
+                            Command="{Binding CompleteSaleCommand}"
+                            IsEnabled="{Binding CanCompleteSale}"
+                            Style="{StaticResource PrimaryActionButton}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding CanCompleteSale}" Value="False">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray700}}" />
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray500}}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
                 </Grid>
-                
-                <Grid IsVisible="{Binding DiscountAmount, Converter={StaticResource GreaterThanZeroConverter}}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    
-                    <Label Grid.Column="0" Text="Discount:" FontSize="14" TextColor="LightCoral" />
-                    <Label Grid.Column="1" Text="{Binding DiscountAmount, StringFormat='-${0:F2}'}" FontSize="14" TextColor="LightCoral" />
-                </Grid>
-                
-                <Grid IsVisible="{Binding TaxAmount, Converter={StaticResource GreaterThanZeroConverter}}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    
-                    <Label Grid.Column="0" Text="Tax:" FontSize="14" TextColor="LightGray" />
-                    <Label Grid.Column="1" Text="{Binding TaxAmount, StringFormat='${0:F2}'}" FontSize="14" TextColor="LightGray" />
-                </Grid>
+            </Grid>
+        </Frame>
+
+        <!-- Loading Overlay with Modern Design -->
+        <Frame Grid.Row="0" Grid.RowSpan="3"
+               IsVisible="{Binding IsBusy}"
+               BackgroundColor="Black"
+               Opacity="0.7"
+               CornerRadius="0"
+               Padding="0">
+            <StackLayout VerticalOptions="Center" 
+                         HorizontalOptions="Center"
+                         Spacing="20">
+                <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                   Color="White"
+                                   WidthRequest="50"
+                                   HeightRequest="50" />
+                <Label Text="Processing..."
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       HorizontalOptions="Center" />
             </StackLayout>
+        </Frame>
 
-            <!-- Total Amount -->
-            <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                   Text="{Binding TotalAmount, StringFormat='Total: ${0:F2}'}"
-                   FontSize="20"
-                   FontAttributes="Bold"
-                   TextColor="White"
-                   HorizontalOptions="Center"
-                   Margin="0,10,0,10" />
-
-            <!-- Action Buttons -->
-            <Button Grid.Row="2" Grid.Column="0"
-                    Text="Clear Sale"
-                    Command="{Binding ClearSaleCommand}"
-                    BackgroundColor="Orange"
-                    TextColor="White"
-                    Margin="0,0,5,0" />
-
-            <Button Grid.Row="2" Grid.Column="1"
-                    Text="Complete Sale"
-                    Command="{Binding CompleteSaleCommand}"
-                    IsEnabled="{Binding CanCompleteSale}"
-                    BackgroundColor="Green"
-                    TextColor="White"
-                    Margin="5,0,0,0" />
-        </Grid>
-
-        <!-- Loading Indicator -->
-        <ActivityIndicator Grid.Row="1"
-                          IsVisible="{Binding IsBusy}"
-                          IsRunning="{Binding IsBusy}"
-                          Color="DodgerBlue"
-                          VerticalOptions="Center"
-                          HorizontalOptions="Center" />
-
-        <!-- Error Message -->
+        <!-- Error Message with Modern Design -->
         <Frame Grid.Row="1"
                IsVisible="{Binding HasError}"
-               BackgroundColor="LightCoral"
-               Padding="15"
-               CornerRadius="5"
-               VerticalOptions="Center"
-               HorizontalOptions="Center"
-               Margin="20">
-            <Label Text="{Binding ErrorMessage}"
-                   TextColor="DarkRed"
-                   FontSize="14"
-                   HorizontalOptions="Center" />
+               Style="{StaticResource ModernCard}"
+               BackgroundColor="{StaticResource ErrorRed}"
+               Margin="20"
+               VerticalOptions="Start"
+               HorizontalOptions="Fill">
+            <StackLayout Orientation="Horizontal" Spacing="12">
+                <Label Text="⚠️"
+                       FontSize="20"
+                       VerticalOptions="Center" />
+                <Label Text="{Binding ErrorMessage}"
+                       TextColor="White"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       VerticalOptions="Center"
+                       HorizontalOptions="FillAndExpand" />
+            </StackLayout>
         </Frame>
     </Grid>
 </ContentPage>

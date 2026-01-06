@@ -446,10 +446,11 @@ public class GlobalExceptionHandler : IGlobalExceptionHandler
     /// </summary>
     public async Task LogExceptionAsync(Exception exception, string context, Guid deviceId, Guid? userId = null, Dictionary<string, object>? metadata = null)
     {
+        string safeContext= string.Empty;
         try
         {
             // Sanitize context to prevent log forging via newline or control characters
-            var safeContext = (context ?? string.Empty)
+            safeContext = (context ?? string.Empty)
                 .Replace("\r", string.Empty)
                 .Replace("\n", string.Empty);
 

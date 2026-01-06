@@ -20,6 +20,9 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
     private readonly IUserContextService _userContextService;
     private readonly IBusinessManagementService _businessManagementService;
 
+    // Event for haptic feedback
+    public event EventHandler<HapticFeedbackEventArgs>? HapticFeedbackRequested;
+
     public SaleViewModel(
         IEnhancedSalesService enhancedSalesService,
         IProductService productService,
@@ -98,6 +101,8 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
 
         try
         {
+            TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.Click);
+            
             // Validate product for sale based on business type
             var validationResult = await _enhancedSalesService.ValidateProductForSaleAsync(
                 product.Id, 
@@ -107,6 +112,7 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
             {
                 var errorMessage = validationResult.Errors.FirstOrDefault() ?? "Product validation failed";
                 SetError(errorMessage);
+                TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.LongPress);
                 return;
             }
 
@@ -116,6 +122,7 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
             if (existingItem != null)
             {
                 existingItem.Quantity++;
+                TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.Click);
             }
             else
             {
@@ -132,6 +139,7 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
                 };
                 
                 SaleItems.Add(saleItemViewModel);
+                TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.Click);
             }
 
             await CalculateTotal();
@@ -139,6 +147,7 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
         catch (Exception ex)
         {
             SetError($"Failed to add product: {ex.Message}");
+            TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.LongPress);
         }
     }
 
@@ -147,6 +156,7 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
     {
         if (item == null) return;
 
+        TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.Click);
         SaleItems.Remove(item);
         await CalculateTotal();
     }
@@ -172,6 +182,7 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
         {
             IsBusy = true;
             ClearError();
+            TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.LongPress);
 
             var user = _currentUserService.CurrentUser;
             var shop = _userContextService.CurrentShop;
@@ -179,6 +190,7 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
             if (user == null || shop == null)
             {
                 SetError("User or shop context not available");
+                TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.LongPress);
                 return;
             }
 
@@ -202,6 +214,7 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
             if (calculationResult == null)
             {
                 SetError("Sale calculation failed");
+                TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.LongPress);
                 return;
             }
 
@@ -214,12 +227,14 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
             // Clear sale
             await ClearSale();
 
-            // Show success message
+            // Success feedback
+            TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.LongPress);
             await Shell.Current.DisplayAlert("Success", "Sale completed successfully!", "OK");
         }
         catch (Exception ex)
         {
             SetError($"Failed to complete sale: {ex.Message}");
+            TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.LongPress);
         }
         finally
         {
@@ -230,6 +245,7 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
     [RelayCommand]
     private async Task ClearSale()
     {
+        TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.Click);
         SaleItems.Clear();
         Subtotal = 0;
         DiscountAmount = 0;
@@ -243,7 +259,48 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
     [RelayCommand]
     private async Task ScanBarcode()
     {
+        TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.Click);
         await Shell.Current.GoToAsync("//scanner");
+    }
+
+    [RelayCommand]
+    private async Task IncreaseQuantity(SaleItemViewModel item)
+    {
+        if (item == null) return;
+
+        TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.Click);
+        item.Quantity++;
+        await CalculateTotal();
+    }
+
+    [RelayCommand]
+    private async Task DecreaseQuantity(SaleItemViewModel item)
+    {
+        if (item == null) return;
+
+        TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.Click);
+        
+        if (item.Quantity > 1)
+        {
+            item.Quantity--;
+            await CalculateTotal();
+        }
+        else
+        {
+            await RemoveItem(item);
+        }
+    }
+
+    [RelayCommand]
+    private async Task Refresh()
+    {
+        TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.Click);
+        await Initialize();
+    }
+
+    private void TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType feedbackType)
+    {
+        HapticFeedbackRequested?.Invoke(this, new HapticFeedbackEventArgs(feedbackType));
     }
 
     [RelayCommand]
@@ -251,11 +308,14 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
     {
         if (item == null) return;
 
+        TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.Click);
+
         // Check if user has permission to apply discounts
         var hasPermission = await _userContextService.HasPermissionAsync(AppPermissions.ApplyDiscounts);
         if (!hasPermission)
         {
             SetError("You don't have permission to apply discounts");
+            TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.LongPress);
             return;
         }
 
@@ -278,11 +338,13 @@ public partial class SaleViewModel : BaseViewModel, IQueryAttributable
                 out var discount) && discount >= 0 && discount <= 100)
         {
             item.DiscountPercentage = discount;
+            TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.Click);
             await CalculateTotal();
         }
         else
         {
             SetError("Invalid discount percentage");
+            TriggerHapticFeedback(Microsoft.Maui.Devices.HapticFeedbackType.LongPress);
         }
     }
 
@@ -458,7 +520,7 @@ public partial class SaleItemViewModel : ObservableObject
 
     [ObservableProperty]
     private DateTime? expiryDate;
-public decimal LineTotal => Quantity * UnitPrice * (IsWeightBased ? Math.Max(Weight ?? 1m, 0m) : 1m);
+
     [ObservableProperty]
     private decimal? weight;
 
@@ -468,7 +530,7 @@ public decimal LineTotal => Quantity * UnitPrice * (IsWeightBased ? Math.Max(Wei
     [ObservableProperty]
     private decimal discountPercentage;
 
-    public decimal LineTotal => Quantity * UnitPrice * (IsWeightBased ? (Weight ?? 0) : 1);
+    public decimal LineTotal => Quantity * UnitPrice * (IsWeightBased ? Math.Max(Weight ?? 1m, 0m) : 1m);
     
     public decimal DiscountAmount => LineTotal * (DiscountPercentage / 100);
     
@@ -499,5 +561,16 @@ public decimal LineTotal => Quantity * UnitPrice * (IsWeightBased ? Math.Max(Wei
     {
         OnPropertyChanged(nameof(DiscountAmount));
         OnPropertyChanged(nameof(NetTotal));
+    }
+}
+
+// Event args for haptic feedback
+public class HapticFeedbackEventArgs : EventArgs
+{
+    public Microsoft.Maui.Devices.HapticFeedbackType FeedbackType { get; set; }
+    
+    public HapticFeedbackEventArgs(Microsoft.Maui.Devices.HapticFeedbackType feedbackType)
+    {
+        FeedbackType = feedbackType;
     }
 }
