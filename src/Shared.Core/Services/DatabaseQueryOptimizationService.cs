@@ -526,9 +526,28 @@ public class DatabaseQueryOptimizationService : IDatabaseQueryOptimizationServic
             {
                 try
                 {
-                    var dbSizeResult = await _context.Database.ExecuteSqlRawAsync("PRAGMA page_count");
-                    var pageSizeResult = await _context.Database.ExecuteSqlRawAsync("PRAGMA page_size");
-                    analytics.DatabaseSizeBytes = dbSizeResult * pageSizeResult;
+                    var connection = _context.Database.GetDbConnection();
+                    if (connection.State != System.Data.ConnectionState.Open)
+                    {
+                        await connection.OpenAsync();
+                    }
+
+                    long pageCount;
+                    long pageSize;
+
+                    await using (var pageCountCommand = connection.CreateCommand())
+                    {
+                        pageCountCommand.CommandText = "PRAGMA page_count;";
+                        pageCount = Convert.ToInt64(await pageCountCommand.ExecuteScalarAsync());
+                    }
+
+                    await using (var pageSizeCommand = connection.CreateCommand())
+                    {
+                        pageSizeCommand.CommandText = "PRAGMA page_size;";
+                        pageSize = Convert.ToInt64(await pageSizeCommand.ExecuteScalarAsync());
+                    }
+
+                    analytics.DatabaseSizeBytes = pageCount * pageSize;
                 }
                 catch (Exception ex)
                 {
