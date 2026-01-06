@@ -420,13 +420,12 @@ public class BarcodeIntegrationService : IBarcodeIntegrationService
 
     private bool IsValidCode128(string barcode)
     {
-        // Code 128 can contain letters, numbers, and special characters
-        // But "!@#$%^&*()" contains characters not typically valid in Code 128
-        if (barcode.Length < 6 || barcode.Length > 48) return false;
-        
-        // Code 128 typically doesn't include these special characters
-        var invalidChars = "!@#$%^&*()";
-        return !barcode.Any(c => invalidChars.Contains(c));
+        // Code 128 supports all 128 ASCII characters.
+        // A simple validation is to check for non-empty and non-control characters.
+        if (string.IsNullOrWhiteSpace(barcode)) return false;
+
+        // Ensure all characters are valid printable ASCII characters (or other supported sets if needed)
+        return barcode.All(c => !char.IsControl(c));
     }
 
     private bool IsValidCode39(string barcode)
