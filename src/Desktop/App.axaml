@@ -15,7 +15,7 @@
             <Setter Property="Foreground" Value="{StaticResource TextOnPrimaryBrush}"/>
             <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
             <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
-            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="Padding" Value="{StaticResource ThicknessMD}"/>
             <Setter Property="FontWeight" Value="Medium"/>
         </Style>
         
@@ -28,7 +28,7 @@
             <Setter Property="Foreground" Value="{StaticResource TextOnPrimaryBrush}"/>
             <Setter Property="BorderBrush" Value="{StaticResource ErrorBrush}"/>
             <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
-            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Padding" Value="{StaticResource ThicknessSM}"/>
             <Setter Property="FontWeight" Value="Medium"/>
         </Style>
         

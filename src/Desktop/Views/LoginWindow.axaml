@@ -1,0 +1,200 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Desktop.ViewModels"
+        x:Class="Desktop.Views.LoginWindow"
+        x:DataType="vm:LoginViewModel"
+        Title="Login - Multi-Business POS"
+        Width="600"
+        Height="500"
+        MinWidth="500"
+        MinHeight="400"
+        WindowStartupLocation="CenterScreen"
+        CanResize="True">
+
+  <Design.DataContext>
+    <vm:LoginViewModel />
+  </Design.DataContext>
+
+  <Grid Background="{DynamicResource BackgroundBrush}">
+    <!-- Background Pattern -->
+    <Border Background="{DynamicResource PrimaryBrush}" Opacity="0.05"/>
+    
+    <!-- Main Content -->
+    <Border Background="{DynamicResource SurfaceBrush}"
+            CornerRadius="12"
+            BoxShadow="0 8 32 0 #26000000"
+            Margin="40"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch">
+      
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header Section -->
+        <Border Grid.Row="0" 
+                Background="{DynamicResource PrimaryBrush}"
+                CornerRadius="12,12,0,0"
+                Padding="40,30">
+          <StackPanel HorizontalAlignment="Center" Spacing="8">
+            <TextBlock Text="🏪" FontSize="48" HorizontalAlignment="Center"/>
+            <TextBlock Text="Multi-Business POS" 
+                       FontSize="28" 
+                       FontWeight="Bold" 
+                       Foreground="White"
+                       HorizontalAlignment="Center"/>
+            <TextBlock Text="Please sign in to continue" 
+                       FontSize="16" 
+                       Foreground="White"
+                       Opacity="0.9"
+                       HorizontalAlignment="Center"/>
+          </StackPanel>
+        </Border>
+
+        <!-- Login Form Section -->
+        <ScrollViewer Grid.Row="1" 
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+          <StackPanel Margin="40,30" 
+                      Spacing="24"
+                      HorizontalAlignment="Stretch">
+            
+            <!-- Login Form -->
+            <StackPanel Spacing="20" MaxWidth="400" HorizontalAlignment="Center">
+              <StackPanel>
+                <TextBlock Text="Username" Classes="label" Margin="0,0,0,8"/>
+                <TextBox Text="{Binding Username}" 
+                         Watermark="Enter your username"
+                         Classes="input-primary"
+                         FontSize="16"
+                         Height="48"/>
+              </StackPanel>
+
+              <StackPanel>
+                <TextBlock Text="Password" Classes="label" Margin="0,0,0,8"/>
+                <TextBox Name="PasswordBox"
+                         PasswordChar="*"
+                         Watermark="Enter your password"
+                         Classes="input-primary"
+                         FontSize="16"
+                         Height="48"
+                         Text="{Binding Password}"/>
+              </StackPanel>
+
+              <CheckBox Content="Remember me" 
+                        IsChecked="{Binding RememberMe}"
+                        FontSize="14"
+                        Margin="0,8,0,0"/>
+            </StackPanel>
+
+            <!-- Error Message -->
+            <Border Background="{DynamicResource ErrorLightBrush}"
+                    BorderBrush="{DynamicResource ErrorBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16,12"
+                    MaxWidth="400"
+                    HorizontalAlignment="Center"
+                    IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <TextBlock Text="⚠️" FontSize="18" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding ErrorMessage}" 
+                           Foreground="{DynamicResource ErrorBrush}"
+                           FontWeight="Medium"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Center"/>
+              </StackPanel>
+            </Border>
+
+            <!-- Loading Indicator -->
+            <StackPanel Orientation="Horizontal" 
+                        Spacing="12" 
+                        HorizontalAlignment="Center"
+                        IsVisible="{Binding IsLoading}">
+              <ProgressBar Classes="loading-circular" IsIndeterminate="True" Width="24" Height="24"/>
+              <TextBlock Text="Authenticating..." 
+                         Classes="body-1"
+                         VerticalAlignment="Center"/>
+            </StackPanel>
+          </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer Section -->
+        <Border Grid.Row="2" 
+                Background="{DynamicResource BackgroundBrush}"
+                CornerRadius="0,0,12,12"
+                Padding="40,20">
+          <StackPanel Spacing="16">
+            <!-- Login Button -->
+            <Button Command="{Binding LoginCommand}"
+                    IsEnabled="{Binding !IsLoading}"
+                    Classes="btn-primary btn-large"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    MaxWidth="400"
+                    FontSize="16"
+                    FontWeight="Medium">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <ProgressBar IsVisible="{Binding IsLoading}"
+                             IsIndeterminate="True"
+                             Width="16"
+                             Height="16"
+                             VerticalAlignment="Center"/>
+                <TextBlock Text="Sign In" 
+                           IsVisible="{Binding !IsLoading}"
+                           VerticalAlignment="Center"/>
+                <TextBlock Text="Signing in..." 
+                           IsVisible="{Binding IsLoading}"
+                           VerticalAlignment="Center"/>
+              </StackPanel>
+              <Button.Styles>
+                <Style Selector="Button:disabled">
+                  <Setter Property="Opacity" Value="0.6"/>
+                </Style>
+              </Button.Styles>
+            </Button>
+            
+            <!-- Demo Credentials Info -->
+            <Border Background="{DynamicResource PrimaryLightBrush}"
+                    CornerRadius="6"
+                    Padding="16,12"
+                    MaxWidth="400"
+                    HorizontalAlignment="Center">
+              <StackPanel Spacing="8">
+                <TextBlock Text="Demo Credentials:" 
+                           FontWeight="SemiBold"
+                           FontSize="14"
+                           HorizontalAlignment="Center"/>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  
+                  <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="Admin:" FontWeight="Medium" FontSize="12"/>
+                    <TextBlock Text="admin / admin123" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                  </StackPanel>
+                  
+                  <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Text="Manager:" FontWeight="Medium" FontSize="12"/>
+                    <TextBlock Text="manager / manager123" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                  </StackPanel>
+                  
+                  <StackPanel Grid.Column="2" Spacing="4">
+                    <TextBlock Text="Cashier:" FontWeight="Medium" FontSize="12"/>
+                    <TextBlock Text="cashier / cashier123" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                  </StackPanel>
+                </Grid>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </Border>
+      </Grid>
+    </Border>
+  </Grid>
+</Window>

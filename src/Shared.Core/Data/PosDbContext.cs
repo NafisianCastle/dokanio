@@ -25,6 +25,7 @@ public class PosDbContext : DbContext
     public DbSet<CustomerPreference> CustomerPreferences { get; set; } = null!;
     public DbSet<Discount> Discounts { get; set; } = null!;
     public DbSet<SaleDiscount> SaleDiscounts { get; set; } = null!;
+    public DbSet<Supplier> Suppliers { get; set; } = null!;
     public DbSet<TransactionLogEntry> TransactionLogs { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<AuditLog> AuditLogs { get; set; } = null!;

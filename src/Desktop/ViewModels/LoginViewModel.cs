@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Shared.Core.Services;
 using Shared.Core.Enums;
+using Shared.Core.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace Desktop.ViewModels;
@@ -15,6 +16,8 @@ public partial class LoginViewModel : BaseViewModel
     private readonly ISessionService _sessionService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IAuditService _auditService;
+
+    public event EventHandler<User>? LoginSuccessful;
 
     [ObservableProperty]
     [Required(ErrorMessage = "Username is required")]
@@ -97,7 +100,8 @@ public partial class LoginViewModel : BaseViewModel
             // Clear password for security
             Password = string.Empty;
 
-            // Navigate to main application (this would be handled by the view)
+            // Trigger login successful event
+            LoginSuccessful?.Invoke(this, user);
             OnLoginSuccessful?.Invoke();
         }
         catch (Exception ex)

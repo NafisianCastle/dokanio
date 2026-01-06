@@ -46,7 +46,8 @@
           <TextBox Text="{Binding Password}"
                    Watermark="Enter your password"
                    PasswordChar="*"
-                   IsEnabled="{Binding !IsLoading}" />
+                   IsEnabled="{Binding !IsLoading}"
+                   Name="PasswordBox" />
         </StackPanel>
 
         <!-- Remember Me -->

@@ -16,7 +16,7 @@
     </Grid.RowDefinitions>
 
     <!-- Header -->
-    <Border Grid.Row="0" Background="{DynamicResource SystemAccentColor}" Padding="16,16">
+    <Border Grid.Row="0" Background="{DynamicResource SystemAccentColor}" Padding="16">
       <StackPanel Orientation="Horizontal">
         <TextBlock Text="⚙️" FontSize="24" VerticalAlignment="Center" Margin="0,0,8,0" />
         <TextBlock Text="Configuration &amp; Settings" 

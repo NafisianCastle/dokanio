@@ -530,6 +530,12 @@ public partial class SaleViewModel : BaseViewModel
         TriggerRealTimeCalculation();
     }
 
+    partial void OnAmountReceivedChanged(decimal value)
+    {
+        // Trigger change calculation
+        OnPropertyChanged(nameof(ChangeAmount));
+    }
+
     private void TriggerRealTimeCalculation()
     {
         // Cancel any pending calculation
@@ -1056,16 +1062,7 @@ public partial class SaleViewModel : BaseViewModel
     {
         if (_barcodeIntegrationService == null)
         {
-            // Fallback to simple simulation for demo
-            IsScanning = true;
-            ScanStatus = "Scanning...";
-            
-            await Task.Delay(2000);
-            
-            IsScanning = false;
-            SearchText = "1234567890123"; // Sample barcode
-            ScanStatus = "Ready";
-            SearchProducts();
+            SetError("No barcode scanner connected. Please connect a barcode scanner and try again.");
             return;
         }
 

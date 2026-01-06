@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Desktop.Services;
 using Desktop.ViewModels;
+using Desktop.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -71,8 +72,34 @@ public partial class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
-            desktop.MainWindow = new MainWindow(mainViewModel);
+            // Check if user is already authenticated
+            var currentUserService = _serviceProvider.GetRequiredService<ICurrentUserService>();
+            var currentUser = currentUserService.CurrentUser;
+            
+            if (currentUser == null)
+            {
+                // Show login window first
+                var loginViewModel = _serviceProvider.GetRequiredService<LoginViewModel>();
+                var loginWindow = new LoginWindow(loginViewModel);
+                desktop.MainWindow = loginWindow;
+                
+                // Subscribe to login success event
+                loginViewModel.LoginSuccessful += (sender, user) =>
+                {
+                    // Close login window and show main window
+                    var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
+                    var mainWindow = new MainWindow(mainViewModel);
+                    desktop.MainWindow = mainWindow;
+                    loginWindow.Close();
+                    mainWindow.Show();
+                };
+            }
+            else
+            {
+                // User is already authenticated, show main window
+                var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
+                desktop.MainWindow = new MainWindow(mainViewModel);
+            }
         }
 
         base.OnFrameworkInitializationCompleted();
