@@ -77,21 +77,18 @@ public class CustomerLookupService : ICustomerLookupService
 
             if (cachedResult != null)
             {
-                _logger.LogDebug("Customer lookup successful for mobile number: {MobileNumber}", 
-                    MaskMobileNumber(mobileNumber));
+                _logger.LogDebug("Customer lookup successful for provided mobile number.");
             }
             else
             {
-                _logger.LogDebug("No customer found for mobile number: {MobileNumber}", 
-                    MaskMobileNumber(mobileNumber));
+                _logger.LogDebug("No customer found for provided mobile number.");
             }
 
             return cachedResult;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during customer lookup for mobile number: {MobileNumber}", 
-                MaskMobileNumber(mobileNumber));
+            _logger.LogError(ex, "Error during customer lookup for provided mobile number.");
             return null;
         }
     }
