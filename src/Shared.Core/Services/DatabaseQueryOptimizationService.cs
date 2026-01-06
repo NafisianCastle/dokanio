@@ -527,27 +527,40 @@ public class DatabaseQueryOptimizationService : IDatabaseQueryOptimizationServic
                 try
                 {
                     var connection = _context.Database.GetDbConnection();
-                    if (connection.State != System.Data.ConnectionState.Open)
+                    var openedHere = false;
+
+                    try
                     {
-                        await connection.OpenAsync();
+                        if (connection.State != System.Data.ConnectionState.Open)
+                        {
+                            await connection.OpenAsync();
+                            openedHere = true;
+                        }
+
+                        long pageCount;
+                        long pageSize;
+
+                        await using (var pageCountCommand = connection.CreateCommand())
+                        {
+                            pageCountCommand.CommandText = "PRAGMA page_count;";
+                            pageCount = Convert.ToInt64(await pageCountCommand.ExecuteScalarAsync());
+                        }
+
+                        await using (var pageSizeCommand = connection.CreateCommand())
+                        {
+                            pageSizeCommand.CommandText = "PRAGMA page_size;";
+                            pageSize = Convert.ToInt64(await pageSizeCommand.ExecuteScalarAsync());
+                        }
+
+                        analytics.DatabaseSizeBytes = pageCount * pageSize;
                     }
-
-                    long pageCount;
-                    long pageSize;
-
-                    await using (var pageCountCommand = connection.CreateCommand())
+                    finally
                     {
-                        pageCountCommand.CommandText = "PRAGMA page_count;";
-                        pageCount = Convert.ToInt64(await pageCountCommand.ExecuteScalarAsync());
+                        if (openedHere && connection.State == System.Data.ConnectionState.Open)
+                        {
+                            await connection.CloseAsync();
+                        }
                     }
-
-                    await using (var pageSizeCommand = connection.CreateCommand())
-                    {
-                        pageSizeCommand.CommandText = "PRAGMA page_size;";
-                        pageSize = Convert.ToInt64(await pageSizeCommand.ExecuteScalarAsync());
-                    }
-
-                    analytics.DatabaseSizeBytes = pageCount * pageSize;
                 }
                 catch (Exception ex)
                 {
