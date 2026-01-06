@@ -478,76 +478,76 @@ public class CustomerLookupService : ICustomerLookupService
         return discounts;
     }
 
-    private List<MembershipBenefit> GetMembershipBenefits(MembershipTier tier)
+    private List<DTOs.MembershipBenefit> GetMembershipBenefits(MembershipTier tier)
     {
-        var benefits = new List<MembershipBenefit>();
+        var benefits = new List<DTOs.MembershipBenefit>();
 
         switch (tier)
         {
             case MembershipTier.Bronze:
-                benefits.Add(new MembershipBenefit
+                benefits.Add(new DTOs.MembershipBenefit
                 {
                     Name = "Welcome Discount",
                     Description = "2% discount on all purchases",
-                    Type = BenefitType.PercentageDiscount,
+                    Type = DTOs.BenefitType.PercentageDiscount,
                     Value = 2
                 });
                 break;
 
             case MembershipTier.Silver:
-                benefits.Add(new MembershipBenefit
+                benefits.Add(new DTOs.MembershipBenefit
                 {
                     Name = "Silver Discount",
                     Description = "5% discount on all purchases",
-                    Type = BenefitType.PercentageDiscount,
+                    Type = DTOs.BenefitType.PercentageDiscount,
                     Value = 5
                 });
-                benefits.Add(new MembershipBenefit
+                benefits.Add(new DTOs.MembershipBenefit
                 {
                     Name = "Priority Support",
                     Description = "Priority customer support",
-                    Type = BenefitType.Other,
+                    Type = DTOs.BenefitType.Other,
                     Value = 0
                 });
                 break;
 
             case MembershipTier.Gold:
-                benefits.Add(new MembershipBenefit
+                benefits.Add(new DTOs.MembershipBenefit
                 {
                     Name = "Gold Discount",
                     Description = "8% discount on all purchases",
-                    Type = BenefitType.PercentageDiscount,
+                    Type = DTOs.BenefitType.PercentageDiscount,
                     Value = 8
                 });
-                benefits.Add(new MembershipBenefit
+                benefits.Add(new DTOs.MembershipBenefit
                 {
                     Name = "Early Access",
                     Description = "Early access to new products and sales",
-                    Type = BenefitType.EarlyAccess,
+                    Type = DTOs.BenefitType.EarlyAccess,
                     Value = 0
                 });
                 break;
 
             case MembershipTier.Platinum:
-                benefits.Add(new MembershipBenefit
+                benefits.Add(new DTOs.MembershipBenefit
                 {
                     Name = "Platinum Discount",
                     Description = "12% discount on all purchases",
-                    Type = BenefitType.PercentageDiscount,
+                    Type = DTOs.BenefitType.PercentageDiscount,
                     Value = 12
                 });
-                benefits.Add(new MembershipBenefit
+                benefits.Add(new DTOs.MembershipBenefit
                 {
                     Name = "VIP Treatment",
                     Description = "VIP customer treatment and exclusive offers",
-                    Type = BenefitType.Other,
+                    Type = DTOs.BenefitType.Other,
                     Value = 0
                 });
-                benefits.Add(new MembershipBenefit
+                benefits.Add(new DTOs.MembershipBenefit
                 {
                     Name = "Free Shipping",
                     Description = "Free shipping on all orders",
-                    Type = BenefitType.FreeShipping,
+                    Type = DTOs.BenefitType.FreeShipping,
                     Value = 0
                 });
                 break;

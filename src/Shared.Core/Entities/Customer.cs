@@ -47,4 +47,6 @@ public class Customer : ISoftDeletable
     
     // Navigation properties
     public virtual ICollection<Sale> Sales { get; set; } = new List<Sale>();
+    public virtual CustomerMembership? Membership { get; set; }
+    public virtual ICollection<CustomerPreference> Preferences { get; set; } = new List<CustomerPreference>();
 }
