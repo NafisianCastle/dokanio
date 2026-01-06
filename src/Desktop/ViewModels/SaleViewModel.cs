@@ -522,14 +522,17 @@ public partial class SaleViewModel : BaseViewModel
 
     private async void PerformCalculation(object? state)
     {
-        if (_calculationCancellationToken?.Token.IsCancellationRequested == true)
+        var token = _calculationCancellationToken?.Token;
+        if (token?.IsCancellationRequested == true)
             return;
 
         try
         {
-            IsCalculating = true;
-            CalculationStatus = "Calculating...";
-            
+            // Do the work off-thread, but marshal UI updates back to the UI thread.
+            // Capture current values first to avoid partially-updated UI state.
+            decimal subtotal, tax, total, totalDiscount;
+            List<CalculationBreakdownDto> breakdown;
+
             if (_calculationEngine != null && _shopConfiguration != null)
             {
                 await PerformEnhancedCalculation();
@@ -538,16 +541,53 @@ public partial class SaleViewModel : BaseViewModel
             {
                 PerformBasicCalculation();
             }
-            
-            LastCalculationTime = DateTime.Now;
-            CalculationStatus = "Ready";
-            
-            // Notify property changes
-            OnPropertyChanged(nameof(Subtotal));
-            OnPropertyChanged(nameof(Tax));
-            OnPropertyChanged(nameof(Total));
-            OnPropertyChanged(nameof(TotalDiscount));
-            OnPropertyChanged(nameof(ChangeAmount));
+
+            if (token?.IsCancellationRequested == true)
+                return;
+
+            subtotal = CalculatedSubtotal;
+            tax = CalculatedTax;
+            total = CalculatedTotal;
+            totalDiscount = CalculatedTotalDiscount;
+            breakdown = CalculationBreakdown.ToList();
+
+            var sync = SynchronizationContext.Current;
+            if (sync != null)
+            {
+                sync.Post(_ =>
+                {
+                    if (token?.IsCancellationRequested == true) return;
+
+                    IsCalculating = true;
+                    CalculationStatus = "Ready";
+                    LastCalculationTime = DateTime.Now;
+
+                    CalculatedSubtotal = subtotal;
+                    CalculatedTax = tax;
+                    CalculatedTotal = total;
+                    CalculatedTotalDiscount = totalDiscount;
+                    CalculationBreakdown = breakdown;
+
+                    OnPropertyChanged(nameof(Subtotal));
+                    OnPropertyChanged(nameof(Tax));
+                    OnPropertyChanged(nameof(Total));
+                    OnPropertyChanged(nameof(TotalDiscount));
+                    OnPropertyChanged(nameof(ChangeAmount));
+
+                    IsCalculating = false;
+                }, null);
+            }
+            else
+            {
+                // Fallback if no context is available (tests/background usage)
+                LastCalculationTime = DateTime.Now;
+                CalculationStatus = "Ready";
+                OnPropertyChanged(nameof(Subtotal));
+                OnPropertyChanged(nameof(Tax));
+                OnPropertyChanged(nameof(Total));
+                OnPropertyChanged(nameof(TotalDiscount));
+                OnPropertyChanged(nameof(ChangeAmount));
+            }
         }
         catch (Exception ex)
         {
@@ -556,7 +596,7 @@ public partial class SaleViewModel : BaseViewModel
         }
         finally
         {
-            IsCalculating = false;
+            // If UI-thread marshalling is used above, avoid fighting over this flag here.
         }
     }
 
