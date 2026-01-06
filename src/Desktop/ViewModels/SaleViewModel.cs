@@ -1,12 +1,20 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Desktop.Models;
+using Desktop.Views;
+using Shared.Core.Services;
+using Shared.Core.Entities;
 using System.Collections.ObjectModel;
 
 namespace Desktop.ViewModels;
 
 public partial class SaleViewModel : BaseViewModel
 {
+    private readonly IBarcodeIntegrationService? _barcodeIntegrationService;
+    private readonly IMultiTabSalesManager? _salesManager;
+    private readonly Guid _sessionId;
+    private readonly Guid _shopId;
+
     [ObservableProperty]
     private string searchText = string.Empty;
 
@@ -34,8 +42,17 @@ public partial class SaleViewModel : BaseViewModel
     public decimal Total => Subtotal + Tax;
     public decimal ChangeAmount => AmountReceived - Total;
 
-    public SaleViewModel()
+    public SaleViewModel(
+        IBarcodeIntegrationService? barcodeIntegrationService = null,
+        IMultiTabSalesManager? salesManager = null,
+        Guid? sessionId = null,
+        Guid? shopId = null)
     {
+        _barcodeIntegrationService = barcodeIntegrationService;
+        _salesManager = salesManager;
+        _sessionId = sessionId ?? Guid.NewGuid();
+        _shopId = shopId ?? Guid.NewGuid();
+        
         Title = "New Sale";
         
         // Sample products for demo
@@ -181,17 +198,60 @@ public partial class SaleViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void StartBarcodeScan()
+    private async Task StartBarcodeScanAsync()
     {
-        IsScanning = true;
-        
-        // Simulate barcode scanning
-        Task.Delay(2000).ContinueWith(_ =>
+        if (_barcodeIntegrationService == null)
         {
+            // Fallback to simple simulation for demo
+            IsScanning = true;
+            
+            await Task.Delay(2000);
+            
             IsScanning = false;
             SearchText = "1234567890123"; // Sample barcode
             SearchProducts();
-        });
+            return;
+        }
+
+        try
+        {
+            // Open barcode scanner window
+            var scannerViewModel = new BarcodeScannerWindowViewModel(
+                _barcodeIntegrationService, 
+                _sessionId, 
+                _shopId);
+            
+            var scannerWindow = new BarcodeScannerWindow(scannerViewModel);
+            
+            // Subscribe to product scanned event
+            scannerViewModel.ProductScanned += (sender, product) =>
+            {
+                if (product != null)
+                {
+                    // Convert Shared.Core.Entities.Product to Desktop.Models.Product
+                    var desktopProduct = new Product
+                    {
+                        Id = product.Id,
+                        Name = product.Name,
+                        Barcode = product.Barcode,
+                        UnitPrice = product.UnitPrice,
+                        Category = product.Category,
+                        StockQuantity = 100 // This would come from stock service
+                    };
+                    
+                    AddProduct(desktopProduct);
+                }
+            };
+            
+            // Show the scanner window
+            await scannerWindow.ShowDialog(App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop 
+                ? desktop.MainWindow 
+                : null);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error opening barcode scanner: {ex.Message}";
+        }
     }
 
     [RelayCommand]

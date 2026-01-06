@@ -33,6 +33,7 @@ public static class ServiceCollectionExtensions
         // Register business logic services
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IEnhancedSalesService, EnhancedSalesService>();
+        services.AddScoped<IEnhancedSalesGridEngine, EnhancedSalesGridEngine>();
         services.AddScoped<IMultiTabSalesManager, MultiTabSalesManager>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IEnhancedInventoryService, EnhancedInventoryService>();
@@ -134,6 +135,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IReceiptService, ReceiptService>();
         services.AddScoped<IPrinterService, PrinterService>();
         services.AddScoped<IBarcodeScanner, BarcodeScanner>();
+        services.AddScoped<IBarcodeIntegrationService, BarcodeIntegrationService>();
         services.AddScoped<ICashDrawerService, CashDrawerService>();
         
         // Register hardware configurations (should be configured by the consuming application)
@@ -198,6 +200,7 @@ public static class ServiceCollectionExtensions
         // Register business logic services
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IEnhancedSalesService, EnhancedSalesService>();
+        services.AddScoped<IEnhancedSalesGridEngine, EnhancedSalesGridEngine>();
         services.AddScoped<IMultiTabSalesManager, MultiTabSalesManager>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IEnhancedInventoryService, EnhancedInventoryService>();
@@ -249,6 +252,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IReceiptService, ReceiptService>();
         services.AddScoped<IPrinterService, PrinterService>();
         services.AddScoped<IBarcodeScanner, BarcodeScanner>();
+        services.AddScoped<IBarcodeIntegrationService, BarcodeIntegrationService>();
         services.AddScoped<ICashDrawerService, CashDrawerService>();
         
         // Register additional repositories and services
