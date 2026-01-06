@@ -1,5 +1,6 @@
 using Shared.Core.Services;
 using Xunit;
+using System.Security.Cryptography;
 
 namespace Shared.Core.Tests;
 
@@ -140,7 +141,7 @@ public class SimpleEncryptionTest
     /// </summary>
     private static List<SensitiveDataTestSet> GenerateRandomSensitiveData()
     {
-        var random = new Random();
+        using var rng = RandomNumberGenerator.Create();
         var dataSets = new List<SensitiveDataTestSet>();
         
         // Test various types of sensitive data
@@ -179,12 +180,12 @@ public class SimpleEncryptionTest
         // Add random generated data
         for (int i = 0; i < 10; i++)
         {
-            var length = random.Next(1, 200);
-            var randomString = GenerateRandomString(length, random);
+            var length = RandomNumberGenerator.GetInt32(1, 200);
+            var randomString = GenerateRandomString(length, rng);
             dataSets.Add(new SensitiveDataTestSet 
             { 
                 PlainText = randomString, 
-                IsPassword = random.Next(0, 3) == 0 // 33% chance of being treated as password
+                IsPassword = RandomNumberGenerator.GetInt32(0, 3) == 0 // 33% chance of being treated as password
             });
         }
         
@@ -200,14 +201,19 @@ public class SimpleEncryptionTest
     /// <summary>
     /// Generates a random string of specified length
     /// </summary>
-    private static string GenerateRandomString(int length, Random random)
+    private static string GenerateRandomString(int length, RandomNumberGenerator rng)
+        var buffer = new byte[length];
     {
+        rng.GetBytes(buffer);
+        
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;':\",./<>? \t\n";
         var result = new char[length];
         
         for (int i = 0; i < length; i++)
         {
-            result[i] = chars[random.Next(chars.Length)];
+            // Map byte value to index in chars string
+            var index = buffer[i] % chars.Length;
+            result[i] = chars[index];
         }
         
         return new string(result);
