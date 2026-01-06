@@ -10,12 +10,15 @@ namespace Mobile.ViewModels;
 
 /// <summary>
 /// Mobile-specific ViewModel for managing multiple sale tabs
+/// Enhanced with touch-optimized controls and mobile-specific features
 /// </summary>
 public partial class MobileSaleTabContainerViewModel : BaseViewModel
 {
     private readonly IMultiTabSalesManager _multiTabSalesManager;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUserContextService _userContextService;
+    private readonly ICustomerLookupService _customerLookupService;
+    private readonly IBarcodeIntegrationService _barcodeIntegrationService;
     private readonly ILogger<MobileSaleTabContainerViewModel> _logger;
 
     [ObservableProperty]
@@ -33,6 +36,24 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
     [ObservableProperty]
     private bool isTabSwitchingEnabled = true;
 
+    [ObservableProperty]
+    private bool enableSwipeGestures = true;
+
+    [ObservableProperty]
+    private bool enableHapticFeedback = true;
+
+    [ObservableProperty]
+    private MobileCustomerLookupViewModel customerLookupViewModel;
+
+    [ObservableProperty]
+    private MobileBarcodeScannerViewModel barcodeScannerViewModel;
+
+    [ObservableProperty]
+    private bool showCustomerLookup;
+
+    [ObservableProperty]
+    private bool showBarcodeScanner;
+
     private Guid _currentUserId;
     private Guid _currentDeviceId;
     private Guid _currentShopId;
@@ -41,14 +62,26 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
         IMultiTabSalesManager multiTabSalesManager,
         ICurrentUserService currentUserService,
         IUserContextService userContextService,
+        ICustomerLookupService customerLookupService,
+        IBarcodeIntegrationService barcodeIntegrationService,
         ILogger<MobileSaleTabContainerViewModel> logger)
     {
         _multiTabSalesManager = multiTabSalesManager;
         _currentUserService = currentUserService;
         _userContextService = userContextService;
+        _customerLookupService = customerLookupService;
+        _barcodeIntegrationService = barcodeIntegrationService;
         _logger = logger;
         
         Title = "Sales";
+        
+        // Initialize mobile-specific ViewModels
+        CustomerLookupViewModel = new MobileCustomerLookupViewModel(_customerLookupService, logger);
+        BarcodeScannerViewModel = new MobileBarcodeScannerViewModel(_barcodeIntegrationService, null!, logger);
+        
+        // Subscribe to events
+        CustomerLookupViewModel.CustomerSelected += OnCustomerSelected;
+        BarcodeScannerViewModel.ProductScanned += OnProductScanned;
         
         // Initialize with current user context
         InitializeUserContext();
@@ -299,7 +332,7 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
     [RelayCommand]
     private async Task SwipeToNextTab()
     {
-        if (ActiveTab == null || SaleTabs.Count <= 1) return;
+        if (!EnableSwipeGestures || ActiveTab == null || SaleTabs.Count <= 1) return;
 
         var currentIndex = SaleTabs.IndexOf(ActiveTab);
         var nextIndex = (currentIndex + 1) % SaleTabs.Count;
@@ -309,11 +342,248 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
     [RelayCommand]
     private async Task SwipeToPreviousTab()
     {
-        if (ActiveTab == null || SaleTabs.Count <= 1) return;
+        if (!EnableSwipeGestures || ActiveTab == null || SaleTabs.Count <= 1) return;
 
         var currentIndex = SaleTabs.IndexOf(ActiveTab);
         var previousIndex = currentIndex == 0 ? SaleTabs.Count - 1 : currentIndex - 1;
         await SwitchToTab(SaleTabs[previousIndex]);
+    }
+
+    [RelayCommand]
+    private async Task ShowCustomerLookupPanel()
+    {
+        ShowCustomerLookup = true;
+        ShowBarcodeScanner = false;
+        TriggerHapticFeedback();
+        
+        // Initialize customer lookup if needed
+        if (CustomerLookupViewModel != null)
+        {
+            CustomerLookupViewModel.ClearError();
+        }
+    }
+
+    [RelayCommand]
+    private async Task HideCustomerLookupPanel()
+    {
+        ShowCustomerLookup = false;
+        TriggerHapticFeedback();
+    }
+
+    [RelayCommand]
+    private async Task ShowBarcodeScannerPanel()
+    {
+        ShowBarcodeScanner = true;
+        ShowCustomerLookup = false;
+        TriggerHapticFeedback();
+        
+        // Initialize barcode scanner
+        if (BarcodeScannerViewModel != null)
+        {
+            await BarcodeScannerViewModel.InitializeAsync();
+        }
+    }
+
+    [RelayCommand]
+    private async Task HideBarcodeScannerPanel()
+    {
+        ShowBarcodeScanner = false;
+        TriggerHapticFeedback();
+        
+        // Stop scanning if active
+        if (BarcodeScannerViewModel?.IsScannerActive == true)
+        {
+            await BarcodeScannerViewModel.StopScanning();
+        }
+    }
+
+    [RelayCommand]
+    private async Task ToggleHapticFeedback()
+    {
+        EnableHapticFeedback = !EnableHapticFeedback;
+        
+        if (EnableHapticFeedback)
+        {
+            TriggerHapticFeedback();
+        }
+        
+        // Update child ViewModels
+        if (CustomerLookupViewModel != null)
+        {
+            CustomerLookupViewModel.EnableHapticFeedback = EnableHapticFeedback;
+        }
+        
+        if (BarcodeScannerViewModel != null)
+        {
+            BarcodeScannerViewModel.EnableVibration = EnableHapticFeedback;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ToggleSwipeGestures()
+    {
+        EnableSwipeGestures = !EnableSwipeGestures;
+        TriggerHapticFeedback();
+    }
+
+    [RelayCommand]
+    private async Task QuickAddTab()
+    {
+        // Quick add with haptic feedback and optimized for mobile
+        TriggerHapticFeedback();
+        await CreateNewTab();
+    }
+
+    [RelayCommand]
+    private async Task LongPressTabOptions(MobileSaleTabViewModel tab)
+    {
+        if (tab == null) return;
+
+        TriggerHapticFeedback();
+        
+        var options = new List<string> { "Rename Tab", "Duplicate Tab" };
+        if (tab.CanClose)
+        {
+            options.Add("Close Tab");
+        }
+        
+        var action = await Shell.Current.DisplayActionSheet(
+            $"Tab Options: {tab.TabName}", 
+            "Cancel", 
+            null, 
+            options.ToArray());
+
+        switch (action)
+        {
+            case "Rename Tab":
+                await RenameTab(tab);
+                break;
+            case "Duplicate Tab":
+                await DuplicateTab(tab);
+                break;
+            case "Close Tab":
+                await CloseTab(tab);
+                break;
+        }
+    }
+
+    [RelayCommand]
+    private async Task PinchToZoom()
+    {
+        // Handle pinch gesture for zooming UI elements
+        TriggerHapticFeedback();
+        
+        // Toggle between compact and expanded view
+        var isCompactView = await Shell.Current.DisplayAlert(
+            "View Mode", 
+            "Switch to compact view for more tabs?", 
+            "Compact", 
+            "Expanded");
+        
+        // This would adjust the UI layout - implementation depends on the UI framework
+        // For now, just provide feedback
+        if (isCompactView)
+        {
+            MaxTabs = 5; // Allow more tabs in compact mode
+        }
+        else
+        {
+            MaxTabs = 3; // Fewer tabs in expanded mode
+        }
+    }
+
+    [RelayCommand]
+    private async Task ShakeToRefresh()
+    {
+        // Handle shake gesture to refresh all tabs
+        TriggerHapticFeedback();
+        
+        try
+        {
+            foreach (var tab in SaleTabs)
+            {
+                await tab.SaleViewModel.Refresh();
+            }
+            
+            await Shell.Current.DisplayAlert("Refreshed", "All tabs have been refreshed", "OK");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during shake to refresh");
+            SetError($"Refresh failed: {ex.Message}");
+        }
+    }
+
+    private async Task RenameTab(MobileSaleTabViewModel tab)
+    {
+        var newName = await Shell.Current.DisplayPromptAsync(
+            "Rename Tab", 
+            "Enter new tab name:", 
+            "Rename", 
+            "Cancel", 
+            tab.TabName);
+
+        if (!string.IsNullOrWhiteSpace(newName) && newName != tab.TabName)
+        {
+            tab.TabName = newName;
+            TriggerHapticFeedback();
+            
+            // Update session
+            var updateRequest = new UpdateSaleSessionRequest
+            {
+                SessionId = tab.SessionId,
+                TabName = newName
+            };
+            
+            await _multiTabSalesManager.UpdateSessionAsync(updateRequest);
+        }
+    }
+
+    private async Task DuplicateTab(MobileSaleTabViewModel sourceTab)
+    {
+        try
+        {
+            var sessionData = sourceTab.GetSessionData();
+            var newTabName = $"{sourceTab.TabName} Copy";
+            
+            var request = new CreateSaleSessionRequest
+            {
+                TabName = newTabName,
+                ShopId = _currentShopId,
+                UserId = _currentUserId,
+                DeviceId = _currentDeviceId,
+                CustomerId = sessionData.CustomerId
+            };
+
+            var result = await _multiTabSalesManager.CreateNewSaleSessionAsync(request);
+            if (result.Success && result.Session != null)
+            {
+                // Copy items to new session
+                foreach (var item in sessionData.Items)
+                {
+                    await _multiTabSalesManager.AddItemToSessionAsync(result.Session.Id, item);
+                }
+
+                // Create tab view model
+                var tabViewModel = new MobileSaleTabViewModel(result.Session, _multiTabSalesManager, _logger)
+                {
+                    IsActive = false,
+                    CanClose = true
+                };
+
+                SaleTabs.Add(tabViewModel);
+                await SwitchToTab(tabViewModel);
+                
+                TriggerHapticFeedback();
+                _logger.LogInformation("Duplicated mobile sale tab: {OriginalTab} -> {NewTab}", 
+                    sourceTab.TabName, newTabName);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error duplicating mobile tab: {TabName}", sourceTab.TabName);
+            SetError($"Failed to duplicate tab: {ex.Message}");
+        }
     }
 
     private async Task SaveCurrentTabState()
@@ -377,6 +647,8 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
 
     private void TriggerHapticFeedback()
     {
+        if (!EnableHapticFeedback) return;
+        
         try
         {
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
@@ -387,9 +659,77 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
         }
     }
 
+    private void OnCustomerSelected(object? sender, CustomerSelectedEventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            try
+            {
+                if (ActiveTab?.SaleViewModel != null)
+                {
+                    ActiveTab.SaleViewModel.CurrentCustomer = e.Customer;
+                    ActiveTab.SaleViewModel.CustomerMobileNumber = e.Customer.Phone ?? string.Empty;
+                    ActiveTab.SaleViewModel.ShowCustomerDetails = true;
+                    
+                    // Apply membership discounts if available
+                    if (e.Customer.AvailableDiscounts?.Any() == true)
+                    {
+                        // This would be implemented in the SaleViewModel
+                        // await ActiveTab.SaleViewModel.ApplyMembershipDiscounts(e.Customer.AvailableDiscounts);
+                    }
+                    
+                    TriggerHapticFeedback();
+                }
+                
+                // Auto-hide customer lookup panel
+                ShowCustomerLookup = false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error handling customer selection");
+                SetError($"Failed to select customer: {ex.Message}");
+            }
+        });
+    }
+
+    private void OnProductScanned(object? sender, ProductScannedEventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            try
+            {
+                if (ActiveTab?.SaleViewModel != null)
+                {
+                    await ActiveTab.SaleViewModel.AddProduct(e.Product);
+                    TriggerHapticFeedback();
+                }
+                
+                // Auto-hide barcode scanner panel after successful scan
+                ShowBarcodeScanner = false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error handling scanned product: {ProductName}", e.Product.Name);
+                SetError($"Failed to add scanned product: {ex.Message}");
+            }
+        });
+    }
+
     public async Task InitializeAsync()
     {
         await LoadExistingSessions();
+        
+        // Initialize mobile-specific components
+        if (CustomerLookupViewModel != null)
+        {
+            CustomerLookupViewModel.EnableHapticFeedback = EnableHapticFeedback;
+        }
+        
+        if (BarcodeScannerViewModel != null)
+        {
+            BarcodeScannerViewModel.EnableVibration = EnableHapticFeedback;
+            await BarcodeScannerViewModel.InitializeAsync();
+        }
     }
 
     public async Task CleanupAsync()
@@ -397,6 +737,23 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
         try
         {
             await SaveAllTabs();
+            
+            // Cleanup mobile-specific components
+            if (BarcodeScannerViewModel != null)
+            {
+                BarcodeScannerViewModel.Dispose();
+            }
+            
+            // Unsubscribe from events
+            if (CustomerLookupViewModel != null)
+            {
+                CustomerLookupViewModel.CustomerSelected -= OnCustomerSelected;
+            }
+            
+            if (BarcodeScannerViewModel != null)
+            {
+                BarcodeScannerViewModel.ProductScanned -= OnProductScanned;
+            }
         }
         catch (Exception ex)
         {
@@ -407,6 +764,12 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
     public async Task HandleBackgroundAsync()
     {
         await SaveAllTabs();
+        
+        // Stop barcode scanning when app goes to background
+        if (BarcodeScannerViewModel?.IsScannerActive == true)
+        {
+            await BarcodeScannerViewModel.StopScanning();
+        }
     }
 
     public async Task HandleForegroundAsync()
@@ -419,6 +782,43 @@ public partial class MobileSaleTabContainerViewModel : BaseViewModel
             {
                 ActiveTab.UpdateFromSessionData(sessionData);
             }
+        }
+        
+        // Re-initialize barcode scanner if needed
+        if (ShowBarcodeScanner && BarcodeScannerViewModel != null)
+        {
+            await BarcodeScannerViewModel.InitializeAsync();
+        }
+    }
+
+    // Mobile-specific gesture handling
+    public async Task HandleSwipeLeft()
+    {
+        if (EnableSwipeGestures)
+        {
+            await SwipeToNextTab();
+        }
+    }
+
+    public async Task HandleSwipeRight()
+    {
+        if (EnableSwipeGestures)
+        {
+            await SwipeToPreviousTab();
+        }
+    }
+
+    public async Task HandleLongPress(MobileSaleTabViewModel tab)
+    {
+        await LongPressTabOptions(tab);
+    }
+
+    // Touch-optimized tab management
+    public async Task HandleDoubleTap()
+    {
+        if (SaleTabs.Count < MaxTabs)
+        {
+            await QuickAddTab();
         }
     }
 }
@@ -458,20 +858,37 @@ public partial class MobileSaleTabViewModel : ObservableObject
         _logger = logger;
 
         // Create the mobile sale view model for this tab
-        SaleViewModel = new SaleViewModel(
-            null!, // These would be injected in a real implementation
-            null!,
-            null!,
-            null!,
-            null!,
-            null!,
-            null!);
+        // Note: In a real implementation, these services would be injected via DI
+        SaleViewModel = CreateSaleViewModelForTab(sessionData);
         
         // Load session data into the view model
         LoadSessionDataIntoViewModel();
         
         // Subscribe to changes
         SaleViewModel.PropertyChanged += (s, e) => HasUnsavedChanges = true;
+    }
+
+    private SaleViewModel CreateSaleViewModelForTab(SaleSessionDto sessionData)
+    {
+        // This is a simplified version - in a real implementation, 
+        // services would be injected through dependency injection
+        var saleViewModel = new SaleViewModel(
+            null!, // IEnhancedSalesService - would be injected
+            null!, // IProductService - would be injected
+            null!, // IPrinterService - would be injected
+            null!, // IReceiptService - would be injected
+            null!, // ICurrentUserService - would be injected
+            null!, // IUserContextService - would be injected
+            null!, // IBusinessManagementService - would be injected
+            null!, // IMultiTabSalesManager - would be injected
+            null!, // ICustomerLookupService - would be injected
+            null!  // IBarcodeIntegrationService - would be injected
+        );
+
+        // Initialize for this session
+        _ = Task.Run(async () => await saleViewModel.InitializeForSession(sessionData.Id, sessionData.TabName));
+        
+        return saleViewModel;
     }
 
     private void LoadSessionDataIntoViewModel()
