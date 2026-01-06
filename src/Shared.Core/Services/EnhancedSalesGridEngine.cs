@@ -69,16 +69,12 @@ public class EnhancedSalesGridEngine : IEnhancedSalesGridEngine
                 return GridOperationResult.ErrorResult("Weight-based products must be added using AddWeightBasedProductToGridAsync");
             }
 
-            // Get existing sale items for this session
-            var existingSaleItems = new List<SaleItem>();
-            if (saleSession.SaleId.HasValue)
-            {
-                existingSaleItems = (await _saleItemRepository.FindAsync(si => 
-                    si.SaleId == saleSession.SaleId.Value && !si.IsDeleted)).ToList();
-            }
+            // Check for an existing item with the same product directly from the repository
+            var existingItem = saleSession.SaleId.HasValue
+                ? await _saleItemRepository.FirstOrDefaultAsync(si =>
+                    si.SaleId == saleSession.SaleId.Value && si.ProductId == product.Id && !si.IsDeleted)
+                : null;
 
-            // Check for existing item with same product
-            var existingItem = existingSaleItems.FirstOrDefault(i => i.ProductId == product.Id);
             if (existingItem != null)
             {
                 // Update existing item quantity
