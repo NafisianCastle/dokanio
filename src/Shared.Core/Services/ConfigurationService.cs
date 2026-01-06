@@ -724,11 +724,12 @@ public class ConfigurationService : IConfigurationService
 
             await _configurationRepository.SetShopConfigurationAsync(shopId, key, stringValue, configurationType, description);
             
-            _logger.LogInformation("Shop configuration {ShopId}:{Key} set to {Value}", shopId, key, stringValue);
+            _logger.LogInformation("Shop configuration {ShopId}:{Key} set to {Value}", shopId, key, SanitizeForLogging(stringValue));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error setting shop configuration {ShopId}:{Key} = {Value}", shopId, key, value);
+            var safeValueForLog = SanitizeForLogging(ConvertToString(value));
+            _logger.LogError(ex, "Error setting shop configuration {ShopId}:{Key} = {Value}", shopId, key, safeValueForLog);
             throw;
         }
     }
@@ -958,6 +959,17 @@ public class ConfigurationService : IConfigurationService
         catch
         {
             return value.ToString() ?? string.Empty;
+    private string SanitizeForLogging(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return input;
+
+        // Remove carriage return and line feed characters to prevent log forging
+        return input
+            .Replace("\r", string.Empty)
+            .Replace("\n", string.Empty);
+    }
+
         }
     }
 
