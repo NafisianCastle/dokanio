@@ -101,6 +101,12 @@ public static class ServiceCollectionExtensions
         // Register comprehensive logging service
         services.AddScoped<IComprehensiveLoggingService, ComprehensiveLoggingService>();
         
+        // Register error tracking and alerting services
+        services.AddScoped<IErrorTrackingService, ErrorTrackingService>();
+        services.AddScoped<IAlertService, AlertService>();
+        services.AddScoped<IUsageAnalyticsService, UsageAnalyticsService>();
+        services.AddScoped<IComprehensiveMonitoringService, ComprehensiveMonitoringService>();
+        
         // Register error recovery and exception handling services
         services.AddScoped<IErrorRecoveryService, ErrorRecoveryService>();
         services.AddScoped<IGlobalExceptionHandler, GlobalExceptionHandler>();
@@ -321,6 +327,12 @@ public static class ServiceCollectionExtensions
         // Register comprehensive logging service
         services.AddScoped<IComprehensiveLoggingService, ComprehensiveLoggingService>();
         
+        // Register error tracking and alerting services
+        services.AddScoped<IErrorTrackingService, ErrorTrackingService>();
+        services.AddScoped<IAlertService, AlertService>();
+        services.AddScoped<IUsageAnalyticsService, UsageAnalyticsService>();
+        services.AddScoped<IComprehensiveMonitoringService, ComprehensiveMonitoringService>();
+        
         // Register error recovery and exception handling services
         services.AddScoped<IErrorRecoveryService, ErrorRecoveryService>();
         services.AddScoped<IGlobalExceptionHandler, GlobalExceptionHandler>();
@@ -408,3 +420,6 @@ public static class ServiceCollectionExtensions
         return services;
     }
 }
+// Additional monitoring service registration
+// Note: IEnhancedPerformanceMonitoringService should be registered in both AddSharedCore and AddSharedCoreInMemory methods
+// This is a temporary addition to ensure the service is available
