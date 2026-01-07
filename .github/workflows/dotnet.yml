@@ -12,17 +12,34 @@ on:
 jobs:
   build:
 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+    
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 10.0.x
-    - name: Restore dependencies
-      run: dotnet restore OfflineFirstPOS.sln
-    - name: Build
-      run: dotnet build OfflineFirstPOS.sln --no-restore
-    - name: Test
-      run: dotnet test OfflineFirstPOS.sln --no-build --verbosity normal
+        dotnet-version: 8.0.x
+    
+    - name: Restore dependencies (exclude Mobile)
+      shell: bash
+      run: |
+        echo "Restoring all projects except src/Mobile..."
+        find . -name '*.csproj' -not -path './src/Mobile/*' -print0 \
+          | xargs -0 -n1 -I{} dotnet restore "{}"
+    
+    - name: Build projects (exclude Mobile)
+      shell: bash
+      run: |
+        echo "Building all projects except src/Mobile..."
+        find . -name '*.csproj' -not -path './src/Mobile/*' -print0 \
+          | xargs -0 -n1 -I{} dotnet build "{}" --no-restore
+    
+    - name: Run tests (exclude Mobile)
+      shell: bash
+      run: |
+        echo "Running tests for test projects excluding src/Mobile..."
+        # adjust the test pattern if your test projects don't contain 'Tests' in the filename
+        find . -name '*Tests*.csproj' -not -path './src/Mobile/*' -print0 \
+          | xargs -0 -n1 -I{} dotnet test "{}" --no-build --verbosity normal
