@@ -1,0 +1,52 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.lock.json', '**/nuget.config', '**/*.props', '**/*.targets') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore projects (exclude Mobile)
+      shell: bash
+      run: |
+        find . -name '*.csproj' -not -path './src/Mobile/*' -print0 \
+          | xargs -0 -n1 dotnet restore
+
+    - name: Run tests (exclude Mobile)
+      run: |
+        echo "Running tests for test projects excluding src/Mobile..."
+        # adjust the test pattern if your test projects don't contain 'Tests' in the filename
+        find . -name '*Tests*.csproj' -not -path './src/Mobile/*' -print0 \
+          | xargs -0 dotnet test --no-build --verbosity normal
+    
+    - name: Run tests (exclude Mobile)
+      shell: bash
+      run: |
+        echo "Running tests for test projects excluding src/Mobile..."
+        # adjust the test pattern if your test projects don't contain 'Tests' in the filename
+        find . -name '*Tests*.csproj' -not -path './src/Mobile/*' -print0 \
+          | xargs -0 -n1 -I{} dotnet test "{}" --no-build --verbosity normal
