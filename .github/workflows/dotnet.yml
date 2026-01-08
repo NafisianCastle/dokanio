@@ -34,7 +34,7 @@ jobs:
       shell: bash
       run: |
         echo "Restoring all projects except src/Mobile..."
-        find . -name '*.csproj' -not -path './src/Mobile/*' -print0 \
+        | xargs -0 -n1 -I{} dotnet build "{}" --no-restore --configuration Release
           | xargs -0 -n1 -I{} dotnet restore "{}"
     
     - name: Build projects (exclude Mobile)
