@@ -36,15 +36,7 @@ jobs:
         find . -name '*.csproj' -not -path './src/Mobile/*' -print0 \
           | xargs -0 -n1 dotnet restore
 
-    - name: Build projects (exclude Mobile)
-      shell: bash
-      run: |
-        echo "Building all projects except src/Mobile..."
-        find . -name '*.csproj' -not -path './src/Mobile/*' -print0 \
-          | xargs -0 dotnet build --no-restore
-
     - name: Run tests (exclude Mobile)
-      shell: bash
       run: |
         echo "Running tests for test projects excluding src/Mobile..."
         # adjust the test pattern if your test projects don't contain 'Tests' in the filename
