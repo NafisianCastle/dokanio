@@ -127,19 +127,19 @@ public class LicenseService : ILicenseService
             var license = await _licenseRepository.GetByLicenseKeyAsync(licenseKey);
             if (license == null)
             {
-                _logger.LogWarning("License key not found: {LicenseKey}", MaskLicenseKey(licenseKey));
+                _logger.LogWarning("License key not found. LicenseKeyHash: {LicenseKeyHash}", HashLicenseKey(licenseKey));
                 return false;
             }
 
             if (license.Status != LicenseStatus.Active)
             {
-                _logger.LogWarning("License is not active: {LicenseKey}, Status: {Status}", MaskLicenseKey(licenseKey), license.Status);
+                _logger.LogWarning("License is not active. LicenseKeyHash: {LicenseKeyHash}, Status: {Status}", HashLicenseKey(licenseKey), license.Status);
                 return false;
             }
 
             if (license.ExpiryDate < DateTime.UtcNow)
             {
-                _logger.LogWarning("License has expired: {LicenseKey}, ExpiryDate: {ExpiryDate}", MaskLicenseKey(licenseKey), license.ExpiryDate);
+                _logger.LogWarning("License has expired. LicenseKeyHash: {LicenseKeyHash}, ExpiryDate: {ExpiryDate}", HashLicenseKey(licenseKey), license.ExpiryDate);
                 return false;
             }
 
@@ -150,12 +150,12 @@ public class LicenseService : ILicenseService
             await _licenseRepository.UpdateAsync(license);
             await _licenseRepository.SaveChangesAsync();
 
-            _logger.LogInformation("License activated successfully: {LicenseKey} for device {DeviceId}", MaskLicenseKey(licenseKey), deviceId);
+            _logger.LogInformation("License activated successfully. LicenseKeyHash: {LicenseKeyHash} for device {DeviceId}", HashLicenseKey(licenseKey), deviceId);
             return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error activating license: {LicenseKey}", MaskLicenseKey(licenseKey));
+            _logger.LogError(ex, "Error activating license. LicenseKeyHash: {LicenseKeyHash}", HashLicenseKey(licenseKey));
             return false;
         }
     }
