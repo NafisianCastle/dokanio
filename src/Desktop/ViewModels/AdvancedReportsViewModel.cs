@@ -1,17 +1,15 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using System.Reactive;
+using System.Collections.ObjectModel;
 using Shared.Core.DTOs;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Services;
-using System.Collections.ObjectModel;
 
 namespace Desktop.ViewModels;
 
-/// <summary>
-/// View model for advanced reporting and analytics dashboards
-/// </summary>
-public partial class AdvancedReportsViewModel : BaseViewModel
+public class AdvancedReportsViewModel : BaseViewModel
 {
     private readonly IDashboardService _dashboardService;
     private readonly IBusinessManagementService _businessManagementService;
@@ -19,70 +17,38 @@ public partial class AdvancedReportsViewModel : BaseViewModel
     private readonly ICurrentUserService _currentUserService;
     private readonly IAuthorizationService _authorizationService;
 
-    [ObservableProperty]
-    private ObservableCollection<BusinessResponse> businesses = new();
+    [Reactive] public ObservableCollection<BusinessResponse> Businesses { get; set; } = new();
+    [Reactive] public ObservableCollection<ShopResponse> Shops { get; set; } = new();
+    [Reactive] public BusinessResponse? SelectedBusiness { get; set; }
+    [Reactive] public ObservableCollection<ShopResponse> SelectedShops { get; set; } = new();
+    [Reactive] public DateTime StartDate { get; set; } = DateTime.Today.AddDays(-30);
+    [Reactive] public DateTime EndDate { get; set; } = DateTime.Today;
+    [Reactive] public bool IsLoading { get; set; }
 
-    [ObservableProperty]
-    private ObservableCollection<ShopResponse> shops = new();
+    [Reactive] public DashboardOverview? DashboardOverview { get; set; }
+    [Reactive] public ObservableCollection<DailyRevenueData> DailyRevenueData { get; set; } = new();
+    [Reactive] public ObservableCollection<MonthlyRevenueData> MonthlyRevenueData { get; set; } = new();
+    [Reactive] public ObservableCollection<TopSellingProduct> TopProducts { get; set; } = new();
+    [Reactive] public ObservableCollection<ShopPerformanceSummary> ShopPerformances { get; set; } = new();
+    [Reactive] public ObservableCollection<CategoryProfitData> CategoryProfits { get; set; } = new();
+    [Reactive] public ObservableCollection<AlertSummary> Alerts { get; set; } = new();
 
-    [ObservableProperty]
-    private BusinessResponse? selectedBusiness;
+    [Reactive] public decimal TotalRevenue { get; set; }
+    [Reactive] public int TotalTransactions { get; set; }
+    [Reactive] public decimal AverageOrderValue { get; set; }
+    [Reactive] public decimal EstimatedProfit { get; set; }
+    [Reactive] public decimal ProfitMarginPercentage { get; set; }
+    [Reactive] public int LowStockAlerts { get; set; }
+    [Reactive] public int ExpiryAlerts { get; set; }
 
-    [ObservableProperty]
-    private ObservableCollection<ShopResponse> selectedShops = new();
+    public bool CanViewReports => _currentUserService.CurrentUser != null &&
+                                  _authorizationService.CanAccessReports(_currentUserService.CurrentUser);
 
-    [ObservableProperty]
-    private DateTime startDate = DateTime.Today.AddDays(-30);
-
-    [ObservableProperty]
-    private DateTime endDate = DateTime.Today;
-
-    [ObservableProperty]
-    private bool isLoading;
-
-    // Dashboard data
-    [ObservableProperty]
-    private DashboardOverview? dashboardOverview;
-
-    [ObservableProperty]
-    private ObservableCollection<DailyRevenueData> dailyRevenueData = new();
-
-    [ObservableProperty]
-    private ObservableCollection<MonthlyRevenueData> monthlyRevenueData = new();
-
-    [ObservableProperty]
-    private ObservableCollection<TopSellingProduct> topProducts = new();
-
-    [ObservableProperty]
-    private ObservableCollection<ShopPerformanceSummary> shopPerformances = new();
-
-    [ObservableProperty]
-    private ObservableCollection<CategoryProfitData> categoryProfits = new();
-
-    [ObservableProperty]
-    private ObservableCollection<AlertSummary> alerts = new();
-
-    // Summary metrics
-    [ObservableProperty]
-    private decimal totalRevenue;
-
-    [ObservableProperty]
-    private int totalTransactions;
-
-    [ObservableProperty]
-    private decimal averageOrderValue;
-
-    [ObservableProperty]
-    private decimal estimatedProfit;
-
-    [ObservableProperty]
-    private decimal profitMarginPercentage;
-
-    [ObservableProperty]
-    private int lowStockAlerts;
-
-    [ObservableProperty]
-    private int expiryAlerts;
+    public ReactiveCommand<Unit, Unit> LoadBusinessesCommand { get; }
+    public ReactiveCommand<Unit, Unit> LoadShopsForBusinessCommand { get; }
+    public ReactiveCommand<Unit, Unit> GenerateReportsCommand { get; }
+    public ReactiveCommand<string, Unit> ExportReportCommand { get; }
+    public ReactiveCommand<Unit, Unit> RefreshDataCommand { get; }
 
     public AdvancedReportsViewModel(
         IDashboardService dashboardService,
@@ -91,183 +57,112 @@ public partial class AdvancedReportsViewModel : BaseViewModel
         ICurrentUserService currentUserService,
         IAuthorizationService authorizationService)
     {
-        _dashboardService = dashboardService;
+        _dashboardService          = dashboardService;
         _businessManagementService = businessManagementService;
-        _reportService = reportService;
-        _currentUserService = currentUserService;
-        _authorizationService = authorizationService;
+        _reportService             = reportService;
+        _currentUserService        = currentUserService;
+        _authorizationService      = authorizationService;
         Title = "Advanced Reports & Analytics";
+
+        LoadBusinessesCommand       = ReactiveCommand.CreateFromTask(LoadBusinessesAsync);
+        LoadShopsForBusinessCommand = ReactiveCommand.CreateFromTask(LoadShopsForBusinessAsync);
+        GenerateReportsCommand      = ReactiveCommand.CreateFromTask(GenerateReportsAsync);
+        ExportReportCommand         = ReactiveCommand.CreateFromTask<string>(ExportReportAsync);
+        RefreshDataCommand          = ReactiveCommand.CreateFromTask(RefreshDataAsync);
+
+        this.WhenAnyValue(x => x.SelectedBusiness).Subscribe(b =>
+        {
+            if (b != null) _ = LoadShopsForBusinessAsync();
+            else { Shops.Clear(); SelectedShops.Clear(); }
+        });
     }
 
-    public bool CanViewReports => _currentUserService.CurrentUser != null &&
-                                  _authorizationService.CanAccessReports(_currentUserService.CurrentUser);
-
-    [RelayCommand]
     private async Task LoadBusinessesAsync()
     {
-        if (!CanViewReports)
-        {
-            SetError("You don't have permission to view reports");
-            return;
-        }
+        if (!CanViewReports) { SetError("You don't have permission to view reports"); return; }
 
         IsLoading = true;
         ClearError();
-
         try
         {
-            var currentUser = _currentUserService.CurrentUser;
-            if (currentUser == null)
-            {
-                SetError("User not authenticated");
-                return;
-            }
+            var user = _currentUserService.CurrentUser;
+            if (user == null) { SetError("User not authenticated"); return; }
 
-            var businessList = await _businessManagementService.GetBusinessesByOwnerAsync(currentUser.Id);
+            var list = await _businessManagementService.GetBusinessesByOwnerAsync(user.Id);
             Businesses.Clear();
-            foreach (var business in businessList)
-            {
-                Businesses.Add(business);
-            }
-
-            // Auto-select first business
-            if (Businesses.Any())
-            {
-                SelectedBusiness = Businesses.First();
-            }
+            foreach (var b in list) Businesses.Add(b);
+            if (Businesses.Any()) SelectedBusiness = Businesses.First();
         }
-        catch (Exception ex)
-        {
-            SetError($"Error loading businesses: {ex.Message}");
-        }
-        finally
-        {
-            IsLoading = false;
-        }
+        catch (Exception ex) { SetError($"Error loading businesses: {ex.Message}"); }
+        finally { IsLoading = false; }
     }
 
-    [RelayCommand]
     private async Task LoadShopsForBusinessAsync()
     {
         if (SelectedBusiness == null) return;
-
         IsLoading = true;
         ClearError();
-
         try
         {
-            var shopList = await _businessManagementService.GetShopsByBusinessAsync(SelectedBusiness.Id);
-            Shops.Clear();
-            SelectedShops.Clear();
-            
-            foreach (var shop in shopList)
-            {
-                Shops.Add(shop);
-                SelectedShops.Add(shop); // Select all shops by default
-            }
+            var list = await _businessManagementService.GetShopsByBusinessAsync(SelectedBusiness.Id);
+            Shops.Clear(); SelectedShops.Clear();
+            foreach (var s in list) { Shops.Add(s); SelectedShops.Add(s); }
         }
-        catch (Exception ex)
-        {
-            SetError($"Error loading shops: {ex.Message}");
-        }
-        finally
-        {
-            IsLoading = false;
-        }
+        catch (Exception ex) { SetError($"Error loading shops: {ex.Message}"); }
+        finally { IsLoading = false; }
     }
 
-    [RelayCommand]
     private async Task GenerateReportsAsync()
     {
-        if (SelectedBusiness == null)
-        {
-            SetError("Please select a business");
-            return;
-        }
-
-        if (StartDate > EndDate)
-        {
-            SetError("Start date must be before end date");
-            return;
-        }
+        if (SelectedBusiness == null) { SetError("Please select a business"); return; }
+        if (StartDate > EndDate) { SetError("Start date must be before end date"); return; }
 
         IsLoading = true;
         ClearError();
-
         try
         {
             var dateRange = new DateRange { StartDate = StartDate, EndDate = EndDate };
-            var shopIds = SelectedShops.Select(s => s.Id).ToList();
+            var shopIds   = SelectedShops.Select(s => s.Id).ToList();
 
-            // Load dashboard overview
-            var filter = new DashboardFilter
-            {
-                DateRange = dateRange,
-                ShopIds = shopIds
-            };
+            DashboardOverview = await _dashboardService.GetDashboardOverviewAsync(
+                SelectedBusiness.Id,
+                new DashboardFilter { DateRange = dateRange, ShopIds = shopIds });
 
-            DashboardOverview = await _dashboardService.GetDashboardOverviewAsync(SelectedBusiness.Id, filter);
-
-            // Load detailed analytics
             await LoadRevenueAnalyticsAsync(dateRange, shopIds);
             await LoadProductAnalyticsAsync(dateRange, shopIds);
             await LoadShopPerformanceAsync(dateRange);
             await LoadProfitAnalysisAsync(dateRange, shopIds);
             await LoadAlertsAsync();
-
-            // Update summary metrics
             UpdateSummaryMetrics();
         }
-        catch (Exception ex)
-        {
-            SetError($"Error generating reports: {ex.Message}");
-        }
-        finally
-        {
-            IsLoading = false;
-        }
+        catch (Exception ex) { SetError($"Error generating reports: {ex.Message}"); }
+        finally { IsLoading = false; }
     }
 
-    [RelayCommand]
     private async Task ExportReportAsync(string format)
     {
         if (SelectedBusiness == null || DashboardOverview == null)
-        {
-            SetError("Please generate reports first");
-            return;
-        }
+        { SetError("Please generate reports first"); return; }
 
         IsLoading = true;
         ClearError();
-
         try
         {
-            var salesRequest = new SalesReportRequest
+            var request = new SalesReportRequest
             {
                 BusinessId = SelectedBusiness.Id,
-                ShopId = SelectedShops.Count == 1 ? SelectedShops.First().Id : null,
-                DateRange = new DateRange { StartDate = StartDate, EndDate = EndDate },
-                Format = Enum.Parse<ReportFormat>(format, true),
+                ShopId     = SelectedShops.Count == 1 ? SelectedShops.First().Id : null,
+                DateRange  = new DateRange { StartDate = StartDate, EndDate = EndDate },
+                Format     = Enum.Parse<ReportFormat>(format, true),
                 ReportType = SalesReportType.Summary
             };
-
-            var reportData = await _reportService.GenerateSalesReportAsync(salesRequest);
-            
-            // Save file dialog would be handled by the view
-            // For now, just show success message
+            await _reportService.GenerateSalesReportAsync(request);
             SuccessMessage = $"Report exported successfully in {format} format";
         }
-        catch (Exception ex)
-        {
-            SetError($"Error exporting report: {ex.Message}");
-        }
-        finally
-        {
-            IsLoading = false;
-        }
+        catch (Exception ex) { SetError($"Error exporting report: {ex.Message}"); }
+        finally { IsLoading = false; }
     }
 
-    [RelayCommand]
     private async Task RefreshDataAsync()
     {
         if (SelectedBusiness != null)
@@ -277,117 +172,64 @@ public partial class AdvancedReportsViewModel : BaseViewModel
         }
     }
 
-    partial void OnSelectedBusinessChanged(BusinessResponse? value)
-    {
-        if (value != null)
-        {
-            _ = LoadShopsForBusinessAsync();
-        }
-        else
-        {
-            Shops.Clear();
-            SelectedShops.Clear();
-        }
-    }
-
     private async Task LoadRevenueAnalyticsAsync(DateRange dateRange, List<Guid> shopIds)
     {
         if (SelectedBusiness == null) return;
+        await _dashboardService.GetRevenueTrendAnalysisAsync(SelectedBusiness.Id, dateRange, shopIds);
 
-        var revenueTrends = await _dashboardService.GetRevenueTrendAnalysisAsync(
-            SelectedBusiness.Id, dateRange, shopIds);
-
-        // Load daily revenue data
-        var dailyData = await _dashboardService.GetDailyRevenueDataAsync(
-            SelectedBusiness.Id, dateRange, shopIds);
-        
+        var daily = await _dashboardService.GetDailyRevenueDataAsync(SelectedBusiness.Id, dateRange, shopIds);
         DailyRevenueData.Clear();
-        foreach (var data in dailyData)
-        {
-            DailyRevenueData.Add(data);
-        }
+        foreach (var d in daily) DailyRevenueData.Add(d);
 
-        // Load monthly revenue data
-        var monthlyData = await _dashboardService.GetMonthlyRevenueDataAsync(
-            SelectedBusiness.Id, 12, shopIds);
-        
+        var monthly = await _dashboardService.GetMonthlyRevenueDataAsync(SelectedBusiness.Id, 12, shopIds);
         MonthlyRevenueData.Clear();
-        foreach (var data in monthlyData)
-        {
-            MonthlyRevenueData.Add(data);
-        }
+        foreach (var m in monthly) MonthlyRevenueData.Add(m);
     }
 
     private async Task LoadProductAnalyticsAsync(DateRange dateRange, List<Guid> shopIds)
     {
         if (SelectedBusiness == null) return;
-
-        var topProducts = await _dashboardService.GetTopSellingProductsAsync(
-            SelectedBusiness.Id, dateRange, 20, shopIds);
-
+        var top = await _dashboardService.GetTopSellingProductsAsync(SelectedBusiness.Id, dateRange, 20, shopIds);
         TopProducts.Clear();
-        foreach (var product in topProducts)
-        {
-            TopProducts.Add(product);
-        }
+        foreach (var p in top) TopProducts.Add(p);
     }
 
     private async Task LoadShopPerformanceAsync(DateRange dateRange)
     {
         if (SelectedBusiness == null) return;
-
-        var performances = await _dashboardService.GetShopPerformanceSummariesAsync(
-            SelectedBusiness.Id, dateRange);
-
+        var perfs = await _dashboardService.GetShopPerformanceSummariesAsync(SelectedBusiness.Id, dateRange);
         ShopPerformances.Clear();
-        foreach (var performance in performances)
-        {
-            ShopPerformances.Add(performance);
-        }
+        foreach (var p in perfs) ShopPerformances.Add(p);
     }
 
     private async Task LoadProfitAnalysisAsync(DateRange dateRange, List<Guid> shopIds)
     {
         if (SelectedBusiness == null) return;
-
-        var profitAnalysis = await _dashboardService.GetProfitAnalysisAsync(
-            SelectedBusiness.Id, dateRange, shopIds);
-
+        var profit = await _dashboardService.GetProfitAnalysisAsync(SelectedBusiness.Id, dateRange, shopIds);
         CategoryProfits.Clear();
-        foreach (var categoryProfit in profitAnalysis.CategoryProfits)
-        {
-            CategoryProfits.Add(categoryProfit);
-        }
+        foreach (var c in profit.CategoryProfits) CategoryProfits.Add(c);
     }
 
     private async Task LoadAlertsAsync()
     {
         if (SelectedBusiness == null) return;
-
-        var alertList = await _dashboardService.GetActiveAlertsAsync(SelectedBusiness.Id);
-
+        var list = await _dashboardService.GetActiveAlertsAsync(SelectedBusiness.Id);
         Alerts.Clear();
-        foreach (var alert in alertList)
-        {
-            Alerts.Add(alert);
-        }
+        foreach (var a in list) Alerts.Add(a);
     }
 
     private void UpdateSummaryMetrics()
     {
         if (DashboardOverview == null) return;
-
-        TotalRevenue = DashboardOverview.RealTimeSales.TodayRevenue;
-        TotalTransactions = DashboardOverview.RealTimeSales.TodayTransactionCount;
-        AverageOrderValue = DashboardOverview.RealTimeSales.AverageOrderValue;
-        
+        TotalRevenue       = DashboardOverview.RealTimeSales.TodayRevenue;
+        TotalTransactions  = DashboardOverview.RealTimeSales.TodayTransactionCount;
+        AverageOrderValue  = DashboardOverview.RealTimeSales.AverageOrderValue;
         if (DashboardOverview.RevenueTrends.ProfitAnalysis != null)
         {
-            EstimatedProfit = DashboardOverview.RevenueTrends.ProfitAnalysis.EstimatedProfit;
+            EstimatedProfit        = DashboardOverview.RevenueTrends.ProfitAnalysis.EstimatedProfit;
             ProfitMarginPercentage = DashboardOverview.RevenueTrends.ProfitAnalysis.ProfitMarginPercentage;
         }
-
         LowStockAlerts = DashboardOverview.InventoryStatus.LowStockProducts;
-        ExpiryAlerts = DashboardOverview.InventoryStatus.ExpiringProducts;
+        ExpiryAlerts   = DashboardOverview.InventoryStatus.ExpiringProducts;
     }
 }

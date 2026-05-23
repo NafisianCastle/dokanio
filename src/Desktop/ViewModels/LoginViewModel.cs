@@ -1,10 +1,10 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using System.Reactive;
 using Shared.Core.Enums;
 using Shared.Core.Entities;
 using Shared.Core.Repositories;
 using Shared.Core.Services;
-using System.ComponentModel.DataAnnotations;
 
 namespace Desktop.ViewModels;
 
@@ -14,7 +14,7 @@ namespace Desktop.ViewModels;
 ///   1. Try the remote server (ServerAuthService) — works when the container is running.
 ///   2. Fall back to local SQLite (UserService) — works offline after first successful login.
 /// </summary>
-public partial class LoginViewModel : BaseViewModel
+public class LoginViewModel : BaseViewModel
 {
     private readonly IUserService _userService;
     private readonly IServerAuthService _serverAuthService;
@@ -26,23 +26,16 @@ public partial class LoginViewModel : BaseViewModel
     private readonly IEncryptionService _encryptionService;
 
     public event EventHandler<User>? LoginSuccessful;
+    public Action? OnLoginSuccessful { get; set; }
 
-    [ObservableProperty]
-    [Required(ErrorMessage = "Username is required")]
-    private string username = string.Empty;
+    [Reactive] public string Username { get; set; } = string.Empty;
+    [Reactive] public string Password { get; set; } = string.Empty;
+    [Reactive] public bool IsLoading { get; set; }
+    [Reactive] public string? ErrorMessage { get; set; }
+    [Reactive] public bool RememberMe { get; set; }
 
-    [ObservableProperty]
-    [Required(ErrorMessage = "Password is required")]
-    private string password = string.Empty;
-
-    [ObservableProperty]
-    private bool isLoading;
-
-    [ObservableProperty]
-    private string? errorMessage;
-
-    [ObservableProperty]
-    private bool rememberMe;
+    public ReactiveCommand<Unit, Unit> LoginCommand { get; }
+    public ReactiveCommand<Unit, Unit> ClearErrorCommand { get; }
 
     public LoginViewModel(
         IUserService userService,
@@ -62,14 +55,19 @@ public partial class LoginViewModel : BaseViewModel
         _authorizationService = authorizationService;
         _userRepository = userRepository;
         _encryptionService = encryptionService;
+
+        // Clear error when username or password changes
+        this.WhenAnyValue(x => x.Username).Subscribe(_ => ErrorMessage = null);
+        this.WhenAnyValue(x => x.Password).Subscribe(_ => ErrorMessage = null);
+
+        var canLogin = this.WhenAnyValue(x => x.IsLoading, loading => !loading);
+
+        LoginCommand = ReactiveCommand.CreateFromTask(LoginAsync, canLogin);
+        ClearErrorCommand = ReactiveCommand.Create(() => { ErrorMessage = null; });
     }
 
-    [RelayCommand]
     private async Task LoginAsync()
     {
-        if (IsLoading)
-            return;
-
         ErrorMessage = null;
 
         if (string.IsNullOrWhiteSpace(Username))
@@ -96,7 +94,6 @@ public partial class LoginViewModel : BaseViewModel
 
             if (serverResult != null)
             {
-                // Server responded (reachable)
                 if (!serverResult.IsSuccess)
                 {
                     ErrorMessage = serverResult.ErrorMessage ?? "Invalid username or password";
@@ -105,8 +102,6 @@ public partial class LoginViewModel : BaseViewModel
                     return;
                 }
 
-                // Server auth succeeded — upsert the user into local SQLite so offline
-                // login works on the next run without a server connection.
                 user = await UpsertLocalUserFromServerAsync(serverResult);
             }
             else
@@ -158,18 +153,13 @@ public partial class LoginViewModel : BaseViewModel
         }
     }
 
-    /// <summary>
-    /// Creates or updates the local SQLite user record from a successful server auth response.
-    /// This keeps the local DB in sync so offline login works after the first online login.
-    /// </summary>
     private async Task<User> UpsertLocalUserFromServerAsync(ServerAuthResult serverResult)
     {
         var existing = await _userRepository.GetByUsernameAsync(serverResult.Username!);
 
         if (existing != null)
         {
-            // Update last-login timestamp and sync any changed fields
-            existing.LastLoginAt   = DateTime.UtcNow;
+            existing.LastLoginAt    = DateTime.UtcNow;
             existing.LastActivityAt = DateTime.UtcNow;
             if (serverResult.BusinessId.HasValue) existing.BusinessId = serverResult.BusinessId.Value;
             if (serverResult.ShopId.HasValue)     existing.ShopId     = serverResult.ShopId;
@@ -179,9 +169,6 @@ public partial class LoginViewModel : BaseViewModel
             return existing;
         }
 
-        // First time this user logs in on this device — create a local record.
-        // We store a placeholder password hash; the real password is validated by the server.
-        // Local offline login will only work if the user has previously logged in online.
         var salt = _encryptionService.GenerateSalt();
         var newUser = new User
         {
@@ -202,46 +189,16 @@ public partial class LoginViewModel : BaseViewModel
             SyncStatus   = Shared.Core.Enums.SyncStatus.Synced
         };
 
-        // BusinessId FK must exist locally — create a placeholder business if needed
         await EnsureLocalBusinessExistsAsync(newUser.BusinessId);
-
         await _userRepository.AddAsync(newUser);
         await _userRepository.SaveChangesAsync();
         return newUser;
     }
 
-    /// <summary>
-    /// Ensures a Business row exists in the local SQLite DB for the given ID.
-    /// Without this the User insert would fail the FK constraint on SQLite (if FK enforcement is on).
-    /// </summary>
-    private async Task EnsureLocalBusinessExistsAsync(Guid businessId)
+    private static Task EnsureLocalBusinessExistsAsync(Guid businessId)
     {
-        if (businessId == Guid.Empty) return;
-        // IBusinessRepository is not injected here to keep the constructor lean.
-        // We use the DbContext directly via the user repository's context — but since
-        // we don't have direct access, we rely on SQLite's default FK-off behaviour.
-        // If FK enforcement is enabled, inject IBusinessRepository and add a placeholder.
-        await Task.CompletedTask;
-    }
-
-    [RelayCommand]
-    private new void ClearError()
-    {
-        ErrorMessage = null;
-    }
-
-    /// <summary>
-    /// Event fired when login is successful
-    /// </summary>
-    public Action? OnLoginSuccessful { get; set; }
-
-    partial void OnUsernameChanged(string value)
-    {
-        ErrorMessage = null;
-    }
-
-    partial void OnPasswordChanged(string value)
-    {
-        ErrorMessage = null;
+        if (businessId == Guid.Empty) return Task.CompletedTask;
+        // Relies on SQLite FK-off default; inject IBusinessRepository if FK enforcement is on.
+        return Task.CompletedTask;
     }
 }
