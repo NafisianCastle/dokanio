@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
 using Shared.Core.Data;
 using Shared.Core.DependencyInjection;
 using Shared.Core.Entities;

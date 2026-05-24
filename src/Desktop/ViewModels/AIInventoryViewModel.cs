@@ -3,7 +3,6 @@ using ReactiveUI.Fody.Helpers;
 using System.Reactive;
 using System.Collections.ObjectModel;
 using Shared.Core.DTOs;
-using Shared.Core.Enums;
 using Shared.Core.Services;
 
 namespace Desktop.ViewModels;

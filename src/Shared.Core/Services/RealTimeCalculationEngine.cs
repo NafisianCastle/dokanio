@@ -3,7 +3,6 @@ using Shared.Core.DTOs;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
 using System.Diagnostics;
-using System.Globalization;
 
 namespace Shared.Core.Services;
 

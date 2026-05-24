@@ -6,10 +6,8 @@ using Desktop.ViewModels;
 using Desktop.Views;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Shared.Core.Services;
-using System.IO;
 
 namespace Desktop;
 

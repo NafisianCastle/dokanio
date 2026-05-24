@@ -1,8 +1,6 @@
-using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Repositories;
 using System.Collections.Concurrent;
-using System.Security.Cryptography;
 using System.Text.Json;
 
 namespace Shared.Core.Services;

@@ -1,10 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Shared.Core.Services;
 using Shared.Core.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Shared.Core.Tests;

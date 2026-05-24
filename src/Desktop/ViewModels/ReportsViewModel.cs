@@ -2,7 +2,6 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System.Reactive;
 using System.Collections.ObjectModel;
-using Desktop.Models;
 using Microsoft.Extensions.Logging;
 using Shared.Core.DTOs;
 using Shared.Core.Repositories;

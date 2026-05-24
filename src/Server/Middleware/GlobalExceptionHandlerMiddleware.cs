@@ -1,7 +1,5 @@
 using System.Net;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Hosting;
 using Shared.Core.Services;
 
 namespace Server.Middleware;

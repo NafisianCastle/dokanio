@@ -4,12 +4,9 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using Desktop.Models;
-using Desktop.Views;
 using Microsoft.Extensions.Logging;
 using Shared.Core.DTOs;
 using Shared.Core.Entities;
-using Shared.Core.Enums;
 using Shared.Core.Repositories;
 using Shared.Core.Services;
 
@@ -163,8 +160,7 @@ public class SaleViewModel : BaseViewModel
         // ── Wire up reactive subscriptions ────────────────────────────────────
         _searchSubscription = this.WhenAnyValue(x => x.SearchText)
             .Throttle(TimeSpan.FromMilliseconds(300))
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(v => SearchProducts(v));
+            .Subscribe(v => Avalonia.Threading.Dispatcher.UIThread.Post(() => SearchProducts(v)));
 
         _phoneSubscription = this.WhenAnyValue(x => x.CustomerPhone)
             .Subscribe(v =>

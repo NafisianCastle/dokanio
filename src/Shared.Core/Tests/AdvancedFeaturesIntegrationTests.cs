@@ -2,12 +2,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Shared.Core.Data;
-using Shared.Core.DependencyInjection;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Services;
 using Shared.Core.Repositories;
-using Shared.Core.DTOs;
 using Xunit;
 
 namespace Shared.Core.Tests;

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Core.DTOs;
 using Shared.Core.Services;
-using System.Security.Claims;
 
 namespace Server.Controllers;
 

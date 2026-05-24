@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Shared.Core.Services;
-using System.Security.Claims;
 
 namespace Server.Middleware;
 
