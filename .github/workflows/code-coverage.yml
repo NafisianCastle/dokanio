@@ -93,7 +93,7 @@ jobs:
             --output ./coverage-report
 
       - name: Upload coverage report as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: ./coverage-report/
