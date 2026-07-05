@@ -1,8 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Shared.Core.Architecture;
 using Shared.Core.Events;
-using Shared.Core.Integration;
 using Shared.Core.Plugins;
 using Xunit;
 

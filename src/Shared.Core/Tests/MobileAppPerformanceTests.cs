@@ -7,7 +7,6 @@ using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Services;
 using Shared.Core.Repositories;
-using Shared.Core.DependencyInjection;
 using System.Diagnostics;
 using Xunit;
 using Xunit.Abstractions;

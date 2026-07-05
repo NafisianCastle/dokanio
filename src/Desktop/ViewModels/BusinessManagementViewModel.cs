@@ -1,89 +1,62 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using System.Reactive;
+using System.Collections.ObjectModel;
 using Shared.Core.DTOs;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Services;
-using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
 
 namespace Desktop.ViewModels;
 
-/// <summary>
-/// View model for business and shop management
-/// </summary>
-public partial class BusinessManagementViewModel : BaseViewModel
+public class BusinessManagementViewModel : BaseViewModel
 {
     private readonly IBusinessManagementService _businessManagementService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IAuditService _auditService;
 
-    [ObservableProperty]
-    private ObservableCollection<BusinessResponse> businesses = new();
+    [Reactive] public ObservableCollection<BusinessResponse> Businesses { get; set; } = new();
+    [Reactive] public ObservableCollection<ShopResponse> Shops { get; set; } = new();
+    [Reactive] public BusinessResponse? SelectedBusiness { get; set; }
+    [Reactive] public ShopResponse? SelectedShop { get; set; }
+    [Reactive] public bool IsLoading { get; set; }
+    [Reactive] public bool IsCreateBusinessDialogOpen { get; set; }
+    [Reactive] public bool IsCreateShopDialogOpen { get; set; }
+    [Reactive] public bool IsEditBusinessDialogOpen { get; set; }
+    [Reactive] public bool IsEditShopDialogOpen { get; set; }
 
-    [ObservableProperty]
-    private ObservableCollection<ShopResponse> shops = new();
+    // Create-business form
+    [Reactive] public string NewBusinessName { get; set; } = string.Empty;
+    [Reactive] public string NewBusinessDescription { get; set; } = string.Empty;
+    [Reactive] public string NewBusinessAddress { get; set; } = string.Empty;
+    [Reactive] public string NewBusinessPhone { get; set; } = string.Empty;
+    [Reactive] public string NewBusinessEmail { get; set; } = string.Empty;
+    [Reactive] public string NewBusinessTaxId { get; set; } = string.Empty;
+    [Reactive] public BusinessType NewBusinessType { get; set; } = BusinessType.GeneralRetail;
 
-    [ObservableProperty]
-    private BusinessResponse? selectedBusiness;
+    // Create-shop form
+    [Reactive] public string NewShopName { get; set; } = string.Empty;
+    [Reactive] public string NewShopAddress { get; set; } = string.Empty;
+    [Reactive] public string NewShopPhone { get; set; } = string.Empty;
+    [Reactive] public string NewShopEmail { get; set; } = string.Empty;
+    [Reactive] public string? SuccessMessage { get; set; }
 
-    [ObservableProperty]
-    private ShopResponse? selectedShop;
+    public bool CanManageBusinesses => _currentUserService.CurrentUser?.Role is
+        UserRole.BusinessOwner or UserRole.Administrator or UserRole.SuperAdmin;
 
-    [ObservableProperty]
-    private bool isLoading;
+    public Array BusinessTypes => Enum.GetValues<BusinessType>();
 
-    [ObservableProperty]
-    private bool isCreateBusinessDialogOpen;
-
-    [ObservableProperty]
-    private bool isCreateShopDialogOpen;
-
-    [ObservableProperty]
-    private bool isEditBusinessDialogOpen;
-
-    [ObservableProperty]
-    private bool isEditShopDialogOpen;
-
-    // Create business properties
-    [ObservableProperty]
-    [Required(ErrorMessage = "Business name is required")]
-    private string newBusinessName = string.Empty;
-
-    [ObservableProperty]
-    private string newBusinessDescription = string.Empty;
-
-    [ObservableProperty]
-    private string newBusinessAddress = string.Empty;
-
-    [ObservableProperty]
-    private string newBusinessPhone = string.Empty;
-
-    [ObservableProperty]
-    private string newBusinessEmail = string.Empty;
-
-    [ObservableProperty]
-    private string newBusinessTaxId = string.Empty;
-
-    [ObservableProperty]
-    private BusinessType newBusinessType = BusinessType.GeneralRetail;
-
-    // Create shop properties
-    [ObservableProperty]
-    [Required(ErrorMessage = "Shop name is required")]
-    private string newShopName = string.Empty;
-
-    [ObservableProperty]
-    private string newShopAddress = string.Empty;
-
-    [ObservableProperty]
-    private string newShopPhone = string.Empty;
-
-    [ObservableProperty]
-    private string newShopEmail = string.Empty;
-
-    [ObservableProperty]
-    private string? successMessage;
+    public ReactiveCommand<Unit, Unit> LoadBusinessesCommand { get; }
+    public ReactiveCommand<Guid, Unit> LoadShopsForBusinessCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenCreateBusinessDialogCommand { get; }
+    public ReactiveCommand<Unit, Unit> CloseCreateBusinessDialogCommand { get; }
+    public ReactiveCommand<Unit, Unit> CreateBusinessCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenCreateShopDialogCommand { get; }
+    public ReactiveCommand<Unit, Unit> CloseCreateShopDialogCommand { get; }
+    public ReactiveCommand<Unit, Unit> CreateShopCommand { get; }
+    public ReactiveCommand<BusinessResponse?, Unit> DeleteBusinessCommand { get; }
+    public ReactiveCommand<ShopResponse?, Unit> DeleteShopCommand { get; }
+    public ReactiveCommand<Unit, Unit> ClearMessagesCommand { get; }
 
     public BusinessManagementViewModel(
         IBusinessManagementService businessManagementService,
@@ -91,146 +64,104 @@ public partial class BusinessManagementViewModel : BaseViewModel
         IAuditService auditService)
     {
         _businessManagementService = businessManagementService;
-        _currentUserService = currentUserService;
-        _auditService = auditService;
+        _currentUserService        = currentUserService;
+        _auditService              = auditService;
         Title = "Business Management";
+
+        LoadBusinessesCommand            = ReactiveCommand.CreateFromTask(LoadBusinessesAsync);
+        LoadShopsForBusinessCommand      = ReactiveCommand.CreateFromTask<Guid>(LoadShopsForBusinessAsync);
+        OpenCreateBusinessDialogCommand  = ReactiveCommand.Create(OpenCreateBusinessDialog);
+        CloseCreateBusinessDialogCommand = ReactiveCommand.Create(CloseCreateBusinessDialog);
+        CreateBusinessCommand            = ReactiveCommand.CreateFromTask(CreateBusinessAsync);
+        OpenCreateShopDialogCommand      = ReactiveCommand.Create(OpenCreateShopDialog);
+        CloseCreateShopDialogCommand     = ReactiveCommand.Create(CloseCreateShopDialog);
+        CreateShopCommand                = ReactiveCommand.CreateFromTask(CreateShopAsync);
+        DeleteBusinessCommand            = ReactiveCommand.CreateFromTask<BusinessResponse?>(DeleteBusinessAsync);
+        DeleteShopCommand                = ReactiveCommand.CreateFromTask<ShopResponse?>(DeleteShopAsync);
+        ClearMessagesCommand             = ReactiveCommand.Create(() => { ClearError(); SuccessMessage = null; });
+
+        // React to business selection
+        this.WhenAnyValue(x => x.SelectedBusiness).Subscribe(b =>
+        {
+            if (b != null) _ = LoadShopsForBusinessAsync(b.Id);
+            else Shops.Clear();
+        });
     }
 
-    public bool CanManageBusinesses => _currentUserService.CurrentUser?.Role is
-        UserRole.BusinessOwner or UserRole.Administrator or UserRole.SuperAdmin;
-
-    public Array BusinessTypes => Enum.GetValues<BusinessType>();
-
-    [RelayCommand]
     private async Task LoadBusinessesAsync()
     {
-        if (!CanManageBusinesses)
-        {
-            SetError("You don't have permission to manage businesses");
-            return;
-        }
+        if (!CanManageBusinesses) { SetError("You don't have permission to manage businesses"); return; }
 
         IsLoading = true;
         ClearError();
-
         try
         {
-            var currentUser = _currentUserService.CurrentUser;
-            if (currentUser == null)
-            {
-                SetError("User not authenticated");
-                return;
-            }
+            var user = _currentUserService.CurrentUser;
+            if (user == null) { SetError("User not authenticated"); return; }
 
-            var businessList = await _businessManagementService.GetBusinessesByOwnerAsync(currentUser.Id);
+            var list = await _businessManagementService.GetBusinessesByOwnerAsync(user.Id);
             Businesses.Clear();
-            foreach (var business in businessList)
-            {
-                Businesses.Add(business);
-            }
+            foreach (var b in list) Businesses.Add(b);
 
-            // Load shops for the first business if available
             if (Businesses.Any())
             {
                 SelectedBusiness = Businesses.First();
                 await LoadShopsForBusinessAsync(SelectedBusiness.Id);
             }
         }
-        catch (Exception ex)
-        {
-            SetError($"Error loading businesses: {ex.Message}");
-        }
-        finally
-        {
-            IsLoading = false;
-        }
+        catch (Exception ex) { SetError($"Error loading businesses: {ex.Message}"); }
+        finally { IsLoading = false; }
     }
 
-    [RelayCommand]
     private async Task LoadShopsForBusinessAsync(Guid businessId)
     {
         IsLoading = true;
         ClearError();
-
         try
         {
-            var shopList = await _businessManagementService.GetShopsByBusinessAsync(businessId);
+            var list = await _businessManagementService.GetShopsByBusinessAsync(businessId);
             Shops.Clear();
-            foreach (var shop in shopList)
-            {
-                Shops.Add(shop);
-            }
+            foreach (var s in list) Shops.Add(s);
         }
-        catch (Exception ex)
-        {
-            SetError($"Error loading shops: {ex.Message}");
-        }
-        finally
-        {
-            IsLoading = false;
-        }
+        catch (Exception ex) { SetError($"Error loading shops: {ex.Message}"); }
+        finally { IsLoading = false; }
     }
 
-    [RelayCommand]
     private void OpenCreateBusinessDialog()
     {
-        if (!CanManageBusinesses)
-        {
-            SetError("You don't have permission to create businesses");
-            return;
-        }
-
+        if (!CanManageBusinesses) { SetError("You don't have permission to create businesses"); return; }
         ClearCreateBusinessForm();
         IsCreateBusinessDialogOpen = true;
     }
 
-    [RelayCommand]
     private void CloseCreateBusinessDialog()
     {
         IsCreateBusinessDialogOpen = false;
         ClearCreateBusinessForm();
     }
 
-    [RelayCommand]
     private async Task CreateBusinessAsync()
     {
-        if (!CanManageBusinesses)
-        {
-            SetError("You don't have permission to create businesses");
-            return;
-        }
-
-        ClearError();
-        SuccessMessage = null;
-
-        // Validate input
-        if (string.IsNullOrWhiteSpace(NewBusinessName))
-        {
-            SetError("Business name is required");
-            return;
-        }
+        if (!CanManageBusinesses) { SetError("You don't have permission to create businesses"); return; }
+        ClearError(); SuccessMessage = null;
+        if (string.IsNullOrWhiteSpace(NewBusinessName)) { SetError("Business name is required"); return; }
 
         IsLoading = true;
-
         try
         {
-            var currentUser = _currentUserService.CurrentUser;
-            if (currentUser == null)
-            {
-                SetError("User not authenticated");
-                return;
-            }
+            var user = _currentUserService.CurrentUser;
+            if (user == null) { SetError("User not authenticated"); return; }
 
             var request = new CreateBusinessRequest
             {
-                Name = NewBusinessName,
-                Type = NewBusinessType,
-                OwnerId = currentUser.Id,
-                Description = NewBusinessDescription,
-                Address = NewBusinessAddress,
-                Phone = NewBusinessPhone,
-                Email = NewBusinessEmail,
-                TaxId = NewBusinessTaxId,
+                Name          = NewBusinessName,
+                Type          = NewBusinessType,
+                OwnerId       = user.Id,
+                Description   = NewBusinessDescription,
+                Address       = NewBusinessAddress,
+                Phone         = NewBusinessPhone,
+                Email         = NewBusinessEmail,
+                TaxId         = NewBusinessTaxId,
                 Configuration = System.Text.Json.JsonSerializer.Serialize(
                     await _businessManagementService.GetDefaultBusinessConfigurationAsync(NewBusinessType))
             };
@@ -239,87 +170,47 @@ public partial class BusinessManagementViewModel : BaseViewModel
             Businesses.Add(business);
             SuccessMessage = $"Business '{NewBusinessName}' created successfully";
 
-            await _auditService.LogAsync(
-                currentUser.Id,
-                AuditAction.SystemConfiguration,
+            await _auditService.LogAsync(user.Id, AuditAction.SystemConfiguration,
                 $"Created business: {NewBusinessName} of type: {NewBusinessType}",
-                nameof(Business),
-                business.Id);
+                nameof(Business), business.Id);
 
             CloseCreateBusinessDialog();
         }
-        catch (Exception ex)
-        {
-            SetError($"Error creating business: {ex.Message}");
-        }
-        finally
-        {
-            IsLoading = false;
-        }
+        catch (Exception ex) { SetError($"Error creating business: {ex.Message}"); }
+        finally { IsLoading = false; }
     }
 
-    [RelayCommand]
     private void OpenCreateShopDialog()
     {
-        if (SelectedBusiness == null)
-        {
-            SetError("Please select a business first");
-            return;
-        }
-
-        if (!CanManageBusinesses)
-        {
-            SetError("You don't have permission to create shops");
-            return;
-        }
-
+        if (SelectedBusiness == null) { SetError("Please select a business first"); return; }
+        if (!CanManageBusinesses) { SetError("You don't have permission to create shops"); return; }
         ClearCreateShopForm();
         IsCreateShopDialogOpen = true;
     }
 
-    [RelayCommand]
     private void CloseCreateShopDialog()
     {
         IsCreateShopDialogOpen = false;
         ClearCreateShopForm();
     }
 
-    [RelayCommand]
     private async Task CreateShopAsync()
     {
-        if (SelectedBusiness == null)
-        {
-            SetError("Please select a business first");
-            return;
-        }
-
-        if (!CanManageBusinesses)
-        {
-            SetError("You don't have permission to create shops");
-            return;
-        }
-
-        ClearError();
-        SuccessMessage = null;
-
-        // Validate input
-        if (string.IsNullOrWhiteSpace(NewShopName))
-        {
-            SetError("Shop name is required");
-            return;
-        }
+        if (SelectedBusiness == null) { SetError("Please select a business first"); return; }
+        if (!CanManageBusinesses) { SetError("You don't have permission to create shops"); return; }
+        ClearError(); SuccessMessage = null;
+        if (string.IsNullOrWhiteSpace(NewShopName)) { SetError("Shop name is required"); return; }
 
         IsLoading = true;
-
         try
         {
             var request = new CreateShopRequest
             {
-                BusinessId = SelectedBusiness.Id,
-                Name = NewShopName,
-                Address = NewShopAddress,
-                Phone = NewShopPhone,
-                Email = NewShopEmail,
+                BusinessId    = SelectedBusiness.Id,
+                Name          = NewShopName,
+                Address       = NewShopAddress,
+                Phone         = NewShopPhone,
+                Email         = NewShopEmail,
                 Configuration = System.Text.Json.JsonSerializer.Serialize(
                     await _businessManagementService.GetDefaultShopConfigurationAsync(SelectedBusiness.Id))
             };
@@ -328,161 +219,79 @@ public partial class BusinessManagementViewModel : BaseViewModel
             Shops.Add(shop);
             SuccessMessage = $"Shop '{NewShopName}' created successfully";
 
-            await _auditService.LogAsync(
-                _currentUserService.CurrentUser?.Id,
+            await _auditService.LogAsync(_currentUserService.CurrentUser?.Id,
                 AuditAction.SystemConfiguration,
                 $"Created shop: {NewShopName} for business: {SelectedBusiness.Name}",
-                nameof(Shop),
-                shop.Id);
+                nameof(Shop), shop.Id);
 
             CloseCreateShopDialog();
         }
-        catch (Exception ex)
-        {
-            SetError($"Error creating shop: {ex.Message}");
-        }
-        finally
-        {
-            IsLoading = false;
-        }
+        catch (Exception ex) { SetError($"Error creating shop: {ex.Message}"); }
+        finally { IsLoading = false; }
     }
 
-    [RelayCommand]
     private async Task DeleteBusinessAsync(BusinessResponse? business)
     {
-        if (business == null || !CanManageBusinesses)
-            return;
+        if (business == null || !CanManageBusinesses) return;
 
         IsLoading = true;
         ClearError();
-
         try
         {
-            var currentUser = _currentUserService.CurrentUser;
-            if (currentUser == null)
-            {
-                SetError("User not authenticated");
-                return;
-            }
+            var user = _currentUserService.CurrentUser;
+            if (user == null) { SetError("User not authenticated"); return; }
 
-            var success = await _businessManagementService.DeleteBusinessAsync(business.Id, currentUser.Id);
+            var success = await _businessManagementService.DeleteBusinessAsync(business.Id, user.Id);
             if (success)
             {
                 Businesses.Remove(business);
-                if (SelectedBusiness?.Id == business.Id)
-                {
-                    SelectedBusiness = null;
-                    Shops.Clear();
-                }
+                if (SelectedBusiness?.Id == business.Id) { SelectedBusiness = null; Shops.Clear(); }
                 SuccessMessage = $"Business '{business.Name}' deleted successfully";
-
-                await _auditService.LogAsync(
-                    currentUser.Id,
-                    AuditAction.SystemConfiguration,
-                    $"Deleted business: {business.Name}",
-                    nameof(Business),
-                    business.Id);
+                await _auditService.LogAsync(user.Id, AuditAction.SystemConfiguration,
+                    $"Deleted business: {business.Name}", nameof(Business), business.Id);
             }
-            else
-            {
-                SetError("Failed to delete business");
-            }
+            else { SetError("Failed to delete business"); }
         }
-        catch (Exception ex)
-        {
-            SetError($"Error deleting business: {ex.Message}");
-        }
-        finally
-        {
-            IsLoading = false;
-        }
+        catch (Exception ex) { SetError($"Error deleting business: {ex.Message}"); }
+        finally { IsLoading = false; }
     }
 
-    [RelayCommand]
     private async Task DeleteShopAsync(ShopResponse? shop)
     {
-        if (shop == null || !CanManageBusinesses)
-            return;
+        if (shop == null || !CanManageBusinesses) return;
 
         IsLoading = true;
         ClearError();
-
         try
         {
-            var currentUser = _currentUserService.CurrentUser;
-            if (currentUser == null)
-            {
-                SetError("User not authenticated");
-                return;
-            }
+            var user = _currentUserService.CurrentUser;
+            if (user == null) { SetError("User not authenticated"); return; }
 
-            var success = await _businessManagementService.DeleteShopAsync(shop.Id, currentUser.Id);
+            var success = await _businessManagementService.DeleteShopAsync(shop.Id, user.Id);
             if (success)
             {
                 Shops.Remove(shop);
                 SuccessMessage = $"Shop '{shop.Name}' deleted successfully";
-
-                await _auditService.LogAsync(
-                    currentUser.Id,
-                    AuditAction.SystemConfiguration,
-                    $"Deleted shop: {shop.Name}",
-                    nameof(Shop),
-                    shop.Id);
+                await _auditService.LogAsync(user.Id, AuditAction.SystemConfiguration,
+                    $"Deleted shop: {shop.Name}", nameof(Shop), shop.Id);
             }
-            else
-            {
-                SetError("Failed to delete shop");
-            }
+            else { SetError("Failed to delete shop"); }
         }
-        catch (Exception ex)
-        {
-            SetError($"Error deleting shop: {ex.Message}");
-        }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
-
-    [RelayCommand]
-    private void ClearMessages()
-    {
-        ClearError();
-        SuccessMessage = null;
-    }
-
-    partial void OnSelectedBusinessChanged(BusinessResponse? value)
-    {
-        if (value != null)
-        {
-            _ = LoadShopsForBusinessAsync(value.Id);
-        }
-        else
-        {
-            Shops.Clear();
-        }
+        catch (Exception ex) { SetError($"Error deleting shop: {ex.Message}"); }
+        finally { IsLoading = false; }
     }
 
     private void ClearCreateBusinessForm()
     {
-        NewBusinessName = string.Empty;
-        NewBusinessDescription = string.Empty;
-        NewBusinessAddress = string.Empty;
-        NewBusinessPhone = string.Empty;
-        NewBusinessEmail = string.Empty;
-        NewBusinessTaxId = string.Empty;
+        NewBusinessName = NewBusinessDescription = NewBusinessAddress =
+        NewBusinessPhone = NewBusinessEmail = NewBusinessTaxId = string.Empty;
         NewBusinessType = BusinessType.GeneralRetail;
-        ClearError();
-        SuccessMessage = null;
+        ClearError(); SuccessMessage = null;
     }
 
     private void ClearCreateShopForm()
     {
-        NewShopName = string.Empty;
-        NewShopAddress = string.Empty;
-        NewShopPhone = string.Empty;
-        NewShopEmail = string.Empty;
-        ClearError();
-        SuccessMessage = null;
+        NewShopName = NewShopAddress = NewShopPhone = NewShopEmail = string.Empty;
+        ClearError(); SuccessMessage = null;
     }
 }

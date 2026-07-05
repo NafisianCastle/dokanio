@@ -2,10 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Core.Data;
 using Shared.Core.Entities;
-using Shared.Core.Services;
 using System.Diagnostics;
 using System.Text.Json;
-using System.Linq;
 
 namespace Shared.Core.Services;
 

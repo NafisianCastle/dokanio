@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Shared.Core.Enums;
 
 namespace Shared.Core.Services;
 

@@ -7,7 +7,6 @@ using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Mobile.ViewModels;
 using Mobile.Services;
-using System.Collections.ObjectModel;
 
 namespace Mobile.Tests;
 

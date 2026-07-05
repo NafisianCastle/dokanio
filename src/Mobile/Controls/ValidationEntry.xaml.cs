@@ -1,6 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
 using Shared.Core.DTOs;
-using Shared.Core.Enums;
 using Shared.Core.Services;
 using System.Timers;
 

@@ -4,7 +4,6 @@ using Shared.Core.Services;
 using Mobile.ViewModels;
 using Mobile.Views;
 using Mobile.Services;
-using System.IO;
 using CommunityToolkit.Maui;
 
 namespace Mobile;
