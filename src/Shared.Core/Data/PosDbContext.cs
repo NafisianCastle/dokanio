@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Core.Entities;
 using Shared.Core.Services;
-using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

@@ -2,10 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Shared.Core.DTOs;
-using Shared.Core.Enums;
 using Shared.Core.Services;
-using System;
-using System.Threading.Tasks;
 using SystemTimer = System.Timers.Timer;
 using System.Timers;
 

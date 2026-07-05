@@ -1,24 +1,15 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace Desktop.ViewModels;
 
-public partial class BaseViewModel : ObservableValidator
+public class BaseViewModel : ReactiveObject
 {
-    [ObservableProperty]
-    private bool isBusy;
-
-    [ObservableProperty]
-    private string title = string.Empty;
-
-    [ObservableProperty]
-    private string errorMessage = string.Empty;
-
-    [ObservableProperty]
-    private bool hasError;
-
-    [ObservableProperty]
-    private string? successMessage;
+    [Reactive] public bool IsBusy { get; set; }
+    [Reactive] public string Title { get; set; } = string.Empty;
+    [Reactive] public string ErrorMessage { get; set; } = string.Empty;
+    [Reactive] public bool HasError { get; set; }
+    [Reactive] public string? SuccessMessage { get; set; }
 
     protected void SetError(string message)
     {
@@ -30,11 +21,5 @@ public partial class BaseViewModel : ObservableValidator
     {
         ErrorMessage = string.Empty;
         HasError = false;
-    }
-
-    [RelayCommand]
-    private void ClearErrorDisplay()
-    {
-        ClearError();
     }
 }

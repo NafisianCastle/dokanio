@@ -1,10 +1,8 @@
 using Xunit;
 using Moq;
-using Microsoft.Extensions.Logging;
 using Shared.Core.Services;
 using Shared.Core.DTOs;
 using Shared.Core.Entities;
-using Shared.Core.Enums;
 
 namespace Shared.Core.Tests;
 

@@ -1,4 +1,5 @@
 using Desktop.ViewModels;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Shared.Core.DependencyInjection;
@@ -8,14 +9,35 @@ namespace Desktop.Services;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddDesktopServices(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddDesktopServices(
+        this IServiceCollection services,
+        string connectionString,
+        IConfiguration? configuration = null)
     {
-        // Add shared core services
+        // Add shared core services (SQLite, repositories, business logic)
         services.AddSharedCore(connectionString);
-        
+
+        // ── Server auth HTTP client ───────────────────────────────────────────────
+        // Reads BaseUrl from appsettings.json → "Server:BaseUrl", falls back to
+        // the POS_SERVER_URL environment variable, then to localhost:5000.
+        var serverBaseUrl =
+            configuration?["Server:BaseUrl"]
+            ?? Environment.GetEnvironmentVariable("POS_SERVER_URL")
+            ?? "http://localhost:5000";
+
+        var authTimeoutSeconds = 5;
+        if (int.TryParse(configuration?["Server:AuthTimeoutSeconds"], out var t))
+            authTimeoutSeconds = t;
+
+        services.AddHttpClient<IServerAuthService, ServerAuthService>(client =>
+        {
+            client.BaseAddress = new Uri(serverBaseUrl.TrimEnd('/') + "/");
+            client.Timeout = TimeSpan.FromSeconds(authTimeoutSeconds);
+        });
+
         // Add desktop-specific exception handling
         services.AddScoped<GlobalExceptionHandlerService>();
-        
+
         // Add ViewModels
         services.AddTransient<MainViewModel>();
         services.AddTransient<SaleViewModel>();
@@ -32,7 +54,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ConfigurationViewModel>();
         // Note: BarcodeScannerWindowViewModel requires sessionId and shopId at construction time,
         // so it is instantiated directly in the view code-behind rather than via DI.
-        
+
         return services;
     }
     
