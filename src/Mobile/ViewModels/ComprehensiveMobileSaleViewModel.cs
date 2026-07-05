@@ -1,12 +1,9 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Shared.Core.Entities;
-using Shared.Core.Enums;
 using Shared.Core.Services;
 using Shared.Core.DTOs;
 using Mobile.Services;
-using System.Globalization;
 using Microsoft.Extensions.Logging;
 
 namespace Mobile.ViewModels;

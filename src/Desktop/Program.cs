@@ -4,11 +4,10 @@ using Avalonia.Markup.Xaml;
 using Desktop.Services;
 using Desktop.ViewModels;
 using Desktop.Views;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Shared.Core.Services;
-using System.IO;
 
 namespace Desktop;
 
@@ -26,7 +25,14 @@ public partial class App : Application
     {
         // Configure services
         var services = new ServiceCollection();
-        
+
+        // Load configuration from appsettings.json + environment variables
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+            .AddEnvironmentVariables()
+            .Build();
+
         // Configure logging
         services.AddLogging(builder =>
         {
@@ -39,8 +45,8 @@ public partial class App : Application
         Directory.CreateDirectory(appDataPath);
         var connectionString = $"Data Source={Path.Combine(appDataPath, "pos.db")}";
 
-        // Add desktop services (which includes shared core)
-        services.AddDesktopServices(connectionString);
+        // Add desktop services (which includes shared core + server auth HTTP client)
+        services.AddDesktopServices(connectionString, configuration);
 
         _serviceProvider = services.BuildServiceProvider();
 

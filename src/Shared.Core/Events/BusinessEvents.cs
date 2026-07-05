@@ -1,4 +1,3 @@
-using Shared.Core.Entities;
 using Shared.Core.Enums;
 
 namespace Shared.Core.Events;

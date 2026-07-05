@@ -3,6 +3,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Desktop.Models;
 using Desktop.ViewModels;
+using System.Reactive;
 
 namespace Desktop.Views;
 
@@ -11,58 +12,38 @@ public partial class SaleView : UserControl
     public SaleView()
     {
         InitializeComponent();
-        
-        // Set up keyboard shortcuts
         KeyDown += OnGlobalKeyDown;
-        
-        // Set initial focus
-        Loaded += OnLoaded;
+        Loaded  += OnLoaded;
     }
 
     private void OnLoaded(object? sender, RoutedEventArgs e)
     {
-        // Set focus to search box when view loads
-        var searchBox = this.FindControl<TextBox>("SearchBox");
-        searchBox?.Focus();
+        this.FindControl<TextBox>("SearchBox")?.Focus();
     }
 
     private void OnGlobalKeyDown(object? sender, KeyEventArgs e)
     {
-        if (DataContext is not SaleViewModel viewModel) return;
+        if (DataContext is not SaleViewModel vm) return;
 
         switch (e.Key)
         {
             case Key.F1:
-                // Focus search box
-                var searchBox = this.FindControl<TextBox>("SearchBox");
-                searchBox?.Focus();
+                this.FindControl<TextBox>("SearchBox")?.Focus();
                 e.Handled = true;
                 break;
-                
+
             case Key.F2:
-                // Start barcode scan
-                if (viewModel.StartBarcodeScanCommand.CanExecute(null))
-                {
-                    viewModel.StartBarcodeScanCommand.Execute(null);
-                }
+                vm.StartBarcodeScanCommand.Execute(Unit.Default);
                 e.Handled = true;
                 break;
-                
+
             case Key.F9:
-                // Complete sale
-                if (viewModel.CompleteSaleCommand.CanExecute(null))
-                {
-                    viewModel.CompleteSaleCommand.Execute(null);
-                }
+                vm.CompleteSaleCommand.Execute(Unit.Default);
                 e.Handled = true;
                 break;
-                
+
             case Key.Escape:
-                // Reset sale (with confirmation)
-                if (viewModel.ResetSaleCommand.CanExecute(null))
-                {
-                    viewModel.ResetSaleCommand.Execute(null);
-                }
+                vm.ResetSaleCommand.Execute(Unit.Default);
                 e.Handled = true;
                 break;
         }
@@ -70,60 +51,41 @@ public partial class SaleView : UserControl
 
     private void OnProductTapped(object? sender, TappedEventArgs e)
     {
-        if (sender is Border border && 
-            border.DataContext is Product product &&
-            DataContext is SaleViewModel viewModel)
-        {
-            viewModel.AddProductCommand.Execute(product);
-        }
+        if (sender is Border { DataContext: Product product } &&
+            DataContext is SaleViewModel vm)
+            vm.AddProductCommand.Execute(product);
     }
 
     private void OnProductKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Enter || e.Key == Key.Space)
+        if ((e.Key == Key.Enter || e.Key == Key.Space) &&
+            sender is Border { DataContext: Product product } &&
+            DataContext is SaleViewModel vm)
         {
-            if (sender is Border border && 
-                border.DataContext is Product product &&
-                DataContext is SaleViewModel viewModel)
-            {
-                viewModel.AddProductCommand.Execute(product);
-                e.Handled = true;
-            }
+            vm.AddProductCommand.Execute(product);
+            e.Handled = true;
         }
     }
 
     private void OnSearchKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Enter && DataContext is SaleViewModel viewModel)
+        if (e.Key == Key.Enter && DataContext is SaleViewModel vm)
         {
-            if (viewModel.SearchProductsCommand.CanExecute(null))
-            {
-                viewModel.SearchProductsCommand.Execute(null);
-            }
+            vm.SearchProductsCommand.Execute(null);
             e.Handled = true;
         }
     }
 
     private void OnQuantityChanged(object? sender, NumericUpDownValueChangedEventArgs e)
     {
-        if (DataContext is SaleViewModel viewModel)
-        {
-            // Trigger recalculation when quantity changes
-            viewModel.RecalculateTotalsCommand?.Execute(null);
-        }
+        if (DataContext is SaleViewModel vm)
+            vm.RecalculateTotalsCommand.Execute(Unit.Default);
     }
 
     private void OnPhoneNumberLostFocus(object? sender, RoutedEventArgs e)
     {
-        if (sender is TextBox textBox && 
-            !string.IsNullOrWhiteSpace(textBox.Text) &&
-            DataContext is SaleViewModel viewModel)
-        {
-            // Auto-trigger customer lookup when phone number is entered
-            if (viewModel.LookupCustomerCommand.CanExecute(null))
-            {
-                viewModel.LookupCustomerCommand.Execute(null);
-            }
-        }
+        if (sender is TextBox { Text: { Length: > 0 } } &&
+            DataContext is SaleViewModel vm)
+            vm.LookupCustomerCommand.Execute(Unit.Default);
     }
 }

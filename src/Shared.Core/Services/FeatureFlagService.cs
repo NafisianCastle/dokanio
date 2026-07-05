@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Shared.Core.DTOs;
 using Shared.Core.Enums;
-using Shared.Core.Services;
 using System.Security.Cryptography;
 using System.Text;
 

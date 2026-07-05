@@ -1,6 +1,5 @@
 using Shared.Core.DTOs;
 using Shared.Core.Entities;
-using Shared.Core.Enums;
 
 namespace Shared.Core.Services;
 

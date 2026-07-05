@@ -6,7 +6,6 @@ using Server.Models;
 using Server.Services;
 using Shared.Core.Services;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace Server.Controllers;
 

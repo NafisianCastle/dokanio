@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Shared.Core.DependencyInjection;
 using Shared.Core.DTOs;
 using Shared.Core.Services;

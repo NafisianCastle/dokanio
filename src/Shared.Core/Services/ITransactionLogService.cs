@@ -1,5 +1,3 @@
-using Shared.Core.Entities;
-
 namespace Shared.Core.Services;
 
 /// <summary>

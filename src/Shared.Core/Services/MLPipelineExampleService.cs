@@ -1,6 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Shared.Core.DTOs;
-using Shared.Core.Enums;
 
 namespace Shared.Core.Services;
 
