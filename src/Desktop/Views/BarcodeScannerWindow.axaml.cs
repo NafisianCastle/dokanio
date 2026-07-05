@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Desktop.ViewModels;
+using System.Reactive;
 
 namespace Desktop.Views;
 
@@ -14,26 +15,21 @@ public partial class BarcodeScannerWindow : Window
     public BarcodeScannerWindow(BarcodeScannerWindowViewModel viewModel) : this()
     {
         DataContext = viewModel;
-        
-        // Subscribe to close event
-        viewModel.CloseRequested += (sender, e) => Close(e);
+        viewModel.CloseRequested += (_, e) => Close(e);
     }
 
     private void OnManualBarcodeKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Enter && DataContext is BarcodeScannerWindowViewModel viewModel)
+        if (e.Key == Key.Enter && DataContext is BarcodeScannerWindowViewModel vm)
         {
-            if (viewModel.ProcessManualBarcodeCommand.CanExecute(null))
-            {
-                viewModel.ProcessManualBarcodeCommand.Execute(null);
-            }
+            vm.ProcessManualBarcodeCommand.Execute(Unit.Default);
             e.Handled = true;
         }
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
-        if (DataContext is not BarcodeScannerWindowViewModel viewModel)
+        if (DataContext is not BarcodeScannerWindowViewModel vm)
         {
             base.OnKeyDown(e);
             return;
@@ -42,26 +38,20 @@ public partial class BarcodeScannerWindow : Window
         switch (e.Key)
         {
             case Key.Escape:
-                viewModel.CloseCommand.Execute(null);
+                vm.CloseCommand.Execute(Unit.Default);
                 e.Handled = true;
                 break;
-                
+
             case Key.F2:
-                if (viewModel.StartScanningCommand.CanExecute(null))
-                {
-                    viewModel.StartScanningCommand.Execute(null);
-                }
+                vm.StartScanningCommand.Execute(Unit.Default);
                 e.Handled = true;
                 break;
-                
-            case Key.Enter when viewModel.HasValidProduct:
-                if (viewModel.AddToSaleCommand.CanExecute(null))
-                {
-                    viewModel.AddToSaleCommand.Execute(null);
-                }
+
+            case Key.Enter when vm.HasValidProduct:
+                vm.AddToSaleCommand.Execute(Unit.Default);
                 e.Handled = true;
                 break;
-                
+
             default:
                 base.OnKeyDown(e);
                 break;

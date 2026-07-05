@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using Shared.Core.Services;
 
 namespace WebDashboard.Services;

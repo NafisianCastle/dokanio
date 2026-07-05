@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using Shared.Core.DTOs;
 using Shared.Core.Services;
-using System.Security.Claims;
 
 namespace Server.Controllers;
 

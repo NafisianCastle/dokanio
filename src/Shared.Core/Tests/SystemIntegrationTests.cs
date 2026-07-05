@@ -1,8 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Shared.Core.DependencyInjection;
-using Shared.Core.DTOs;
-using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Services;
 using Xunit;

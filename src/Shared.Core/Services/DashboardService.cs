@@ -4,7 +4,6 @@ using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Repositories;
 using System.Globalization;
-using System.Linq;
 
 namespace Shared.Core.Services;
 

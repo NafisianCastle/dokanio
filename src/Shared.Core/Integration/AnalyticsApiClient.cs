@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Shared.Core.Architecture;
 using System.Net.Http.Json;
-using System.Text.Json;
 
 namespace Shared.Core.Integration;
 

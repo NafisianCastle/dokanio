@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Shared.Core.Data;
 using Shared.Core.Entities;
 using Shared.Core.Enums;

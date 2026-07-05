@@ -1,12 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Moq;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Shared.Core.Data;
 using Shared.Core.DependencyInjection;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
-using Shared.Core.Repositories;
 using Shared.Core.Services;
 using Xunit;
 using Xunit.Abstractions;
