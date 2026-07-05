@@ -3,7 +3,6 @@ using Shared.Core.DTOs;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
 using Shared.Core.Repositories;
-using System.Text.Json;
 using System.Security.Cryptography;
 
 namespace Shared.Core.Services;

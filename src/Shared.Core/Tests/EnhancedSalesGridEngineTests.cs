@@ -1,11 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Shared.Core.DependencyInjection;
 using Shared.Core.Entities;
-using Shared.Core.Enums;
 using Shared.Core.Repositories;
 using Shared.Core.Services;
-using Shared.Core.DTOs;
 
 namespace Shared.Core.Tests;
 

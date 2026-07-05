@@ -1,5 +1,3 @@
-using Shared.Core.Enums;
-
 namespace Shared.Core.DTOs;
 
 /// <summary>

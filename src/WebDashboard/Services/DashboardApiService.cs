@@ -1,6 +1,4 @@
-using Microsoft.Extensions.Logging;
 using Shared.Core.DTOs;
-using Shared.Core.Services;
 using Shared.Core.Repositories;
 using System.Text.Json;
 

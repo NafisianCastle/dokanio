@@ -1,8 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Shared.Core.DTOs;
-using Shared.Core.Enums;
 using Shared.Core.Repositories;
-using System.Text.Json;
 
 namespace Shared.Core.Services;
 
