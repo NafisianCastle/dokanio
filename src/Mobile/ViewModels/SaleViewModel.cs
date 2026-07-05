@@ -7,10 +7,7 @@ using Shared.Core.Services;
 using Shared.Core.DTOs;
 using Mobile.Services;
 using System.Globalization;
-using Microsoft.Maui.Authentication;
-using Microsoft.Maui.Media;
 using CommunityToolkit.Maui.Media;
-using Microsoft.Maui.Networking;
 using AppPermissions = Mobile.Services.Permissions;
 
 namespace Mobile.ViewModels;

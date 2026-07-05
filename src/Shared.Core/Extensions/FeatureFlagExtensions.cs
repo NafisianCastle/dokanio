@@ -1,4 +1,3 @@
-using Shared.Core.DTOs;
 using Shared.Core.Services;
 
 namespace Shared.Core.Extensions;

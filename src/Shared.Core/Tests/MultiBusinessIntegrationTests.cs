@@ -12,7 +12,6 @@ using LoginRequest = Shared.Core.Services.LoginRequest;
 using DataConflict = Shared.Core.Services.DataConflict;
 using ConflictType = Shared.Core.Services.ConflictType;
 using ConflictResolutionResult = Shared.Core.Services.ConflictResolutionResult;
-using SyncResult = Shared.Core.Services.SyncResult;
 
 namespace Shared.Core.Tests;
 

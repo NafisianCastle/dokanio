@@ -1,7 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Shared.Core.Services;
-using System;
-using System.Threading.Tasks;
 
 namespace Desktop.Services;
 

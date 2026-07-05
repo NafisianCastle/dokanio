@@ -1,8 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Shared.Core.Services;
-using Shared.Core.DTOs;
-using Shared.Core.Enums;
 using Mobile.Services;
 using AppPermissions = Mobile.Services.Permissions;
 

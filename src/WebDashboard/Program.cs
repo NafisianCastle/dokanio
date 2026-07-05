@@ -1,8 +1,6 @@
 using Blazorise;
 using Blazorise.Bootstrap5;
 using Blazorise.Icons.FontAwesome;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Shared.Core.DependencyInjection;
 using Shared.Core.Services;
 using WebDashboard.Services;

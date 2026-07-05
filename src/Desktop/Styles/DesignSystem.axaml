@@ -181,10 +181,17 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="{StaticResource RadiusSM}"/>
         <Setter Property="Padding" Value="{StaticResource ThicknessSM}"/>
-        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
-        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="Background" Value="#FFFFFF"/>
+        <Setter Property="Foreground" Value="#111827"/>
+        <Setter Property="CaretBrush" Value="#111827"/>
+        <Setter Property="SelectionBrush" Value="#BBDEFB"/>
     </Style>
-    
+
+    <!-- Force the inner template border to stay white regardless of OS theme -->
+    <Style Selector="TextBox.input-primary /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="#FFFFFF"/>
+    </Style>
+
     <Style Selector="TextBox.input-primary:focus">
         <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
         <Setter Property="BorderThickness" Value="2"/>

@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
-using System.Runtime;
 
 namespace Shared.Core.Services;
 

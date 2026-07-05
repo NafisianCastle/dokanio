@@ -1,5 +1,3 @@
-using Shared.Core.Services;
-
 namespace Shared.Core.Services;
 
 /// <summary>

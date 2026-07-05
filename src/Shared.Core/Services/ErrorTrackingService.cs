@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Core.Data;
 using System.Text.Json;

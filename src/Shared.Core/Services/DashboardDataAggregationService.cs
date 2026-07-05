@@ -1,9 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Shared.Core.DTOs;
 using Shared.Core.Entities;
-using Shared.Core.Enums;
 using Shared.Core.Repositories;
-using System.Linq;
 
 namespace Shared.Core.Services;
 

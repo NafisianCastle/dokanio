@@ -1,18 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Http;
 using Moq;
 using Shared.Core.Architecture;
 using Shared.Core.Data;
 using Shared.Core.DTOs;
 using Shared.Core.Entities;
 using Shared.Core.Enums;
-using Shared.Core.Events;
-using Shared.Core.Integration;
-using Shared.Core.Plugins;
 using Shared.Core.Repositories;
 using Shared.Core.Services;
-using Shared.Core.Tests.TestImplementations;
 
 namespace Shared.Core.DependencyInjection;
 
