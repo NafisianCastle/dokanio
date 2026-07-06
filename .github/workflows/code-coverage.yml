@@ -77,7 +77,7 @@ jobs:
             -f cobertura
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v7
         with:
           files: ./coverage/merged.cobertura.xml
           flags: unittests

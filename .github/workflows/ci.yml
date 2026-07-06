@@ -64,7 +64,7 @@ jobs:
         run: dotnet test src/Mobile/Tests/Mobile.Tests.csproj -c Release --no-build --logger "console;verbosity=detailed" --collect:"XPlat Code Coverage"
 
       - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v7
         with:
           files: ./coverage.cobertura.xml
           flags: unittests
