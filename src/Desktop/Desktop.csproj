@@ -21,7 +21,7 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.0" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.1" />
     <!-- DataGrid is a separate package; latest stable is 12.0.0 (compatible with Avalonia 12.x) -->
-    <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.1.0" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.1.2" />
     <PackageReference Include="ReactiveUI" Version="24.1.0" />
     <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.8" />
